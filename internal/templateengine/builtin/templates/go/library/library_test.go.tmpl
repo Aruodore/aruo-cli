@@ -1,0 +1,10 @@
+package {{ .Variables.PackageName }}
+
+import "testing"
+
+func TestVersion(t *testing.T) {
+	t.Parallel()
+	if Version == "" {
+		t.Fatal("Version must not be empty")
+	}
+}

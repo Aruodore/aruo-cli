@@ -1,0 +1,13 @@
+name: Feature proposal
+description: Propose a user problem worth solving
+body:
+  - type: textarea
+    attributes:
+      label: Problem and evidence
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Proposed outcome
+    validations:
+      required: true

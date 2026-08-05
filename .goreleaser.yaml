@@ -1,0 +1,62 @@
+version: 2
+
+project_name: aruo
+
+before:
+  hooks:
+    - go mod tidy -diff
+    - go test -race ./...
+
+builds:
+  - id: aruo
+    main: ./cmd/aruo
+    binary: aruo
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    flags:
+      - -trimpath
+    ldflags:
+      - >-
+        -s -w
+        -X github.com/aruodore/aruo/internal/buildinfo.version={{ .Version }}
+        -X github.com/aruodore/aruo/internal/buildinfo.commit={{ .Commit }}
+        -X github.com/aruodore/aruo/internal/buildinfo.date={{ .Date }}
+
+archives:
+  - id: default
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+    files:
+      - LICENSE
+      - README.md
+      - CHANGELOG.md
+      - SECURITY.md
+
+checksum:
+  name_template: checksums.txt
+  algorithm: sha256
+
+sboms:
+  - artifacts: archive
+
+changelog:
+  disable: true
+
+release:
+  draft: true
+  prerelease: auto
+  mode: keep-existing
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"

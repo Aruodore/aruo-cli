@@ -1,0 +1,29 @@
+# Aruo local state and transaction scratch
+.aruo/state.json
+.aruo/tmp/
+aruo.local.yaml
+
+# `.design/` is intentionally committed. Packaging and generation exclude it
+# through explicit allowlists and conformance tests, not Git ignore rules.
+
+# Build, coverage, benchmark, and documentation output
+/bin/
+/dist/
+/coverage/
+/site/
+*.prof
+*.test
+
+# Editors and operating systems
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key

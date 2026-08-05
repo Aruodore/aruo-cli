@@ -1,0 +1,37 @@
+name: Bug report
+description: Report reproducible incorrect behavior
+title: "bug: "
+labels: ["type: bug", "status: triage"]
+body:
+  - type: markdown
+    attributes:
+      value: "Do not report vulnerabilities here; use SECURITY.md."
+  - type: input
+    id: version
+    attributes:
+      label: Aruo version or commit
+      placeholder: v0.x.y or commit SHA
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, architecture, shell, terminal/CI, and relevant native tool versions.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Commands, safe fixture, expected result, and actual result. Redact secrets.
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact and recovery
+      description: What was affected, whether files/external state changed, and recovery attempted.
+    validations:
+      required: true
+

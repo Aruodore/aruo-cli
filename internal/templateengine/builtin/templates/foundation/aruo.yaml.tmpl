@@ -1,0 +1,8 @@
+apiVersion: aruo.dev/v1alpha1
+project:
+  name: {{ .Project.Name }}
+  language: {{ .Project.Language }}
+  license: {{ .Project.License }}
+template:
+  id: {{ .Variables.TemplateID }}
+  version: builtin

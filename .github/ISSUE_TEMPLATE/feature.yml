@@ -1,0 +1,25 @@
+name: Feature request
+description: Describe a user problem or improvement
+title: "proposal: "
+labels: ["type: proposal", "status: triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and evidence
+      description: Who experiences it, current workaround, frequency, and evidence.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: Describe success without requiring a particular implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives and scope
+      description: Existing tools, rejected approaches, non-goals, and compatibility concerns.
+

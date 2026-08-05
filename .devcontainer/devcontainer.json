@@ -1,0 +1,24 @@
+{
+  "name": "Aruo development",
+  "image": "mcr.microsoft.com/devcontainers/go:1-1.26-bookworm",
+  "remoteUser": "vscode",
+  "containerEnv": {
+    "GOTOOLCHAIN": "auto"
+  },
+  "postCreateCommand": "go mod download",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "editor.formatOnSave": true,
+        "go.toolsManagement.autoUpdate": false,
+        "go.useLanguageServer": true,
+        "go.lintTool": "golangci-lint"
+      },
+      "extensions": [
+        "golang.go",
+        "EditorConfig.EditorConfig"
+      ]
+    }
+  }
+}
+

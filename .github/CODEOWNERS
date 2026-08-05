@@ -1,0 +1,13 @@
+# Replace placeholders with verified maintainers before enabling required reviews.
+* @aruodore/maintainers
+/.design/ @aruodore/maintainers
+/decisions/ @aruodore/architecture
+/rfcs/ @aruodore/maintainers
+/research/ @aruodore/research
+/docs/ @aruodore/documentation
+/.github/ @aruodore/maintainers
+/SECURITY.md @aruodore/security
+/plugins/ @aruodore/plugin-maintainers
+/templates/ @aruodore/repository-standards
+/blueprints/ @aruodore/repository-standards
+/policies/ @aruodore/repository-standards
