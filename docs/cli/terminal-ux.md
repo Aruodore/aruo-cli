@@ -4,6 +4,10 @@
 **Research baseline:** 5 August 2026  
 **Applies to:** Every Aruo command, prompt, progress renderer, pager, and future plugin-hosted interaction
 
+The proposed Go dependency selection and the mandatory vendor-isolation boundary
+are defined in the [Go terminal UX technology stack](../../research/technology/2026-go-terminal-ux-stack.md).
+This specification defines behavior; that report evaluates how to implement it.
+
 ## Purpose
 
 This document defines how Aruo behaves as a process inside a terminal. It is the implementation contract for signals, keyboard input, prompts, progress, output, errors, accessibility, terminal compatibility, performance, and testing.
