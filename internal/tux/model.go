@@ -97,7 +97,7 @@ const (
 	AlignRight
 )
 
-// Column describes one semantic table field.
+// Column describes one semantic table field. Lower priorities are retained first.
 type Column struct {
 	ID        string
 	Heading   string
