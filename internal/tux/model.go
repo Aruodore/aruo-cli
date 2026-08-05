@@ -35,12 +35,13 @@ const (
 type OutputFormat string
 
 const (
-	OutputHuman OutputFormat = "human"
-	OutputPlain OutputFormat = "plain"
-	OutputJSON  OutputFormat = "json"
-	OutputJSONL OutputFormat = "jsonl"
-	OutputYAML  OutputFormat = "yaml"
-	OutputSARIF OutputFormat = "sarif"
+	OutputHuman    OutputFormat = "human"
+	OutputPlain    OutputFormat = "plain"
+	OutputJSON     OutputFormat = "json"
+	OutputJSONL    OutputFormat = "jsonl"
+	OutputYAML     OutputFormat = "yaml"
+	OutputSARIF    OutputFormat = "sarif"
+	OutputMarkdown OutputFormat = "markdown"
 )
 
 // Capabilities records independently detected terminal features.
