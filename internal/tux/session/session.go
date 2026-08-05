@@ -52,7 +52,11 @@ func New(ctx context.Context, in io.Reader, out, errOut io.Writer, environment m
 		errOut:       errOut,
 	}
 
-	if resolved.Mode == tux.ModeInteractive && !resolved.Accessible {
+	// CursorAddressing is false under TERM=dumb even on a real TTY; Huh's
+	// forms redraw in place and have no graceful degradation for a terminal
+	// that cannot address the cursor, so fall back to the line-oriented
+	// reference adapter rather than the rich one.
+	if resolved.Mode == tux.ModeInteractive && !resolved.Accessible && capabilities.CursorAddressing {
 		session.prompter = charm.NewPrompter(in, errOut, capabilities, resolved)
 	} else {
 		session.prompter = reference

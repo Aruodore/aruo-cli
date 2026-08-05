@@ -73,6 +73,23 @@ func TestNewSelectsPlainAdapterWhenAccessible(t *testing.T) {
 	}
 }
 
+func TestNewSelectsPlainPrompterForDumbTerminal(t *testing.T) {
+	t.Parallel()
+
+	terminalProbe := probe{terminals: map[int]bool{1: true, 2: true}}
+	built := session.New(context.Background(), stream{1}, stream{1}, stream{2}, map[string]string{"TERM": "dumb"}, policy.Overrides{}, terminalProbe)
+
+	if built.Policy().Mode != tux.ModeInteractive {
+		t.Fatalf("Mode = %v, want interactive", built.Policy().Mode)
+	}
+	if built.Capabilities().CursorAddressing {
+		t.Fatal("CursorAddressing = true for TERM=dumb")
+	}
+	if _, ok := built.Prompter().(*plain.Adapter); !ok {
+		t.Fatalf("Prompter() = %T, want *plain.Adapter", built.Prompter())
+	}
+}
+
 func TestNewSelectsPlainAdapterForMachineFormat(t *testing.T) {
 	t.Parallel()
 
