@@ -13,6 +13,7 @@ import (
 	"github.com/aruodore/aruo/internal/cli/iostreams"
 	"github.com/aruodore/aruo/internal/create"
 	"github.com/aruodore/aruo/internal/doctor"
+	"github.com/aruodore/aruo/internal/tux/term"
 )
 
 // Dependencies contains process-level resources. Command constructors receive
@@ -24,11 +25,22 @@ type Dependencies struct {
 	Doctor  *doctor.Service
 	Logger  *slog.Logger
 	Streams iostreams.IOStreams
+	// Environment supplies presentation-policy hints (NO_COLOR, CI, TERM, and
+	// similar). A nil map resolves policy with no environment hints, which
+	// keeps tests hermetic; cmd/aruo supplies the real process environment.
+	Environment map[string]string
+	// Probe overrides terminal detection for tests. A nil probe uses the
+	// system terminal.
+	Probe term.Probe
 }
 
 // Run executes one CLI invocation and returns a process exit code.
 func Run(ctx context.Context, args []string, dependencies Dependencies) int {
-	root := command.NewRoot(dependencies.Streams, dependencies.Build, dependencies.Catalog, dependencies.Creator, dependencies.Doctor)
+	environment := dependencies.Environment
+	if environment == nil {
+		environment = map[string]string{}
+	}
+	root := command.NewRoot(dependencies.Streams, dependencies.Build, dependencies.Catalog, dependencies.Creator, dependencies.Doctor, environment, dependencies.Probe)
 	root.SetArgs(args)
 
 	if err := root.ExecuteContext(ctx); err != nil {

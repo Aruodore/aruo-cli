@@ -14,6 +14,7 @@ import (
 	"github.com/aruodore/aruo/internal/cli/iostreams"
 	"github.com/aruodore/aruo/internal/create"
 	"github.com/aruodore/aruo/internal/doctor"
+	"github.com/aruodore/aruo/internal/tux/term"
 )
 
 func main() {
@@ -45,12 +46,13 @@ func run() int {
 		return 1
 	}
 	dependencies := cli.Dependencies{
-		Build:   buildinfo.Current(),
-		Catalog: templateCatalog,
-		Creator: creator,
-		Doctor:  doctorService,
-		Logger:  slog.New(slog.NewTextHandler(os.Stderr, nil)),
-		Streams: iostreams.System(),
+		Build:       buildinfo.Current(),
+		Catalog:     templateCatalog,
+		Creator:     creator,
+		Doctor:      doctorService,
+		Logger:      slog.New(slog.NewTextHandler(os.Stderr, nil)),
+		Streams:     iostreams.System(),
+		Environment: term.SystemEnvironment(),
 	}
 
 	return cli.Run(ctx, os.Args[1:], dependencies)

@@ -1,14 +1,16 @@
 package command
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"sort"
+	"strings"
 
-	"github.com/aruodore/aruo/internal/cli/iostreams"
 	"github.com/aruodore/aruo/internal/clierror"
 	"github.com/aruodore/aruo/internal/doctor"
+	"github.com/aruodore/aruo/internal/tux"
 	"github.com/spf13/cobra"
 )
 
@@ -17,7 +19,7 @@ type doctorOptions struct {
 	minimumScore int
 }
 
-func newDoctor(streams iostreams.IOStreams, service *doctor.Service) *cobra.Command {
+func newDoctor(factory sessionFactory, service *doctor.Service) *cobra.Command {
 	options := doctorOptions{format: "human", minimumScore: 80}
 	command := &cobra.Command{
 		Use:   "doctor [repository]",
@@ -31,15 +33,21 @@ func newDoctor(streams iostreams.IOStreams, service *doctor.Service) *cobra.Comm
 			if options.minimumScore < 0 || options.minimumScore > 100 {
 				return errors.New("--minimum-score must be between 0 and 100")
 			}
-			report, err := service.Audit(command.Context(), target)
+			ctx := command.Context()
+			report, err := service.Audit(ctx, target)
 			if err != nil {
 				return err
 			}
 			switch options.format {
 			case "human":
-				err = renderDoctorHuman(streams, report)
+				terminal, sessionErr := factory.build(ctx, tux.OutputHuman, false)
+				if sessionErr != nil {
+					return sessionErr
+				}
+				defer func() { _ = terminal.Close() }()
+				err = renderDoctorHuman(ctx, terminal.Presenter(), report)
 			case "json":
-				encoder := json.NewEncoder(streams.Out)
+				encoder := json.NewEncoder(factory.streams.Out)
 				encoder.SetIndent("", "  ")
 				err = encoder.Encode(report)
 			default:
@@ -59,14 +67,22 @@ func newDoctor(streams iostreams.IOStreams, service *doctor.Service) *cobra.Comm
 	return command
 }
 
-func renderDoctorHuman(streams iostreams.IOStreams, report doctor.Report) error {
-	if _, err := fmt.Fprintf(streams.Out, "Repository health: %d/%d (%s)\n%s\n\n", report.Score, report.MaxScore, report.Grade, report.Repository); err != nil {
-		return err
+func renderDoctorHuman(ctx context.Context, presenter tux.Presenter, report doctor.Report) error {
+	summary := tux.Table{
+		Columns: []tux.Column{
+			{ID: "category", Heading: "Category"},
+			{ID: "score", Heading: "Score", Alignment: tux.AlignRight},
+		},
 	}
 	for _, category := range report.Categories {
-		if _, err := fmt.Fprintf(streams.Out, "  %-15s %2d/%2d\n", category.Category, category.Points, category.MaxPoints); err != nil {
-			return err
-		}
+		summary.Rows = append(summary.Rows, []string{string(category.Category), fmt.Sprintf("%d/%d", category.Points, category.MaxPoints)})
+	}
+	header := fmt.Sprintf("Repository health: %d/%d (%s)\n%s", report.Score, report.MaxScore, report.Grade, report.Repository)
+	if err := presenter.Message(ctx, tux.Message{Kind: tux.MessageInfo, Text: header}); err != nil {
+		return err
+	}
+	if err := presenter.Table(ctx, summary); err != nil {
+		return err
 	}
 
 	type deduction struct {
@@ -87,16 +103,12 @@ func renderDoctorHuman(streams iostreams.IOStreams, report doctor.Report) error 
 		return deductions[i].id < deductions[j].id
 	})
 	if len(deductions) == 0 {
-		_, err := fmt.Fprintln(streams.Out, "\nNo recommendations. All local v1 checks passed.")
-		return err
+		return presenter.Message(ctx, tux.Message{Kind: tux.MessageSuccess, Text: "No recommendations. All local v1 checks passed."})
 	}
-	if _, err := fmt.Fprintln(streams.Out, "\nRecommendations:"); err != nil {
-		return err
-	}
+	lines := make([]string, 0, len(deductions)*2+1)
+	lines = append(lines, "Recommendations:")
 	for _, item := range deductions {
-		if _, err := fmt.Fprintf(streams.Out, "  - %s\n    %s\n", item.recommendation.Message, item.recommendation.Action); err != nil {
-			return err
-		}
+		lines = append(lines, "  - "+item.recommendation.Message, "    "+item.recommendation.Action)
 	}
-	return nil
+	return presenter.Message(ctx, tux.Message{Kind: tux.MessageInfo, Text: strings.Join(lines, "\n")})
 }

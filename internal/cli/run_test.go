@@ -16,6 +16,28 @@ import (
 	"github.com/aruodore/aruo/internal/doctor"
 )
 
+// ttyReader and ttyWriter fake a real terminal descriptor so tests can
+// exercise interactive-eligible sessions without an actual PTY; a paired
+// fakeProbe reports which faked file descriptors are terminals.
+type ttyReader struct {
+	*strings.Reader
+	fd uintptr
+}
+
+func (r ttyReader) Fd() uintptr { return r.fd }
+
+type ttyWriter struct {
+	*bytes.Buffer
+	fd uintptr
+}
+
+func (w ttyWriter) Fd() uintptr { return w.fd }
+
+type fakeProbe struct{ terminals map[int]bool }
+
+func (p fakeProbe) IsTerminal(fd int) bool     { return p.terminals[fd] }
+func (p fakeProbe) Size(int) (int, int, error) { return 80, 24, nil }
+
 func TestRun(t *testing.T) {
 	t.Parallel()
 
@@ -98,6 +120,40 @@ func TestRunCreateNonInteractive(t *testing.T) {
 	}
 }
 
+func TestRunCreateNoInputFailsOnMissingValue(t *testing.T) {
+	t.Parallel()
+
+	templateCatalog, err := catalogbuiltin.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	creator, err := create.NewService(templateCatalog, create.OSWriter{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	destination := t.TempDir() + "/blocked"
+	var stdout, stderr bytes.Buffer
+	stdin := ttyReader{Reader: strings.NewReader("must not be read"), fd: 0}
+	code := cli.Run(context.Background(), []string{
+		"create", destination,
+		"--template", "go-library",
+		"--no-input",
+	}, cli.Dependencies{
+		Build:   buildinfo.Info{Version: "test"},
+		Catalog: templateCatalog,
+		Creator: creator,
+		Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+		Streams: iostreams.IOStreams{In: stdin, Out: &stdout, ErrOut: ttyWriter{Buffer: &stderr, fd: 2}},
+		Probe:   fakeProbe{terminals: map[int]bool{0: true, 2: true}},
+	})
+	if code == 0 {
+		t.Fatalf("Run() code = 0, want non-zero; stdout = %q", stdout.String())
+	}
+	if !strings.Contains(stderr.String(), "Go module path is required; provide --module") {
+		t.Errorf("stderr = %q", stderr.String())
+	}
+}
+
 func TestRunCreateInteractive(t *testing.T) {
 	t.Parallel()
 
@@ -117,13 +173,15 @@ func TestRunCreateInteractive(t *testing.T) {
 		"yes",
 	}, "\n") + "\n"
 	var stdout bytes.Buffer
-	var stderr bytes.Buffer
-	code := cli.Run(context.Background(), []string{"create", destination}, cli.Dependencies{
+	stdin := ttyReader{Reader: strings.NewReader(input), fd: 0}
+	stderr := ttyWriter{Buffer: &bytes.Buffer{}, fd: 2}
+	code := cli.Run(context.Background(), []string{"create", destination, "--accessible"}, cli.Dependencies{
 		Build:   buildinfo.Info{Version: "test"},
 		Catalog: templateCatalog,
 		Creator: creator,
 		Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
-		Streams: iostreams.IOStreams{In: strings.NewReader(input), Out: &stdout, ErrOut: &stderr},
+		Streams: iostreams.IOStreams{In: stdin, Out: &stdout, ErrOut: stderr},
+		Probe:   fakeProbe{terminals: map[int]bool{0: true, 2: true}},
 	})
 	if code != 0 {
 		t.Fatalf("Run() code = %d; stderr = %q", code, stderr.String())
@@ -165,5 +223,32 @@ func TestRunDoctorJSONAndFindingsExitCode(t *testing.T) {
 	}
 	if stderr.Len() != 0 {
 		t.Errorf("stderr = %q, want empty for expected findings", stderr.String())
+	}
+}
+
+func TestRunDoctorHumanFormat(t *testing.T) {
+	t.Parallel()
+	engine, err := doctor.NewEngine(doctor.BuiltinChecks()...)
+	if err != nil {
+		t.Fatal(err)
+	}
+	service, err := doctor.NewService(engine)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var stdout, stderr bytes.Buffer
+	code := cli.Run(context.Background(), []string{"doctor", t.TempDir()}, cli.Dependencies{
+		Build:  buildinfo.Info{Version: "test"},
+		Doctor: service,
+		Logger: slog.New(slog.NewTextHandler(io.Discard, nil)),
+		Streams: iostreams.IOStreams{
+			In: strings.NewReader(""), Out: &stdout, ErrOut: &stderr,
+		},
+	})
+	if code != 3 {
+		t.Fatalf("Run() code = %d, want 3; stderr=%q", code, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "Repository health:") || !strings.Contains(stdout.String(), "Recommendations:") {
+		t.Errorf("stdout = %q", stdout.String())
 	}
 }

@@ -1,7 +1,6 @@
 package command
 
 import (
-	"bufio"
 	"context"
 	"errors"
 	"fmt"
@@ -10,9 +9,9 @@ import (
 	"strings"
 
 	"github.com/aruodore/aruo/internal/catalog"
-	"github.com/aruodore/aruo/internal/cli/iostreams"
 	"github.com/aruodore/aruo/internal/create"
 	"github.com/aruodore/aruo/internal/templateengine"
+	"github.com/aruodore/aruo/internal/tux"
 	"github.com/spf13/cobra"
 )
 
@@ -31,7 +30,7 @@ type createOptions struct {
 	variables      []string
 }
 
-func newCreate(streams iostreams.IOStreams, templateCatalog catalog.Catalog, creator *create.Service) *cobra.Command {
+func newCreate(factory sessionFactory, templateCatalog catalog.Catalog, creator *create.Service) *cobra.Command {
 	options := createOptions{}
 	command := &cobra.Command{
 		Use:   "create [name-or-path]",
@@ -44,7 +43,7 @@ func newCreate(streams iostreams.IOStreams, templateCatalog catalog.Catalog, cre
 			if len(args) == 1 {
 				options.destination = args[0]
 			}
-			return runCreate(command.Context(), streams, templateCatalog, creator, options)
+			return runCreate(command.Context(), factory, templateCatalog, creator, options)
 		},
 	}
 	flags := command.Flags()
@@ -59,16 +58,28 @@ func newCreate(streams iostreams.IOStreams, templateCatalog catalog.Catalog, cre
 	flags.StringSliceVar(&options.variables, "set", nil, "template variable as key=value (repeatable)")
 	flags.BoolVar(&options.nonInteractive, "non-interactive", false, "disable prompts and fail on missing input")
 	flags.BoolVarP(&options.yes, "yes", "y", false, "accept the final creation confirmation")
+	_ = flags.MarkDeprecated("non-interactive", "use --no-input instead")
 	return command
 }
 
-func runCreate(ctx context.Context, streams iostreams.IOStreams, templateCatalog catalog.Catalog, creator *create.Service, options createOptions) error {
-	prompter := &linePrompter{scanner: bufio.NewScanner(streams.In), out: streams.ErrOut, disabled: options.nonInteractive}
-	var err error
+func runCreate(ctx context.Context, factory sessionFactory, templateCatalog catalog.Catalog, creator *create.Service, options createOptions) error {
+	terminal, err := factory.build(ctx, tux.OutputHuman, options.nonInteractive)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = terminal.Close() }()
+	prompter := terminal.Prompter()
+	interactive := terminal.Policy().Mode == tux.ModeInteractive
+
 	if options.destination == "" {
-		options.name, err = prompter.requiredWithHint("Project name", options.name, "", "Aruo will create a new folder with this name.", "my-library")
+		options.name, err = resolveInput(ctx, prompter, options.name, tux.InputRequest{
+			ID:          "name",
+			Label:       "Project name",
+			Description: "Aruo will create a new folder with this name.",
+			Example:     "my-library",
+		}, "name-or-path argument")
 		if err != nil {
-			return missingFlag(err, "name-or-path argument")
+			return err
 		}
 		options.destination = options.name
 	}
@@ -83,16 +94,18 @@ func runCreate(ctx context.Context, streams iostreams.IOStreams, templateCatalog
 			return errors.New("no templates match the requested language/kind filters")
 		case len(entries) == 1:
 			options.templateID = entries[0].ID
-		case options.nonInteractive:
+		case !interactive:
 			return errors.New("--template is required when multiple templates match")
 		default:
-			for _, entry := range entries {
-				_, _ = fmt.Fprintf(streams.ErrOut, "  %s — %s\n", entry.ID, entry.Description)
+			selected, selectErr := prompter.Select(ctx, tux.SelectRequest{
+				ID:      "template",
+				Label:   "Template",
+				Options: templateOptions(entries),
+			})
+			if selectErr != nil {
+				return selectErr
 			}
-			options.templateID, err = prompter.required("Template", "", "")
-			if err != nil {
-				return err
-			}
+			options.templateID = string(selected)
 		}
 	}
 	entry, err := templateCatalog.Resolve(ctx, options.templateID)
@@ -101,12 +114,6 @@ func runCreate(ctx context.Context, streams iostreams.IOStreams, templateCatalog
 	}
 	if options.language != "" && entry.Language != options.language || options.kind != "" && entry.Kind != options.kind {
 		return fmt.Errorf("template %q does not match the requested language/kind filters", entry.ID)
-	}
-	if !options.nonInteractive {
-		_, _ = fmt.Fprintf(streams.ErrOut, "\nCreating: %s\n%s\n\n", entry.Name, entry.Description)
-	}
-	if options.name == "" {
-		options.name = filepath.Base(filepath.Clean(options.destination))
 	}
 	if options.name == "" {
 		options.name = filepath.Base(filepath.Clean(options.destination))
@@ -118,17 +125,36 @@ func runCreate(ctx context.Context, streams iostreams.IOStreams, templateCatalog
 	if moduleLabel == "" {
 		moduleLabel = "Package or module path"
 	}
-	options.module, err = prompter.requiredWithHint(moduleLabel, options.module, "", entry.Prompts.ModuleDescription, entry.Prompts.ModuleExample)
-	if err != nil {
-		return missingFlag(err, "--module")
+	moduleDescription := entry.Prompts.ModuleDescription
+	if interactive {
+		moduleDescription = fmt.Sprintf("Creating: %s\n%s\n\n%s", entry.Name, entry.Description, moduleDescription)
 	}
-	options.description, err = prompter.requiredWithHint("Short description", options.description, "", "One sentence explaining what the project does.", "A Go library for reliable configuration loading")
+	options.module, err = resolveInput(ctx, prompter, options.module, tux.InputRequest{
+		ID:          "module",
+		Label:       moduleLabel,
+		Description: moduleDescription,
+		Example:     entry.Prompts.ModuleExample,
+	}, "--module")
 	if err != nil {
-		return missingFlag(err, "--description")
+		return err
 	}
-	options.author, err = prompter.requiredWithHint("Author or organization", options.author, "", "Used in the license and project metadata.", "Jane Doe or Acme, Inc.")
+	options.description, err = resolveInput(ctx, prompter, options.description, tux.InputRequest{
+		ID:          "description",
+		Label:       "Short description",
+		Description: "One sentence explaining what the project does.",
+		Example:     "A Go library for reliable configuration loading",
+	}, "--description")
 	if err != nil {
-		return missingFlag(err, "--author")
+		return err
+	}
+	options.author, err = resolveInput(ctx, prompter, options.author, tux.InputRequest{
+		ID:          "author",
+		Label:       "Author or organization",
+		Description: "Used in the license and project metadata.",
+		Example:     "Jane Doe or Acme, Inc.",
+	}, "--author")
+	if err != nil {
+		return err
 	}
 	if options.license == "" {
 		options.license = entry.DefaultLicense
@@ -140,14 +166,16 @@ func runCreate(ctx context.Context, streams iostreams.IOStreams, templateCatalog
 	if err != nil {
 		return err
 	}
-	if !options.yes && !options.nonInteractive {
-		_, _ = fmt.Fprintln(streams.ErrOut, "\nProject summary:")
-		_, _ = fmt.Fprintf(streams.ErrOut, "  Name:        %s\n", options.name)
-		_, _ = fmt.Fprintf(streams.ErrOut, "  Template:    %s\n", entry.Name)
-		_, _ = fmt.Fprintf(streams.ErrOut, "  Location:    %s\n", options.destination)
-		_, _ = fmt.Fprintf(streams.ErrOut, "  %s: %s\n", moduleLabel, options.module)
-		_, _ = fmt.Fprintf(streams.ErrOut, "  License:     %s\n\n", options.license)
-		confirmed, confirmErr := prompter.confirm("Create this project?")
+	if !options.yes && interactive {
+		summary := fmt.Sprintf(
+			"Project summary:\n  Name:        %s\n  Template:    %s\n  Location:    %s\n  %s: %s\n  License:     %s",
+			options.name, entry.Name, options.destination, moduleLabel, options.module, options.license,
+		)
+		confirmed, confirmErr := prompter.Confirm(ctx, tux.ConfirmRequest{
+			ID:          "confirm",
+			Label:       "Create this project?",
+			Description: summary,
+		})
 		if confirmErr != nil {
 			return confirmErr
 		}
@@ -167,13 +195,41 @@ func runCreate(ctx context.Context, streams iostreams.IOStreams, templateCatalog
 	if err != nil {
 		return err
 	}
-	_, _ = fmt.Fprintf(streams.Out, "Created %s with %d files at %s\n", result.TemplateID, result.FileCount, result.Destination)
-	_, _ = fmt.Fprintln(streams.Out, "\nNext steps:")
-	_, _ = fmt.Fprintf(streams.Out, "  cd %s\n", options.destination)
-	for _, step := range result.NextSteps {
-		_, _ = fmt.Fprintf(streams.Out, "  %s\n", step)
+	return presentCreated(ctx, terminal.Presenter(), options.destination, result)
+}
+
+func presentCreated(ctx context.Context, presenter tux.Presenter, destination string, result create.Result) error {
+	lines := []string{fmt.Sprintf("Created %s with %d files at %s", result.TemplateID, result.FileCount, result.Destination)}
+	if len(result.NextSteps) > 0 {
+		lines = append(lines, "", "Next steps:", "  cd "+destination)
+		for _, step := range result.NextSteps {
+			lines = append(lines, "  "+step)
+		}
 	}
-	return nil
+	return presenter.Message(ctx, tux.Message{Kind: tux.MessageSuccess, Text: strings.Join(lines, "\n")})
+}
+
+func resolveInput(ctx context.Context, prompter tux.Prompter, value string, request tux.InputRequest, flag string) (string, error) {
+	if value != "" {
+		return value, nil
+	}
+	resolved, err := prompter.Input(ctx, request)
+	switch {
+	case err == nil:
+		return resolved, nil
+	case errors.Is(err, tux.ErrUnavailable):
+		return "", fmt.Errorf("%s is required; provide %s", request.Label, flag)
+	default:
+		return "", err
+	}
+}
+
+func templateOptions(entries []catalog.Entry) []tux.Option {
+	options := make([]tux.Option, len(entries))
+	for index, entry := range entries {
+		options[index] = tux.Option{ID: tux.OptionID(entry.ID), Label: entry.Name, Description: entry.Description}
+	}
+	return options
 }
 
 func filterEntries(entries []catalog.Entry, language, kind string) []catalog.Entry {
@@ -210,58 +266,4 @@ func contains(values []string, wanted string) bool {
 		}
 	}
 	return false
-}
-
-type linePrompter struct {
-	scanner  *bufio.Scanner
-	out      interface{ Write([]byte) (int, error) }
-	disabled bool
-}
-
-func (p *linePrompter) required(label, value, defaultValue string) (string, error) {
-	return p.requiredWithHint(label, value, defaultValue, "", "")
-}
-
-func (p *linePrompter) requiredWithHint(label, value, defaultValue, description, example string) (string, error) {
-	if value != "" {
-		return value, nil
-	}
-	if p.disabled {
-		return "", fmt.Errorf("%s is required in non-interactive mode", label)
-	}
-	if description != "" {
-		_, _ = fmt.Fprintf(p.out, "%s\n", description)
-	}
-	if example != "" {
-		_, _ = fmt.Fprintf(p.out, "Example: %s\n", example)
-	}
-	if defaultValue != "" {
-		_, _ = fmt.Fprintf(p.out, "%s [%s]: ", label, defaultValue)
-	} else {
-		_, _ = fmt.Fprintf(p.out, "%s: ", label)
-	}
-	if !p.scanner.Scan() {
-		return "", errors.New("input ended before required answers were provided")
-	}
-	answer := strings.TrimSpace(p.scanner.Text())
-	if answer == "" {
-		answer = defaultValue
-	}
-	if answer == "" {
-		return "", fmt.Errorf("%s is required", label)
-	}
-	return answer, nil
-}
-
-func (p *linePrompter) confirm(question string) (bool, error) {
-	_, _ = fmt.Fprintf(p.out, "%s [y/N]: ", question)
-	if !p.scanner.Scan() {
-		return false, errors.New("input ended before confirmation")
-	}
-	answer := strings.ToLower(strings.TrimSpace(p.scanner.Text()))
-	return answer == "y" || answer == "yes", nil
-}
-
-func missingFlag(err error, flag string) error {
-	return fmt.Errorf("%w; provide %s", err, flag)
 }
