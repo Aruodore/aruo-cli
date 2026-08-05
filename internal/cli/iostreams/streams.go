@@ -7,7 +7,6 @@ import (
 )
 
 // IOStreams makes terminal input and output explicit and replaceable in tests.
-// Capability detection will be added here when commands need color or prompts.
 type IOStreams struct {
 	In     io.Reader
 	Out    io.Writer

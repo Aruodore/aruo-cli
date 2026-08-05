@@ -46,7 +46,7 @@ func New() (*catalog.Memory, error) {
 
 func prepareGoLibrary(data templateengine.Data) (templateengine.Data, error) {
 	if data.Project.Module == "" {
-		return data, fmt.Errorf("Go module path is required (use --module)")
+		return data, fmt.Errorf("go module path is required (use --module)")
 	}
 	name := strings.ToLower(nonIdentifier.ReplaceAllString(data.Project.Name, "_"))
 	name = strings.Trim(name, "_")
