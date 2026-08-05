@@ -139,6 +139,7 @@ type InputRequest struct {
 	Description string
 	Example     string
 	Placeholder string
+	Suggestions []string
 	Default     *string
 	Optional    bool
 	Validate    func(string) error
