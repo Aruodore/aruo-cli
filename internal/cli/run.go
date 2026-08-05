@@ -13,6 +13,7 @@ import (
 	"github.com/aruodore/aruo/internal/cli/iostreams"
 	"github.com/aruodore/aruo/internal/create"
 	"github.com/aruodore/aruo/internal/doctor"
+	"github.com/aruodore/aruo/internal/tux"
 	"github.com/aruodore/aruo/internal/tux/term"
 )
 
@@ -47,6 +48,10 @@ func Run(ctx context.Context, args []string, dependencies Dependencies) int {
 		if dependencies.Logger != nil {
 			dependencies.Logger.DebugContext(ctx, "command failed", "error", err)
 		}
+		if isCancellation(err) {
+			_, _ = fmt.Fprintln(dependencies.Streams.ErrOut, "Cancelled.")
+			return 130
+		}
 		var silent interface{ SuppressMessage() bool }
 		if !errors.As(err, &silent) || !silent.SuppressMessage() {
 			_, _ = fmt.Fprintf(dependencies.Streams.ErrOut, "Error: %v\n", err)
@@ -59,4 +64,14 @@ func Run(ctx context.Context, args []string, dependencies Dependencies) int {
 	}
 
 	return 0
+}
+
+// isCancellation reports whether err stems from Ctrl+C or SIGTERM rather than
+// an operational failure. Interactive rich adapters own raw terminal mode
+// while running, which keeps the terminal driver from generating SIGINT, so
+// cancellation can surface as context.Canceled (the process-level signal
+// path) or tux.ErrCancelled (an adapter's own Ctrl+C key handling) without
+// the other.
+func isCancellation(err error) bool {
+	return errors.Is(err, context.Canceled) || errors.Is(err, tux.ErrCancelled)
 }
