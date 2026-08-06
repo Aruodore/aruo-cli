@@ -1,0 +1,8 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+
+import { VERSION } from "./index.js";
+
+test("VERSION is set", () => {
+  assert.notEqual(VERSION, "");
+});

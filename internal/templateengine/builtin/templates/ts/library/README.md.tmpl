@@ -1,0 +1,33 @@
+# {{ .Project.Name }}
+
+{{ .Project.Description }}
+
+## Why
+
+This project provides a focused, tested TypeScript library with strict type-checking and a documented maintenance contract.
+
+## Setup
+
+```sh
+npm install
+```
+{{- if .Variables.IncludeInstall }}
+
+## Installation
+
+```sh
+npm install {{ .Project.Module }}
+```
+{{- end }}
+
+## Usage
+
+Import `{{ .Project.Module }}` and begin with its exported, typed API. Public APIs follow Semantic Versioning from the first tagged release.
+
+## Contributing and security
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before proposing a change. Report vulnerabilities privately using [SECURITY.md](SECURITY.md); do not open a public vulnerability issue.
+
+## License
+
+Licensed under {{ .Project.License }}. See [LICENSE](LICENSE).

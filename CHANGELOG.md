@@ -12,6 +12,7 @@ The format follows [Keep a Changelog 2.0.0](https://keepachangelog.com/en/2.0.0/
 - Go 1.26 module bootstrap, Make task facade, lint/test configuration, cross-platform GitHub Actions, Dependabot, Conventional Commit validation, development container, and draft release automation with SBOMs and provenance attestations.
 - `aruo create`'s second catalog entry, `js-library`: a dependency-free JavaScript library template, surfacing the interactive template picker for the first time now that more than one entry is registered.
 - `aruo create`'s third catalog entry, `python-library`: a dependency-free Python library template (stdlib `unittest`, `src/` layout).
+- `aruo create`'s fourth catalog entry, `ts-library`: a TypeScript library template with strict type-checking. Unlike the others, its `npm install` needs the network for the real `typescript` compiler; Aruo's own test suite verifies its file plan only, and its generated CI does the real `npm ci`/`npm test` run.
 
 ### Changed
 

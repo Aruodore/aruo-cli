@@ -83,6 +83,43 @@ func TestJSLibrary(t *testing.T) {
 	}
 }
 
+func TestTSLibrary(t *testing.T) {
+	t.Parallel()
+
+	source, blueprint := builtin.TSLibrary()
+	engine, err := templateengine.New(source, templateengine.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	plan, err := engine.Render(context.Background(), blueprint, templateengine.Data{
+		Project: templateengine.Project{
+			Name:        "Example",
+			Module:      "example-project",
+			Description: "An example TypeScript library.",
+			License:     "MIT",
+			Language:    "typescript",
+		},
+		Variables: map[string]any{"IncludeInstall": true, "TemplateID": "ts-library"},
+	})
+	if err != nil {
+		t.Fatalf("Render() error = %v", err)
+	}
+
+	files := make(map[string]string, len(plan.Files))
+	for _, file := range plan.Files {
+		files[file.Path] = string(file.Content)
+	}
+	if len(files) != 25 {
+		t.Errorf("file count = %d, want 25", len(files))
+	}
+	if pkg := files["package.json"]; !strings.Contains(pkg, `"name": "example-project"`) || !strings.Contains(pkg, `"typescript"`) {
+		t.Errorf("package.json = %q", pkg)
+	}
+	if tsconfig := files["tsconfig.json"]; !strings.Contains(tsconfig, `"strict": true`) {
+		t.Errorf("tsconfig.json = %q", tsconfig)
+	}
+}
+
 func TestPythonLibrary(t *testing.T) {
 	t.Parallel()
 

@@ -17,6 +17,7 @@ var nonIdentifier = regexp.MustCompile(`[^a-zA-Z0-9_]+`)
 func New() (*catalog.Memory, error) {
 	goSource, goBlueprint := templatebuiltin.GoLibrary()
 	jsSource, jsBlueprint := templatebuiltin.JSLibrary()
+	tsSource, tsBlueprint := templatebuiltin.TSLibrary()
 	pySource, pyBlueprint := templatebuiltin.PythonLibrary()
 	return catalog.NewMemory(
 		catalog.Entry{
@@ -62,6 +63,32 @@ func New() (*catalog.Memory, error) {
 			Prepare: prepareJSLibrary,
 			NextSteps: []string{
 				"node --test",
+				"git init && git add .",
+			},
+			Prompts: catalog.ProjectPrompts{
+				ModuleLabel:       "npm package name",
+				ModuleDescription: `This is written to package.json as "name".`,
+				ModuleExample:     "my-library",
+			},
+		},
+		catalog.Entry{
+			ID:             "ts-library",
+			Name:           "TypeScript library",
+			Language:       "typescript",
+			Kind:           "library",
+			Description:    "A production-ready TypeScript library with CI, governance, security, tests, and documentation",
+			Licenses:       []string{"MIT"},
+			DefaultLicense: "MIT",
+			Source:         tsSource,
+			Blueprint:      tsBlueprint,
+			Defaults: map[string]any{
+				"IncludeInstall": true,
+				"TemplateID":     "ts-library",
+			},
+			Prepare: prepareJSLibrary,
+			NextSteps: []string{
+				"npm install",
+				"npm test",
 				"git init && git add .",
 			},
 			Prompts: catalog.ProjectPrompts{
