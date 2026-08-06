@@ -15,35 +15,28 @@ aruo/
 ├── internal/create/          catalog-neutral creation service and atomic writer
 ├── internal/doctor/          read-only checks, scoring, evidence, and recommendations
 ├── pkg/                      intentionally public Go APIs; empty by default
-├── api/                      versioned schemas and plugin protocol contracts
-├── blueprints/               first-party composable project definitions
 ├── templates/                text/document templates used by blueprints
-├── plugins/                  first-party plugin manifests and SDK fixtures
-├── policies/                 machine-readable engineering policy packs
-├── configs/                  development/tool configuration fragments
 ├── docs/                     user and contributor documentation source
-├── examples/                 executable consumer workflows, later tested
 ├── tests/                    cross-module integration/conformance fixtures
 ├── benchmarks/               harness definitions and governed results
-├── scripts/                  thin documented automation, no business logic
 ├── decisions/                immutable architecture decision records
 ├── rfcs/                     substantial proposals and RFC process artifacts
 ├── research/                 permanent evidence, evaluations, and open questions
-├── website/                  docs-site application/configuration, not content truth
-├── assets/                   source-controlled shared brand/diagram assets
 ├── go.mod                    module identity and Go compatibility/toolchain
 ├── Makefile                  discoverable local quality task facade
 ├── .golangci.yml             formatting and curated static-analysis policy
 └── .goreleaser.yaml          cross-platform release artifact specification
 ```
 
+`api/`, `assets/`, `blueprints/`, `configs/`, `examples/`, `plugins/`, `policies/`, `scripts/`, and `website/` do not exist yet. They are added, each with an accepted RFC, when real content is ready to land — not created ahead of time as empty placeholders.
+
 ## Rules
 
-- Do not create empty directories for appearance. During design, each future implementation directory contains a README defining its boundary.
+- Do not create empty directories for appearance. A directory is added, with real content and an accepted RFC, when the work is ready to land — not ahead of time as a placeholder.
 - Add a top-level directory only when it has a distinct audience, lifecycle, ownership, or tooling boundary that cannot be expressed in an existing directory.
 - `cmd/` wires dependencies; reusable behavior belongs in `internal/`.
 - `pkg/` is not a dumping ground. Moving code there creates a compatibility promise and requires an ADR/API review.
-- User docs live in `docs/`; `website/` contains presentation/build machinery only.
+- User docs live in `docs/`. A future `website/` will contain presentation/build machinery only, never content truth.
 - `research/` preserves evidence and rejected options; `decisions/` states accepted choices; `rfcs/` proposes change. They are not interchangeable.
 - `.design/` preserves informal product thinking and meeting context. It is committed in Aruo but excluded from generated repositories, packages, release archives, and the public docs build.
 - Generated outputs, caches, dependencies, secrets, raw datasets, binaries, and benchmark scratch files are never committed.

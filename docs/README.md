@@ -34,5 +34,5 @@ Use the Diátaxis separation of tutorials, how-to guides, reference, and explana
 
 Write direct inclusive English, sentence-case headings, explicit units, stable terminology, and honest limitations. Avoid “easy,” “obvious,” and claims without evidence. Essential diagrams include prose equivalents; media has alternative text; the site targets WCAG 2.2 AA.
 
-This directory is the documentation source of truth. [`website/`](../website/README.md) owns rendering only. Every docs PR receives a preview, and every section has a maintainer. Versioned documentation follows the support policy and visibly marks archived releases.
+This directory is the documentation source of truth. A future `website/` directory (see [project structure](architecture/project-structure.md)) will own rendering only, never content truth. Every docs PR receives a preview, and every section has a maintainer. Versioned documentation follows the support policy and visibly marks archived releases.
 
