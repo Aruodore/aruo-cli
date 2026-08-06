@@ -50,4 +50,4 @@ aruo/
 - Distribution allowlists MUST be used instead of relying only on ignore patterns; tests MUST fail if `.design/` appears in any downstream artifact.
 - Language-native colocated tests remain beside code; `tests/` holds cross-package, compatibility, E2E, and fixture suites.
 
-The executable shell above is implemented; future domain package names remain provisional until their implementation RFCs. [ARCHITECTURE.md](ARCHITECTURE.md) and the [CLI application architecture](docs/architecture/cli-application.md) define responsibility boundaries that package names must preserve.
+The executable shell above is implemented; future domain package names remain provisional until their implementation RFCs. [Architecture](README.md) and the [CLI application architecture](cli-application.md) define responsibility boundaries that package names must preserve.

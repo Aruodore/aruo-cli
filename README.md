@@ -53,7 +53,7 @@ binary (`aruo version` reports `dev`); rebuild it after pulling changes. Do not
 install packages claiming to be official Aruo releases before this repository
 publishes verified release instructions.
 
-Review the [create architecture](docs/architecture/create-command.md), [system architecture](ARCHITECTURE.md), and [CLI specification](CLI.md) before extending the command or catalog.
+Review the [create architecture](docs/architecture/create-command.md), [system architecture](docs/architecture/README.md), and [CLI specification](CLI.md) before extending the command or catalog.
 
 ## Roadmap
 

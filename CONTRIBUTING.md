@@ -4,7 +4,7 @@ Thank you for helping build durable open-source engineering infrastructure. Duri
 
 ## Before you begin
 
-Read [VISION.md](VISION.md), [PHILOSOPHY.md](PHILOSOPHY.md), [ARCHITECTURE.md](ARCHITECTURE.md), and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Search issues/RFCs before opening a large proposal. Security reports follow [SECURITY.md](SECURITY.md), not public issues.
+Read [VISION.md](VISION.md), [PHILOSOPHY.md](PHILOSOPHY.md), [the architecture guide](docs/architecture/README.md), and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md). Search issues/RFCs before opening a large proposal. Security reports follow [SECURITY.md](SECURITY.md), not public issues.
 
 ## Development setup
 
