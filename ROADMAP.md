@@ -40,5 +40,5 @@ Evidence-grounded architecture assistance, policy simulation, onboarding generat
 
 Hosted accounts, public plugin marketplace, autonomous code changes, deployment-provider abstraction, IDE daemon, and AI-generated fixes are deferred until the local deterministic engine is trustworthy.
 
-Milestones are capability gates, not date promises. See [RELEASE.md](RELEASE.md) for release readiness.
+Milestones are capability gates, not date promises. See [the release process](docs/development/release.md) for release readiness.
 

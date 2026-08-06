@@ -35,4 +35,4 @@ Review evaluates correctness, simplicity, contracts, security, cross-platform be
 
 ## Standards
 
-Follow [STYLE_GUIDE.md](STYLE_GUIDE.md), [TESTING.md](TESTING.md), and [DOCUMENTATION.md](DOCUMENTATION.md). Never commit credentials, private data, generated dependencies, or unlicensed assets. Contributions are licensed under Apache-2.0; a Developer Certificate of Origin sign-off may be introduced before accepting code.
+Follow [the style guide](docs/development/style-guide.md), [the testing strategy](docs/development/testing.md), and [DOCUMENTATION.md](DOCUMENTATION.md). Never commit credentials, private data, generated dependencies, or unlicensed assets. Contributions are licensed under Apache-2.0; a Developer Certificate of Origin sign-off may be introduced before accepting code.

@@ -17,6 +17,6 @@ The format follows [Keep a Changelog 2.0.0](https://keepachangelog.com/en/2.0.0/
 
 ## Release process
 
-Release intent is captured with the change and reviewed in a release PR. At release, maintainers move entries from `Unreleased` to a dated version, link migrations for breaking changes, build once from the protected tag, verify/sign artifacts, publish through trusted identities, and create curated GitHub release notes from this canonical record. See [RELEASE.md](RELEASE.md).
+Release intent is captured with the change and reviewed in a release PR. At release, maintainers move entries from `Unreleased` to a dated version, link migrations for breaking changes, build once from the protected tag, verify/sign artifacts, publish through trusted identities, and create curated GitHub release notes from this canonical record. See [the release process](docs/development/release.md).
 
 [Unreleased]: https://github.com/aruodore/aruo/commits/main
