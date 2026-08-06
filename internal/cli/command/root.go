@@ -59,8 +59,11 @@ func NewRoot(streams iostreams.IOStreams, build buildinfo.Info, templateCatalog 
 	root.SetIn(streams.In)
 	root.SetOut(streams.Out)
 	root.SetErr(streams.ErrOut)
-	root.CompletionOptions.DisableDefaultCmd = true
-	global.register(root.PersistentFlags())
+	// Cobra's generated completion command only reads static command
+	// metadata and the registered completion functions below; it never
+	// prompts, mutates state, or reaches the network.
+	root.CompletionOptions.DisableDefaultCmd = false
+	global.register(root)
 	root.AddCommand(newVersion(build))
 	if templateCatalog != nil && creator != nil {
 		root.AddCommand(newCreate(factory, templateCatalog, creator))

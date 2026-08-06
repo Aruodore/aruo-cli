@@ -59,7 +59,55 @@ func newCreate(factory sessionFactory, templateCatalog catalog.Catalog, creator 
 	flags.BoolVar(&options.nonInteractive, "non-interactive", false, "disable prompts and fail on missing input")
 	flags.BoolVarP(&options.yes, "yes", "y", false, "accept the final creation confirmation")
 	_ = flags.MarkDeprecated("non-interactive", "use --no-input instead")
+	registerCreateCompletions(command, templateCatalog)
 	return command
+}
+
+// registerCreateCompletions offers template, language, and kind values from
+// the local, offline template catalog. Shell completion must return quickly
+// and never reach the network; the builtin catalog is embedded, so listing
+// it is instant.
+func registerCreateCompletions(command *cobra.Command, templateCatalog catalog.Catalog) {
+	entries := func() ([]catalog.Entry, error) { return templateCatalog.List(command.Context()) }
+	_ = command.RegisterFlagCompletionFunc("template", func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+		list, err := entries()
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveError
+		}
+		completions := make([]string, 0, len(list))
+		for _, entry := range list {
+			completions = append(completions, entry.ID+"\t"+entry.Description)
+		}
+		return completions, cobra.ShellCompDirectiveNoFileComp
+	})
+	_ = command.RegisterFlagCompletionFunc("language", func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+		list, err := entries()
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveError
+		}
+		return uniqueValues(list, func(entry catalog.Entry) string { return entry.Language }), cobra.ShellCompDirectiveNoFileComp
+	})
+	_ = command.RegisterFlagCompletionFunc("kind", func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+		list, err := entries()
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveError
+		}
+		return uniqueValues(list, func(entry catalog.Entry) string { return entry.Kind }), cobra.ShellCompDirectiveNoFileComp
+	})
+}
+
+func uniqueValues(entries []catalog.Entry, field func(catalog.Entry) string) []string {
+	seen := make(map[string]struct{}, len(entries))
+	result := make([]string, 0, len(entries))
+	for _, entry := range entries {
+		value := field(entry)
+		if _, exists := seen[value]; exists {
+			continue
+		}
+		seen[value] = struct{}{}
+		result = append(result, value)
+	}
+	return result
 }
 
 func runCreate(ctx context.Context, factory sessionFactory, templateCatalog catalog.Catalog, creator *create.Service, options createOptions) error {

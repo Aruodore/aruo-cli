@@ -64,6 +64,9 @@ func newDoctor(factory sessionFactory, service *doctor.Service) *cobra.Command {
 	}
 	command.Flags().StringVar(&options.format, "format", "human", "output format: human or json")
 	command.Flags().IntVar(&options.minimumScore, "minimum-score", 80, "minimum passing score (0-100)")
+	_ = command.RegisterFlagCompletionFunc("format", func(*cobra.Command, []string, string) ([]string, cobra.ShellCompDirective) {
+		return []string{"human", "json"}, cobra.ShellCompDirectiveNoFileComp
+	})
 	return command
 }
 
