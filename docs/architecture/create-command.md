@@ -20,7 +20,7 @@ The command package owns flags and prompts only. `internal/create` owns validati
 
 - The destination is the single positional argument and project name defaults to its base name.
 - Interactive mode asks only for unresolved required inputs, shows defaults, and confirms the exact destination/template/file count.
-- `--non-interactive` never reads stdin. Missing required input is an actionable error naming the flag.
+- `--no-input` never reads stdin. Missing required input is an actionable error naming the flag. (`--non-interactive` is a deprecated alias that still works.)
 - `--yes` accepts the final creation confirmation; it does not invent identity or publishing decisions.
 - `--template` is the stable automation selector. `--language` and `--kind` filter catalog discovery without embedding language branches in the command.
 - Existing destinations fail, even if empty. A future `init` command will own adoption of existing directories.

@@ -25,7 +25,7 @@ aruo create ./my-library \
   --module example.com/my-library \
   --description "A production-quality Go library." \
   --author "Example Authors" \
-  --non-interactive
+  --no-input
 ```
 
 Use `--language` and `--kind` to filter catalog entries, `--set key=value` for declared template variables, and `--yes` to accept interactive confirmation. Creation refuses every existing destination.
@@ -58,7 +58,7 @@ aruo completion
 
 ## Proposed global behavior
 
-Global flags include `--cwd`, `--config`, `--profile`, `--format human|json|sarif`, `--color auto|always|never`, `--quiet`, `--verbose`, `--offline`, `--non-interactive`, `--yes`, and `--no-input`. Flags override purpose-built environment variables, which override files. `NO_COLOR`, redirected output, dumb terminals, reduced motion, and CI are respected.
+Global flags include `--cwd`, `--config`, `--profile`, `--format human|json|sarif`, `--color auto|always|never`, `--quiet`, `--verbose`, `--offline`, `--yes`, and `--no-input`. Flags override purpose-built environment variables, which override files. `NO_COLOR`, redirected output, dumb terminals, reduced motion, and CI are respected.
 
 Human results go to stdout; diagnostics/progress to stderr. JSON is versioned, undecorated, and stable. Exit codes: `0` success/conformant, `1` operational failure, `2` usage/configuration, `3` findings at threshold, `4` unresolved conflicts, `5` trust/security refusal.
 
