@@ -4,7 +4,7 @@
 
 Most generators stop after copying files. Aruo treats creation as the beginning: it models repository intent, checks evidence against versioned standards, previews safe changes, reconciles upgrades, and coordinates documentation, tests, benchmarks, and releases through native ecosystem tools.
 
-> Project status: **pre-0.1**. `aruo create` provides one qualified Go-library catalog entry, and `aruo doctor` performs versioned local repository-health assessment. Other lifecycle commands remain intentionally unavailable.
+> Project status: **pre-0.1**. `aruo create` provides two qualified catalog entries (Go and JavaScript libraries), and `aruo doctor` performs versioned local repository-health assessment. Other lifecycle commands remain intentionally unavailable.
 
 ## Why Aruo
 

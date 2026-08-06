@@ -77,10 +77,10 @@ any command's behavior until one calls them.
 
 - `Prompter.Secret` (no-echo, non-logged input): no command asks for a
   credential today.
-- `Prompter.MultiSelect`: `create`'s only template (`go-library`) has one
-  boolean default (`IncludeInstall`) applied silently, never surfaced as a
-  choice; there is no enumerable option set in the product yet for it to
-  represent.
+- `Prompter.MultiSelect`: both of `create`'s templates (`go-library`,
+  `js-library`) have one boolean default (`IncludeInstall`) applied silently,
+  never surfaced as a choice; there is no enumerable option set in the
+  product yet for it to represent.
 - The entire live-progress path (`ProgressSink.Emit`, `tux.TaskEvent`,
   `internal/tux/charm`'s Bubble Tea renderer, `Session.Progress()`):
   `create`'s write (~24 files, staged then renamed) is sub-100ms and
