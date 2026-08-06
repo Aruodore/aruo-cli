@@ -25,4 +25,4 @@ initial workflow on a disposable repository, expected output, cleanup, and the
 next two workflows. It must finish in five minutes on each tier-1 platform and
 run in release CI.
 
-For now, start with the [project vision](../../VISION.md) and [architecture](../architecture/README.md). Do not install unofficial packages using the Aruo name.
+For now, start with the [project vision](../design-principles/vision.md) and [architecture](../architecture/README.md). Do not install unofficial packages using the Aruo name.

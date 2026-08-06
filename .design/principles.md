@@ -1,6 +1,6 @@
 # Working principles
 
-These are product heuristics under active refinement. Accepted engineering principles live in [`PHILOSOPHY.md`](../PHILOSOPHY.md).
+These are product heuristics under active refinement. Accepted engineering principles live in [the design principles guide](../docs/design-principles/README.md).
 
 1. **Begin with the repository’s intent.** Do not infer a universal goal from language or framework alone.
 2. **Show the plan before the effect.** Consequential work should be inspectable before execution.
