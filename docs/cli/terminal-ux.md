@@ -42,21 +42,15 @@ for measured evidence.
   resolves policy, and selects the plain reference adapter or the Charm v2
   adapters. `TERM=dumb`, `--accessible`/`ARUO_ACCESSIBLE`, and non-interactive
   or non-human-format sessions deterministically select the plain adapter.
-- Prompts (`internal/tux/charm` via Huh v2, `internal/tux/plain` reference):
-  text input, confirm, single-select with descriptions and defaults.
-  Multi-select and secret/no-echo input exist on both adapters but are not
-  yet wired into any command.
+- Prompts (`internal/tux/charm` via Huh v2, `internal/tux/plain` reference)
+  reached by `create`'s name/module/description/author/template/confirm
+  flow: text input, confirm, and single-select with descriptions and
+  defaults.
 - Output (`internal/tux/charm` via Lip Gloss v2, `internal/tux/plain`
   reference): semantic messages (info/success/warning/note), width-aware
   tables that drop lower-priority columns before truncating, and one
   actionable diagnostic renderer. Color/Unicode degrade to plain text under
   `NO_COLOR`, `--color=never`, `ColorNone` capability, or accessible mode.
-- Live progress (`internal/tux/charm` via Bubble Tea v2): concurrent/nested
-  tasks, spinner, determinate bars, durable terminal states, parent-cycle
-  protection, 10 FPS cap, no idle animation once every task reaches a
-  terminal state. Non-interactive/machine/accessible sessions fall back to
-  the plain adapter's sparse durable lines, not a JSONL event stream (see
-  gaps below).
 - Signal lifecycle (`internal/tux/lifecycle`, wired in `cmd/aruo`): first
   Ctrl+C cancels cooperatively with one acknowledgement, second Ctrl+C forces
   exit, SIGTERM cancels without prompting; exit codes 130/143; idempotent
@@ -74,6 +68,27 @@ for measured evidence.
 - Shell completion (bash/zsh/fish/PowerShell) via Cobra, including dynamic,
   local, sub-100ms completion for `--template`/`--language`/`--kind`,
   `--format`, `--color`, and `--motion`.
+
+**Implemented and adapter-tested, but with no caller in any shipped command:**
+these are real, working ports built ahead of a command that needs them, not
+placeholders; each is exercised by its own package's tests but never reached
+through `create`, `doctor`, or `cmd/aruo`. Do not describe them as active in
+any command's behavior until one calls them.
+
+- `Prompter.Secret` (no-echo, non-logged input): no command asks for a
+  credential today.
+- `Prompter.MultiSelect`: `create`'s only template (`go-library`) has one
+  boolean default (`IncludeInstall`) applied silently, never surfaced as a
+  choice; there is no enumerable option set in the product yet for it to
+  represent.
+- The entire live-progress path (`ProgressSink.Emit`, `tux.TaskEvent`,
+  `internal/tux/charm`'s Bubble Tea renderer, `Session.Progress()`):
+  `create`'s write (~24 files, staged then renamed) is sub-100ms and
+  `doctor`'s audit is a fast local walk, both squarely in this
+  specification's own "<200ms: no progress" bucket. Wiring progress
+  reporting into either would contradict that guidance rather than satisfy
+  it; the mechanism is complete and tested, but nothing in Aruo is slow,
+  networked, or multi-step enough yet to warrant it.
 
 **Known gaps (not yet implemented):**
 
