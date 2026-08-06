@@ -178,6 +178,7 @@ func TestRunCreateInteractive(t *testing.T) {
 	}
 	destination := t.TempDir() + "/guided"
 	input := strings.Join([]string{
+		"1", // Template: Go library, now that js-library makes the picker fire
 		"example.com/guided",
 		"A guided library.",
 		"Guided Authors",
