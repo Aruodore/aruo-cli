@@ -15,33 +15,61 @@ var nonIdentifier = regexp.MustCompile(`[^a-zA-Z0-9_]+`)
 
 // New returns the compiled first-party catalog.
 func New() (*catalog.Memory, error) {
-	source, blueprint := templatebuiltin.GoLibrary()
-	return catalog.NewMemory(catalog.Entry{
-		ID:             "go-library",
-		Name:           "Go library",
-		Language:       "go",
-		Kind:           "library",
-		Description:    "A production-ready Go library with CI, governance, security, tests, and documentation",
-		Licenses:       []string{"MIT"},
-		DefaultLicense: "MIT",
-		Source:         source,
-		Blueprint:      blueprint,
-		Defaults: map[string]any{
-			"GoVersion":      "1.26.0",
-			"IncludeInstall": true,
-			"TemplateID":     "go-library",
+	goSource, goBlueprint := templatebuiltin.GoLibrary()
+	jsSource, jsBlueprint := templatebuiltin.JSLibrary()
+	return catalog.NewMemory(
+		catalog.Entry{
+			ID:             "go-library",
+			Name:           "Go library",
+			Language:       "go",
+			Kind:           "library",
+			Description:    "A production-ready Go library with CI, governance, security, tests, and documentation",
+			Licenses:       []string{"MIT"},
+			DefaultLicense: "MIT",
+			Source:         goSource,
+			Blueprint:      goBlueprint,
+			Defaults: map[string]any{
+				"GoVersion":      "1.26.0",
+				"IncludeInstall": true,
+				"TemplateID":     "go-library",
+			},
+			Prepare: prepareGoLibrary,
+			NextSteps: []string{
+				"go test ./...",
+				"git init && git add .",
+			},
+			Prompts: catalog.ProjectPrompts{
+				ModuleLabel:       "Go module path",
+				ModuleDescription: "This is written to go.mod and becomes the import path for your library.",
+				ModuleExample:     "github.com/your-name/my-library",
+			},
 		},
-		Prepare: prepareGoLibrary,
-		NextSteps: []string{
-			"go test ./...",
-			"git init && git add .",
+		catalog.Entry{
+			ID:             "js-library",
+			Name:           "JavaScript library",
+			Language:       "javascript",
+			Kind:           "library",
+			Description:    "A production-ready JavaScript library with CI, governance, security, tests, and documentation",
+			Licenses:       []string{"MIT"},
+			DefaultLicense: "MIT",
+			Source:         jsSource,
+			Blueprint:      jsBlueprint,
+			Defaults: map[string]any{
+				"IncludeInstall": true,
+				"TemplateID":     "js-library",
+			},
+			Prepare: prepareJSLibrary,
+			NextSteps: []string{
+				"node --test",
+				"git init && git add .",
+			},
+			Prompts: catalog.ProjectPrompts{
+				ModuleLabel:       "npm package name",
+				ModuleDescription: `This is written to package.json as "name".`,
+				ModuleExample:     "my-library",
+			},
 		},
-		Prompts: catalog.ProjectPrompts{
-			ModuleLabel:       "Go module path",
-			ModuleDescription: "This is written to go.mod and becomes the import path for your library.",
-			ModuleExample:     "github.com/your-name/my-library",
-		},
-	})
+	)
 }
 
 func prepareGoLibrary(data templateengine.Data) (templateengine.Data, error) {
@@ -54,5 +82,15 @@ func prepareGoLibrary(data templateengine.Data) (templateengine.Data, error) {
 		return data, fmt.Errorf("project name %q cannot form a Go package identifier", data.Project.Name)
 	}
 	data.Variables["PackageName"] = name
+	return data, nil
+}
+
+func prepareJSLibrary(data templateengine.Data) (templateengine.Data, error) {
+	if data.Project.Module == "" {
+		return data, fmt.Errorf("npm package name is required (use --module)")
+	}
+	if data.Project.Module != strings.ToLower(data.Project.Module) {
+		return data, fmt.Errorf("npm package name %q must be lowercase", data.Project.Module)
+	}
 	return data, nil
 }

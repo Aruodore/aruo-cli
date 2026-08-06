@@ -1,0 +1,16 @@
+{
+  "name": "{{ .Project.Module }}",
+  "version": "0.0.0",
+  "description": "{{ .Project.Description }}",
+  "license": "{{ .Project.License }}",
+  "author": "{{ .Project.Author }}",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": "./src/index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test"
+  }
+}
