@@ -16,6 +16,94 @@ The key words **MUST**, **MUST NOT**, **SHOULD**, **SHOULD NOT**, and **MAY** ar
 
 Aruo is a command-line application first. It may use inline terminal UI where that improves a decision, but it must remain predictable when redirected, automated, accessed through SSH, read with assistive technology, or run in a limited terminal. Rich presentation is an enhancement over a complete line-oriented contract.
 
+## Implementation status (2026-08-06)
+
+This section states what `internal/tux` and `internal/cli` genuinely
+implement today, against the normative sections below. Where this section is
+silent on a normative requirement, treat it as **not yet implemented**; do
+not infer support from the specification text alone. See
+[ADR-0010](../../decisions/0010-charm-v2-terminal-ux-stack.md) for the
+accepted dependency stack and
+[benchmarks/results/2026-08-06-terminal-ux-baseline.md](../../benchmarks/results/2026-08-06-terminal-ux-baseline.md)
+for measured evidence.
+
+**Implemented:**
+
+- Capability detection (`internal/tux/term`): input/output/error TTY status,
+  dimensions, color depth, Unicode-locale heuristic, cursor addressing,
+  alternate-screen support, hyperlink heuristic, CI, SSH, tmux/screen.
+- Deterministic policy resolution (`internal/tux/policy`): flag precedence
+  over `ARUO_*`/generic environment over detection; `NO_COLOR`,
+  `ARUO_ACCESSIBLE`, `ARUO_MOTION`, `ARUO_NO_INPUT`, CI-forced no-input, and
+  the interactive/non-interactive/machine mode switch.
+- One `Session` per invocation (`internal/tux/session`), assembled once at
+  each command's entry point (not a single process-wide composition root,
+  since commands are built fresh per Cobra invocation): detects capabilities,
+  resolves policy, and selects the plain reference adapter or the Charm v2
+  adapters. `TERM=dumb`, `--accessible`/`ARUO_ACCESSIBLE`, and non-interactive
+  or non-human-format sessions deterministically select the plain adapter.
+- Prompts (`internal/tux/charm` via Huh v2, `internal/tux/plain` reference):
+  text input, confirm, single-select with descriptions and defaults.
+  Multi-select and secret/no-echo input exist on both adapters but are not
+  yet wired into any command.
+- Output (`internal/tux/charm` via Lip Gloss v2, `internal/tux/plain`
+  reference): semantic messages (info/success/warning/note), width-aware
+  tables that drop lower-priority columns before truncating, and one
+  actionable diagnostic renderer. Color/Unicode degrade to plain text under
+  `NO_COLOR`, `--color=never`, `ColorNone` capability, or accessible mode.
+- Live progress (`internal/tux/charm` via Bubble Tea v2): concurrent/nested
+  tasks, spinner, determinate bars, durable terminal states, parent-cycle
+  protection, 10 FPS cap, no idle animation once every task reaches a
+  terminal state. Non-interactive/machine/accessible sessions fall back to
+  the plain adapter's sparse durable lines, not a JSONL event stream (see
+  gaps below).
+- Signal lifecycle (`internal/tux/lifecycle`, wired in `cmd/aruo`): first
+  Ctrl+C cancels cooperatively with one acknowledgement, second Ctrl+C forces
+  exit, SIGTERM cancels without prompting; exit codes 130/143; idempotent
+  best-effort terminal restoration on every cancellation point including the
+  forced second interrupt.
+- `cli.Run` renders ordinary cancellation (`context.Canceled` from the
+  signal path, or `tux.ErrCancelled` from a rich adapter's own Ctrl+C key
+  handling when raw mode has cleared `ISIG`) as `Cancelled.`, not a red
+  `Error:` line.
+- Global flags: `--no-input`, `--interactive`, `--accessible`,
+  `--color=auto|always|never`, `--motion=auto|always|never`; `create`'s
+  `--non-interactive` is deprecated in favor of `--no-input` but still works.
+  `doctor --format human|json` predates this work and is unchanged; its JSON
+  schema is untouched.
+- Shell completion (bash/zsh/fish/PowerShell) via Cobra, including dynamic,
+  local, sub-100ms completion for `--template`/`--language`/`--kind`,
+  `--format`, `--color`, and `--motion`.
+
+**Known gaps (not yet implemented):**
+
+- `--unicode`, `--hyperlink`, `--progress`, `--pager`/`--no-pager`,
+  `--quiet`/`--verbose`/`-v`/`--debug` flags, and `aruo config explain
+  terminal.mode`.
+- Paging, full-screen/alternate-buffer views, and mouse support (no current
+  command needs them).
+- `jsonl`, `yaml`, `sarif`, and `markdown` output formats: the `OutputFormat`
+  enum and machine-mode policy exist, but no command emits them yet.
+- A JSONL structured progress protocol for machine mode.
+- `--interactive` opening `/dev/tty` explicitly when stdin carries piped
+  data; today it only overrides CI/no-input-forced input policy.
+- Non-interactive/machine mode reports only the first missing value, not
+  every missing value together as the specification recommends.
+- Retry/backoff behavior (no networked, retryable command exists yet).
+- `--debug` diagnostic reference codes (`Diagnostic.Code` exists structurally;
+  no command populates it yet).
+- Genuine PTY keystroke-level qualification tests. A real pty-driven test was
+  attempted for this work and found to require either a new third-party pty
+  dependency or hand-rolled Unix ioctls; neither was justified for this pass.
+  Huh/Bubble Tea component behavior is unit-tested in `internal/tux/charm`,
+  and the underlying session/lifecycle wiring is qualification-tested in
+  `internal/cli` and `cmd/aruo`, but no test drives real keystrokes through a
+  real terminal device end to end.
+- Localization: all prompt/output prose is hardcoded English.
+- Windows and macOS are cross-compiled and vetted in CI
+  (`GOOS=windows|darwin`), not run; no ConPTY, Terminal.app, or
+  NVDA/Narrator/VoiceOver qualification has been performed.
+
 ## Research conclusions
 
 ### What modern CLIs converge on
