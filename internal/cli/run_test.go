@@ -33,10 +33,21 @@ type ttyWriter struct {
 
 func (w ttyWriter) Fd() uintptr { return w.fd }
 
-type fakeProbe struct{ terminals map[int]bool }
+// width defaults to 80 when unset so existing fixtures keep their prior
+// behavior; qualification tests override it to exercise narrow rendering.
+type fakeProbe struct {
+	terminals map[int]bool
+	width     int
+}
 
-func (p fakeProbe) IsTerminal(fd int) bool     { return p.terminals[fd] }
-func (p fakeProbe) Size(int) (int, int, error) { return 80, 24, nil }
+func (p fakeProbe) IsTerminal(fd int) bool { return p.terminals[fd] }
+func (p fakeProbe) Size(int) (int, int, error) {
+	width := p.width
+	if width == 0 {
+		width = 80
+	}
+	return width, 24, nil
+}
 
 func TestRun(t *testing.T) {
 	t.Parallel()
