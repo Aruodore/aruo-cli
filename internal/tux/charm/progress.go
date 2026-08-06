@@ -18,8 +18,15 @@ type Progress struct {
 	program   *tea.Program
 	done      chan error
 	closeOnce sync.Once
-	closed    chan struct{}
 	closeErr  error
+
+	// lifecycle guards Emit against Close: Emit holds it for read for the
+	// duration of one Send, and Close takes it for write before starting
+	// shutdown. This guarantees Send is never called concurrently with or
+	// after Quit, so it can never block on a program whose event loop has
+	// already stopped reading.
+	lifecycle sync.RWMutex
+	closed    bool
 }
 
 // NewProgress starts a live progress renderer with Aruo-owned lifecycle and signals.
@@ -34,7 +41,7 @@ func NewProgress(ctx context.Context, output io.Writer, capabilities tux.Capabil
 		tea.WithWindowSize(capabilities.Width, capabilities.Height),
 		tea.WithoutSignalHandler(),
 	)
-	progress := &Progress{program: program, done: make(chan error, 1), closed: make(chan struct{})}
+	progress := &Progress{program: program, done: make(chan error, 1)}
 	go func() {
 		_, err := program.Run()
 		progress.done <- err
@@ -47,19 +54,21 @@ func (p *Progress) Emit(ctx context.Context, event tux.TaskEvent) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	select {
-	case <-p.closed:
+	p.lifecycle.RLock()
+	defer p.lifecycle.RUnlock()
+	if p.closed {
 		return tux.ErrUnavailable
-	default:
-		p.program.Send(taskEventMsg(event))
-		return nil
 	}
+	p.program.Send(taskEventMsg(event))
+	return nil
 }
 
 // Close completes the live region and restores Bubble Tea terminal state.
 func (p *Progress) Close() error {
 	p.closeOnce.Do(func() {
-		close(p.closed)
+		p.lifecycle.Lock()
+		p.closed = true
+		p.lifecycle.Unlock()
 		p.program.Quit()
 		p.closeErr = <-p.done
 		if errors.Is(p.closeErr, tea.ErrProgramKilled) {

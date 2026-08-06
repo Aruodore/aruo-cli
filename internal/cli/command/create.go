@@ -131,37 +131,10 @@ func runCreate(ctx context.Context, factory sessionFactory, templateCatalog cata
 		}
 		options.destination = options.name
 	}
-	entries, err := templateCatalog.List(ctx)
+
+	entry, err := resolveTemplate(ctx, prompter, templateCatalog, interactive, &options)
 	if err != nil {
 		return err
-	}
-	entries = filterEntries(entries, options.language, options.kind)
-	if options.templateID == "" {
-		switch {
-		case len(entries) == 0:
-			return errors.New("no templates match the requested language/kind filters")
-		case len(entries) == 1:
-			options.templateID = entries[0].ID
-		case !interactive:
-			return errors.New("--template is required when multiple templates match")
-		default:
-			selected, selectErr := prompter.Select(ctx, tux.SelectRequest{
-				ID:      "template",
-				Label:   "Template",
-				Options: templateOptions(entries),
-			})
-			if selectErr != nil {
-				return selectErr
-			}
-			options.templateID = string(selected)
-		}
-	}
-	entry, err := templateCatalog.Resolve(ctx, options.templateID)
-	if err != nil {
-		return err
-	}
-	if options.language != "" && entry.Language != options.language || options.kind != "" && entry.Kind != options.kind {
-		return fmt.Errorf("template %q does not match the requested language/kind filters", entry.ID)
 	}
 	if options.name == "" {
 		options.name = filepath.Base(filepath.Clean(options.destination))
@@ -169,17 +142,90 @@ func runCreate(ctx context.Context, factory sessionFactory, templateCatalog cata
 	if options.name == "." {
 		return errors.New("cannot infer a project name for the current directory; provide --name")
 	}
-	moduleLabel := entry.Prompts.ModuleLabel
-	if moduleLabel == "" {
-		moduleLabel = "Package or module path"
+
+	if err := resolveProjectFields(ctx, prompter, entry, interactive, &options); err != nil {
+		return err
 	}
+	if options.license == "" {
+		options.license = entry.DefaultLicense
+	}
+	if !contains(entry.Licenses, options.license) {
+		return fmt.Errorf("template %q does not support license %q; supported: %s", entry.ID, options.license, strings.Join(entry.Licenses, ", "))
+	}
+	variables, err := parseVariables(options.variables)
+	if err != nil {
+		return err
+	}
+
+	if err := confirmCreation(ctx, prompter, entry, options, interactive); err != nil {
+		return err
+	}
+
+	result, err := creator.Create(ctx, create.Request{
+		Destination: options.destination,
+		TemplateID:  entry.ID,
+		Project: templateengine.Project{
+			Name: options.name, Module: options.module, Description: options.description,
+			Author: options.author, License: options.license, Language: entry.Language,
+		},
+		Variables: variables,
+	})
+	if err != nil {
+		return err
+	}
+	return presentCreated(ctx, terminal.Presenter(), options.destination, result)
+}
+
+// resolveTemplate applies options.language/options.kind filters, resolves
+// options.templateID (prompting when more than one template matches and the
+// session is interactive), and returns the matching catalog entry.
+func resolveTemplate(ctx context.Context, prompter tux.Prompter, templateCatalog catalog.Catalog, interactive bool, options *createOptions) (catalog.Entry, error) {
+	entries, err := templateCatalog.List(ctx)
+	if err != nil {
+		return catalog.Entry{}, err
+	}
+	entries = filterEntries(entries, options.language, options.kind)
+	if options.templateID == "" {
+		switch {
+		case len(entries) == 0:
+			return catalog.Entry{}, errors.New("no templates match the requested language/kind filters")
+		case len(entries) == 1:
+			options.templateID = entries[0].ID
+		case !interactive:
+			return catalog.Entry{}, errors.New("--template is required when multiple templates match")
+		default:
+			selected, selectErr := prompter.Select(ctx, tux.SelectRequest{
+				ID:      "template",
+				Label:   "Template",
+				Options: templateOptions(entries),
+			})
+			if selectErr != nil {
+				return catalog.Entry{}, selectErr
+			}
+			options.templateID = string(selected)
+		}
+	}
+	entry, err := templateCatalog.Resolve(ctx, options.templateID)
+	if err != nil {
+		return catalog.Entry{}, err
+	}
+	if options.language != "" && entry.Language != options.language || options.kind != "" && entry.Kind != options.kind {
+		return catalog.Entry{}, fmt.Errorf("template %q does not match the requested language/kind filters", entry.ID)
+	}
+	return entry, nil
+}
+
+// resolveProjectFields fills in the module, description, and author fields,
+// prompting for whichever were not supplied as flags.
+func resolveProjectFields(ctx context.Context, prompter tux.Prompter, entry catalog.Entry, interactive bool, options *createOptions) error {
 	moduleDescription := entry.Prompts.ModuleDescription
 	if interactive {
 		moduleDescription = fmt.Sprintf("Creating: %s\n%s\n\n%s", entry.Name, entry.Description, moduleDescription)
 	}
+	var err error
 	options.module, err = resolveInput(ctx, prompter, options.module, tux.InputRequest{
 		ID:          "module",
-		Label:       moduleLabel,
+		Label:       moduleLabel(entry),
 		Description: moduleDescription,
 		Example:     entry.Prompts.ModuleExample,
 	}, "--module")
@@ -201,49 +247,38 @@ func runCreate(ctx context.Context, factory sessionFactory, templateCatalog cata
 		Description: "Used in the license and project metadata.",
 		Example:     "Jane Doe or Acme, Inc.",
 	}, "--author")
-	if err != nil {
-		return err
+	return err
+}
+
+// confirmCreation asks for final approval unless --yes was passed or the
+// session cannot prompt.
+func confirmCreation(ctx context.Context, prompter tux.Prompter, entry catalog.Entry, options createOptions, interactive bool) error {
+	if options.yes || !interactive {
+		return nil
 	}
-	if options.license == "" {
-		options.license = entry.DefaultLicense
-	}
-	if !contains(entry.Licenses, options.license) {
-		return fmt.Errorf("template %q does not support license %q; supported: %s", entry.ID, options.license, strings.Join(entry.Licenses, ", "))
-	}
-	variables, err := parseVariables(options.variables)
-	if err != nil {
-		return err
-	}
-	if !options.yes && interactive {
-		summary := fmt.Sprintf(
-			"Project summary:\n  Name:        %s\n  Template:    %s\n  Location:    %s\n  %s: %s\n  License:     %s",
-			options.name, entry.Name, options.destination, moduleLabel, options.module, options.license,
-		)
-		confirmed, confirmErr := prompter.Confirm(ctx, tux.ConfirmRequest{
-			ID:          "confirm",
-			Label:       "Create this project?",
-			Description: summary,
-		})
-		if confirmErr != nil {
-			return confirmErr
-		}
-		if !confirmed {
-			return errors.New("creation cancelled")
-		}
-	}
-	result, err := creator.Create(ctx, create.Request{
-		Destination: options.destination,
-		TemplateID:  entry.ID,
-		Project: templateengine.Project{
-			Name: options.name, Module: options.module, Description: options.description,
-			Author: options.author, License: options.license, Language: entry.Language,
-		},
-		Variables: variables,
+	summary := fmt.Sprintf(
+		"Project summary:\n  Name:        %s\n  Template:    %s\n  Location:    %s\n  %s: %s\n  License:     %s",
+		options.name, entry.Name, options.destination, moduleLabel(entry), options.module, options.license,
+	)
+	confirmed, err := prompter.Confirm(ctx, tux.ConfirmRequest{
+		ID:          "confirm",
+		Label:       "Create this project?",
+		Description: summary,
 	})
 	if err != nil {
 		return err
 	}
-	return presentCreated(ctx, terminal.Presenter(), options.destination, result)
+	if !confirmed {
+		return errors.New("creation cancelled")
+	}
+	return nil
+}
+
+func moduleLabel(entry catalog.Entry) string {
+	if entry.Prompts.ModuleLabel != "" {
+		return entry.Prompts.ModuleLabel
+	}
+	return "Package or module path"
 }
 
 func presentCreated(ctx context.Context, presenter tux.Presenter, destination string, result create.Result) error {
