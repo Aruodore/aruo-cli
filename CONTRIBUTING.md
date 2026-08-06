@@ -19,7 +19,7 @@ Use `make help` for the supported task list and [`docs/development/toolchain.md`
 
 ## Workflow
 
-1. Discuss substantial or compatibility-affecting work through the [RFC process](RFC_PROCESS.md).
+1. Discuss substantial or compatibility-affecting work through the [RFC process](rfcs/README.md).
 2. Branch from current `main`: `type/short-description`, where type is `feature`, `fix`, `docs`, `refactor`, `test`, `perf`, or `chore`.
 3. Make one cohesive change with tests/evidence and documentation.
 4. Add release intent when user-visible behavior changes.

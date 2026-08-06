@@ -61,7 +61,7 @@ The first vertical slice supports read-only inspection and policy checking for G
 
 ## Contributing
 
-Early contributions should improve requirements, research, ADRs, RFCs, fixtures, architecture, and acceptance criteria—not add product commands without an accepted implementation RFC. Start with [CONTRIBUTING.md](CONTRIBUTING.md), the [RFC process](RFC_PROCESS.md), and the [Code of Conduct](CODE_OF_CONDUCT.md).
+Early contributions should improve requirements, research, ADRs, RFCs, fixtures, architecture, and acceptance criteria—not add product commands without an accepted implementation RFC. Start with [CONTRIBUTING.md](CONTRIBUTING.md), the [RFC process](rfcs/README.md), and the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## License and security
 
