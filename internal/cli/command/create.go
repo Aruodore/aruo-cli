@@ -143,7 +143,7 @@ func runCreate(ctx context.Context, factory sessionFactory, templateCatalog cata
 		return errors.New("cannot infer a project name for the current directory; provide --name")
 	}
 
-	if err := resolveProjectFields(ctx, prompter, entry, interactive, &options); err != nil {
+	if err = resolveProjectFields(ctx, prompter, entry, interactive, &options); err != nil {
 		return err
 	}
 	if options.license == "" {
@@ -157,7 +157,7 @@ func runCreate(ctx context.Context, factory sessionFactory, templateCatalog cata
 		return err
 	}
 
-	if err := confirmCreation(ctx, prompter, entry, options, interactive); err != nil {
+	if err = confirmCreation(ctx, prompter, entry, options, interactive); err != nil {
 		return err
 	}
 
