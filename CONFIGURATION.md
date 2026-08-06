@@ -23,5 +23,5 @@ Environment variables are reserved for CI/runtime overrides and credentials, not
 
 ## Plugins
 
-Plugins are explicitly listed with pinned identity/version and granted capabilities. Manifest-requested permissions and repository grants are distinct; permission widening requires approval. See [PLUGINS.md](PLUGINS.md).
+Plugins are explicitly listed with pinned identity/version and granted capabilities. Manifest-requested permissions and repository grants are distinct; permission widening requires approval. See [the plugin architecture guide](docs/plugins/README.md).
 
