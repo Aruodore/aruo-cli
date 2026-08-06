@@ -72,6 +72,7 @@ func (r Repository) TestFiles() ([]string, error) {
 		}
 		base := strings.ToLower(path.Base(name))
 		if strings.HasSuffix(base, "_test.go") || strings.HasSuffix(base, "_test.py") ||
+			strings.HasPrefix(base, "test_") && strings.HasSuffix(base, ".py") ||
 			strings.Contains(base, ".test.") || strings.Contains(base, ".spec.") ||
 			strings.HasSuffix(base, "_test.rs") {
 			result = append(result, name)

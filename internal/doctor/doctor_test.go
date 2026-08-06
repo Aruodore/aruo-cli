@@ -48,6 +48,68 @@ func TestGeneratedRepositoryScoresA(t *testing.T) {
 	}
 }
 
+func TestGeneratedJSLibraryScoresA(t *testing.T) {
+	t.Parallel()
+	templateCatalog, err := builtin.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	creator, err := create.NewService(templateCatalog, create.OSWriter{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	destination := filepath.Join(t.TempDir(), "project")
+	_, err = creator.Create(context.Background(), create.Request{
+		Destination: destination, TemplateID: "js-library",
+		Project: templateengine.Project{
+			Name: "Healthy", Module: "healthy", Description: "A healthy production-ready JavaScript library.",
+			Author: "Healthy Maintainers <security@example.com>", License: "MIT", Language: "javascript",
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	service := newService(t)
+	report, err := service.Audit(context.Background(), destination)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.MaxScore != 100 || report.Score < 90 || report.Grade != "A" {
+		t.Errorf("score = %d/%d grade=%s, want at least 90/A", report.Score, report.MaxScore, report.Grade)
+	}
+}
+
+func TestGeneratedPythonLibraryScoresA(t *testing.T) {
+	t.Parallel()
+	templateCatalog, err := builtin.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	creator, err := create.NewService(templateCatalog, create.OSWriter{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	destination := filepath.Join(t.TempDir(), "project")
+	_, err = creator.Create(context.Background(), create.Request{
+		Destination: destination, TemplateID: "python-library",
+		Project: templateengine.Project{
+			Name: "Healthy", Module: "healthy", Description: "A healthy production-ready Python library.",
+			Author: "Healthy Maintainers <security@example.com>", License: "MIT", Language: "python",
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	service := newService(t)
+	report, err := service.Audit(context.Background(), destination)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.MaxScore != 100 || report.Score < 90 || report.Grade != "A" {
+		t.Errorf("score = %d/%d grade=%s, want at least 90/A", report.Score, report.MaxScore, report.Grade)
+	}
+}
+
 func TestEmptyRepositoryProducesActionableZeroScore(t *testing.T) {
 	t.Parallel()
 	report, err := newService(t).Audit(context.Background(), t.TempDir())

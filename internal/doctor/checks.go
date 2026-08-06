@@ -166,7 +166,7 @@ func checkTests(repository Repository) (Assessment, error) {
 	if err != nil {
 		return assessment, err
 	}
-	if containsAny(strings.ToLower(workflows), "go test", "pytest", "cargo test", "npm test", "pnpm test", "bun test", "deno test") {
+	if containsAny(strings.ToLower(workflows), "go test", "pytest", "unittest", "cargo test", "npm test", "pnpm test", "bun test", "deno test", "node --test") {
 		assessment.Points += 5
 		assessment.Evidence = append(assessment.Evidence, "CI appears to invoke a native test runner")
 	} else {
