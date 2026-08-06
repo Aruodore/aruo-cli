@@ -6,7 +6,7 @@ No production release exists. Design documents receive corrections on `main`; th
 
 ## Reporting a vulnerability
 
-Use GitHub private vulnerability reporting when enabled. A dedicated `security@` address and PGP key must be verified before the first binary release and added here. Do not open a public issue for suspected command execution, traversal, plugin, credential, artifact-signing, or supply-chain vulnerabilities.
+No reporting channel is active yet. This checkout has not been pushed to a public host; GitHub private vulnerability reporting cannot be enabled until it is, and a dedicated `security@` address and PGP key must be verified before the first binary release. Both will be added here once live. Do not open a public issue for suspected command execution, traversal, plugin, credential, artifact-signing, or supply-chain vulnerabilities in the meantime — hold the report until this section names an active channel.
 
 Include affected version/commit, platform, reproduction, impact, prerequisites, and suggested mitigation if known. Remove real secrets and personal data. Maintainers target acknowledgement within three business days, an initial assessment within seven, and status updates at least every fourteen days; these targets may change with published support capacity.
 
