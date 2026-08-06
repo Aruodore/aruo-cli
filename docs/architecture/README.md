@@ -94,7 +94,7 @@ Not yet implemented; no `internal/plugin` package exists. This section records t
 
 ## Template engine
 
-`internal/templateengine` today renders bounded, deterministic `fs.FS` bundles (the `go-library` and `js-library` catalog entries) into a caller-owned file plan; layered blueprint composition and semantic JSON/YAML/TOML/XML adapters below are the design target, not current behavior. Blueprints compose foundation, language, workload, capability, and organization layers. Restricted templates render new text; semantic adapters change JSON, YAML, TOML, XML, and language structures. Executable hooks are plugins or explicit process operations, never hidden template behavior. Provenance is recorded at semantic-key or managed-region granularity.
+`internal/templateengine` today renders bounded, deterministic `fs.FS` bundles (the built-in catalog entries under `internal/catalog/builtin`) into a caller-owned file plan; layered blueprint composition and semantic JSON/YAML/TOML/XML adapters below are the design target, not current behavior. Blueprints compose foundation, language, workload, capability, and organization layers. Restricted templates render new text; semantic adapters change JSON, YAML, TOML, XML, and language structures. Executable hooks are plugins or explicit process operations, never hidden template behavior. Provenance is recorded at semantic-key or managed-region granularity.
 
 ## Configuration
 

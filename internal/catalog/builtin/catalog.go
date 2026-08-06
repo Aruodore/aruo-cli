@@ -17,6 +17,7 @@ var nonIdentifier = regexp.MustCompile(`[^a-zA-Z0-9_]+`)
 func New() (*catalog.Memory, error) {
 	goSource, goBlueprint := templatebuiltin.GoLibrary()
 	jsSource, jsBlueprint := templatebuiltin.JSLibrary()
+	pySource, pyBlueprint := templatebuiltin.PythonLibrary()
 	return catalog.NewMemory(
 		catalog.Entry{
 			ID:             "go-library",
@@ -69,6 +70,31 @@ func New() (*catalog.Memory, error) {
 				ModuleExample:     "my-library",
 			},
 		},
+		catalog.Entry{
+			ID:             "python-library",
+			Name:           "Python library",
+			Language:       "python",
+			Kind:           "library",
+			Description:    "A production-ready Python library with CI, governance, security, tests, and documentation",
+			Licenses:       []string{"MIT"},
+			DefaultLicense: "MIT",
+			Source:         pySource,
+			Blueprint:      pyBlueprint,
+			Defaults: map[string]any{
+				"IncludeInstall": true,
+				"TemplateID":     "python-library",
+			},
+			Prepare: preparePythonLibrary,
+			NextSteps: []string{
+				"make check",
+				"git init && git add .",
+			},
+			Prompts: catalog.ProjectPrompts{
+				ModuleLabel:       "PyPI package name",
+				ModuleDescription: "This is written to pyproject.toml as \"name\".",
+				ModuleExample:     "my-library",
+			},
+		},
 	)
 }
 
@@ -92,5 +118,18 @@ func prepareJSLibrary(data templateengine.Data) (templateengine.Data, error) {
 	if data.Project.Module != strings.ToLower(data.Project.Module) {
 		return data, fmt.Errorf("npm package name %q must be lowercase", data.Project.Module)
 	}
+	return data, nil
+}
+
+func preparePythonLibrary(data templateengine.Data) (templateengine.Data, error) {
+	if data.Project.Module == "" {
+		return data, fmt.Errorf("PyPI package name is required (use --module)")
+	}
+	name := strings.ToLower(nonIdentifier.ReplaceAllString(data.Project.Name, "_"))
+	name = strings.Trim(name, "_")
+	if name == "" || (name[0] >= '0' && name[0] <= '9') {
+		return data, fmt.Errorf("project name %q cannot form a Python package identifier", data.Project.Name)
+	}
+	data.Variables["PackageName"] = name
 	return data, nil
 }

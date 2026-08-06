@@ -1,0 +1,12 @@
+import unittest
+
+from {{ .Variables.PackageName }} import VERSION
+
+
+class VersionTest(unittest.TestCase):
+    def test_version_is_set(self):
+        self.assertNotEqual(VERSION, "")
+
+
+if __name__ == "__main__":
+    unittest.main()

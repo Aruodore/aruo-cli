@@ -11,6 +11,7 @@ The format follows [Keep a Changelog 2.0.0](https://keepachangelog.com/en/2.0.0/
 - Phase 0 repository design, governance, architecture, research archive, ADR system, RFC process, and documentation structure.
 - Go 1.26 module bootstrap, Make task facade, lint/test configuration, cross-platform GitHub Actions, Dependabot, Conventional Commit validation, development container, and draft release automation with SBOMs and provenance attestations.
 - `aruo create`'s second catalog entry, `js-library`: a dependency-free JavaScript library template, surfacing the interactive template picker for the first time now that more than one entry is registered.
+- `aruo create`'s third catalog entry, `python-library`: a dependency-free Python library template (stdlib `unittest`, `src/` layout).
 
 ### Changed
 

@@ -1,0 +1,27 @@
+# {{ .Project.Name }}
+
+{{ .Project.Description }}
+
+## Why
+
+This project provides a focused, tested Python library with zero third-party dependencies and a documented maintenance contract.
+{{- if .Variables.IncludeInstall }}
+
+## Installation
+
+```sh
+pip install {{ .Project.Module }}
+```
+{{- end }}
+
+## Usage
+
+Import `{{ .Variables.PackageName }}` and begin with its exported API. Public APIs follow Semantic Versioning from the first tagged release.
+
+## Contributing and security
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before proposing a change. Report vulnerabilities privately using [SECURITY.md](SECURITY.md); do not open a public vulnerability issue.
+
+## License
+
+Licensed under {{ .Project.License }}. See [LICENSE](LICENSE).
