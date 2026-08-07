@@ -5,6 +5,7 @@ import (
 	"context"
 	"io"
 	"log/slog"
+	"os"
 	"strings"
 	"testing"
 
@@ -128,6 +129,51 @@ func TestRunCreateNonInteractive(t *testing.T) {
 	}
 	if !strings.Contains(stdout.String(), "Created go-library with 24 files") {
 		t.Errorf("stdout = %q", stdout.String())
+	}
+}
+
+func TestRunCreateNoInputSucceedsWithoutOptionalFields(t *testing.T) {
+	t.Parallel()
+
+	templateCatalog, err := catalogbuiltin.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	creator, err := create.NewService(templateCatalog, create.OSWriter{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	destination := t.TempDir() + "/created"
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	code := cli.Run(context.Background(), []string{
+		"create", destination,
+		"--template", "go-library",
+		"--module", "example.com/created",
+		"--no-input",
+	}, cli.Dependencies{
+		Build:   buildinfo.Info{Version: "test"},
+		Catalog: templateCatalog,
+		Creator: creator,
+		Logger:  slog.New(slog.NewTextHandler(io.Discard, nil)),
+		Streams: iostreams.IOStreams{In: strings.NewReader("must not be read"), Out: &stdout, ErrOut: &stderr},
+	})
+	if code != 0 {
+		t.Fatalf("Run() code = %d, want 0 since --description/--author are optional; stderr = %q", code, stderr.String())
+	}
+	readme, err := os.ReadFile(destination + "/README.md")
+	if err != nil {
+		t.Fatalf("read generated README.md: %v", err)
+	}
+	if !strings.Contains(string(readme), "TODO: describe this project.") {
+		t.Errorf("README.md = %q, want the --description placeholder", readme)
+	}
+	license, err := os.ReadFile(destination + "/LICENSE")
+	if err != nil {
+		t.Fatalf("read generated LICENSE: %v", err)
+	}
+	if !strings.Contains(string(license), "TODO: set an author") {
+		t.Errorf("LICENSE = %q, want the --author placeholder", license)
 	}
 }
 

@@ -228,6 +228,7 @@ func resolveProjectFields(ctx context.Context, prompter tux.Prompter, entry cata
 		Label:       moduleLabel(entry),
 		Description: moduleDescription,
 		Example:     entry.Prompts.ModuleExample,
+		Placeholder: entry.Prompts.ModuleExample,
 	}, "--module")
 	if err != nil {
 		return err
@@ -235,8 +236,11 @@ func resolveProjectFields(ctx context.Context, prompter tux.Prompter, entry cata
 	options.description, err = resolveInput(ctx, prompter, options.description, tux.InputRequest{
 		ID:          "description",
 		Label:       "Short description",
-		Description: "One sentence explaining what the project does.",
+		Description: "One sentence explaining what the project does. Optional; leave blank to fill in later.",
 		Example:     "A Go library for reliable configuration loading",
+		Placeholder: "A Go library for reliable configuration loading",
+		Optional:    true,
+		Default:     &defaultDescription,
 	}, "--description")
 	if err != nil {
 		return err
@@ -244,11 +248,23 @@ func resolveProjectFields(ctx context.Context, prompter tux.Prompter, entry cata
 	options.author, err = resolveInput(ctx, prompter, options.author, tux.InputRequest{
 		ID:          "author",
 		Label:       "Author or organization",
-		Description: "Used in the license and project metadata.",
+		Description: "Used in the license and project metadata. Optional; leave blank to fill in later.",
 		Example:     "Jane Doe or Acme, Inc.",
+		Placeholder: "Jane Doe or Acme, Inc.",
+		Optional:    true,
+		Default:     &defaultAuthor,
 	}, "--author")
 	return err
 }
+
+// defaultDescription and defaultAuthor fill in --description/--author when
+// left blank; both are ordinary project metadata, unlike --module, which
+// downstream templates require as a valid identifier (a Go import path, an
+// npm/PyPI package name) and cannot safely default on the caller's behalf.
+var (
+	defaultDescription = "TODO: describe this project."
+	defaultAuthor      = "TODO: set an author"
+)
 
 // confirmCreation asks for final approval unless --yes was passed or the
 // session cannot prompt.
@@ -301,6 +317,12 @@ func resolveInput(ctx context.Context, prompter tux.Prompter, value string, requ
 	case err == nil:
 		return resolved, nil
 	case errors.Is(err, tux.ErrUnavailable):
+		if request.Optional {
+			if request.Default != nil {
+				return *request.Default, nil
+			}
+			return "", nil
+		}
 		return "", fmt.Errorf("%s is required; provide %s", request.Label, flag)
 	default:
 		return "", err

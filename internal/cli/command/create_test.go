@@ -164,3 +164,34 @@ func TestResolveInputPropagatesOtherErrors(t *testing.T) {
 		t.Fatalf("resolveInput() error = %v, want it to wrap %v", err, sentinel)
 	}
 }
+
+func TestResolveInputOptionalUnavailableUsesDefaultInsteadOfErroring(t *testing.T) {
+	t.Parallel()
+
+	placeholder := "TODO: describe this project."
+	prompter := stubPrompter{inputErr: tux.ErrUnavailable}
+	got, err := resolveInput(context.Background(), prompter, "", tux.InputRequest{
+		Label: "Short description", Optional: true, Default: &placeholder,
+	}, "--description")
+	if err != nil {
+		t.Fatalf("resolveInput() error = %v, want nil for an optional field with a default", err)
+	}
+	if got != placeholder {
+		t.Fatalf("resolveInput() = %q, want the default %q", got, placeholder)
+	}
+}
+
+func TestResolveInputOptionalUnavailableWithoutDefaultReturnsEmpty(t *testing.T) {
+	t.Parallel()
+
+	prompter := stubPrompter{inputErr: tux.ErrUnavailable}
+	got, err := resolveInput(context.Background(), prompter, "", tux.InputRequest{
+		Label: "Author or organization", Optional: true,
+	}, "--author")
+	if err != nil {
+		t.Fatalf("resolveInput() error = %v, want nil for an optional field with no default", err)
+	}
+	if got != "" {
+		t.Fatalf("resolveInput() = %q, want empty string", got)
+	}
+}
