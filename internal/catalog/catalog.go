@@ -60,7 +60,10 @@ func NewMemory(entries ...Entry) (*Memory, error) {
 	return result, nil
 }
 
-// List returns entries ordered by stable ID.
+// List returns entries grouped by kind, then ordered by stable ID within
+// each kind, so a picker over many entries reads as related groups (every
+// library together, every app together) rather than one flat alphabetical
+// list interleaving unrelated kinds.
 func (c *Memory) List(ctx context.Context) ([]Entry, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
@@ -69,7 +72,12 @@ func (c *Memory) List(ctx context.Context) ([]Entry, error) {
 	for _, entry := range c.entries {
 		entries = append(entries, entry)
 	}
-	sort.Slice(entries, func(i, j int) bool { return entries[i].ID < entries[j].ID })
+	sort.Slice(entries, func(i, j int) bool {
+		if entries[i].Kind != entries[j].Kind {
+			return entries[i].Kind < entries[j].Kind
+		}
+		return entries[i].ID < entries[j].ID
+	})
 	return entries, nil
 }
 

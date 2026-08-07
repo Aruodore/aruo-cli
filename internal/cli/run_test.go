@@ -224,7 +224,10 @@ func TestRunCreateInteractive(t *testing.T) {
 	}
 	destination := t.TempDir() + "/guided"
 	input := strings.Join([]string{
-		"1", // Template: Go library, now that js-library makes the picker fire
+		"4", // Template: Go library. The catalog groups by kind, then ID: apps
+		// (next-app, nuxt-app, react-app) sort first, then libraries
+		// (go-library, js-library, python-library, ts-library, vue-library),
+		// putting go-library at position 4.
 		"example.com/guided",
 		"A guided library.",
 		"Guided Authors",
