@@ -20,6 +20,7 @@ func New() (*catalog.Memory, error) {
 	tsSource, tsBlueprint := templatebuiltin.TSLibrary()
 	pySource, pyBlueprint := templatebuiltin.PythonLibrary()
 	reactSource, reactBlueprint := templatebuiltin.ReactApp()
+	nuxtSource, nuxtBlueprint := templatebuiltin.NuxtApp()
 	return catalog.NewMemory(
 		catalog.Entry{
 			ID:             "go-library",
@@ -111,6 +112,32 @@ func New() (*catalog.Memory, error) {
 			Defaults: map[string]any{
 				"IncludeInstall": false,
 				"TemplateID":     "react-app",
+			},
+			Prepare: prepareJSLibrary,
+			NextSteps: []string{
+				"npm install",
+				"npm run dev",
+				"git init && git add .",
+			},
+			Prompts: catalog.ProjectPrompts{
+				ModuleLabel:       "npm package name",
+				ModuleDescription: `This is written to package.json as "name" (the app is private and not published).`,
+				ModuleExample:     "my-app",
+			},
+		},
+		catalog.Entry{
+			ID:             "nuxt-app",
+			Name:           "Nuxt application",
+			Language:       "typescript",
+			Kind:           "app",
+			Description:    "A production-ready Nuxt application with server-side rendering, CI, governance, security, and documentation",
+			Licenses:       []string{"MIT"},
+			DefaultLicense: "MIT",
+			Source:         nuxtSource,
+			Blueprint:      nuxtBlueprint,
+			Defaults: map[string]any{
+				"IncludeInstall": false,
+				"TemplateID":     "nuxt-app",
 			},
 			Prepare: prepareJSLibrary,
 			NextSteps: []string{

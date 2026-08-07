@@ -1,0 +1,31 @@
+{
+  "name": "{{ .Project.Module }}",
+  "private": true,
+  "version": "0.0.0",
+  "description": "{{ .Project.Description }}",
+  "license": "{{ .Project.License }}",
+  "author": "{{ .Project.Author }}",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "nuxt": "4.5.2",
+    "vue": "3.5.40",
+    "vue-router": "5.2.0"
+  },
+  "devDependencies": {
+    "@nuxt/test-utils": "4.1.0",
+    "@vue/test-utils": "2.4.11",
+    "happy-dom": "20.11.1",
+    "vitest": "4.1.10"
+  }
+}

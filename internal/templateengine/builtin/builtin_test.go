@@ -163,6 +163,46 @@ func TestReactApp(t *testing.T) {
 	}
 }
 
+func TestNuxtApp(t *testing.T) {
+	t.Parallel()
+
+	source, blueprint := builtin.NuxtApp()
+	engine, err := templateengine.New(source, templateengine.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	plan, err := engine.Render(context.Background(), blueprint, templateengine.Data{
+		Project: templateengine.Project{
+			Name:        "Example",
+			Module:      "example-app",
+			Description: "An example Nuxt app.",
+			License:     "MIT",
+			Language:    "typescript",
+		},
+		Variables: map[string]any{"IncludeInstall": false, "TemplateID": "nuxt-app"},
+	})
+	if err != nil {
+		t.Fatalf("Render() error = %v", err)
+	}
+
+	files := make(map[string]string, len(plan.Files))
+	for _, file := range plan.Files {
+		files[file.Path] = string(file.Content)
+	}
+	if len(files) != 27 {
+		t.Errorf("file count = %d, want 27", len(files))
+	}
+	if pkg := files["package.json"]; !strings.Contains(pkg, `"name": "example-app"`) || !strings.Contains(pkg, `"nuxt"`) {
+		t.Errorf("package.json = %q", pkg)
+	}
+	if app := files["app/app.vue"]; !strings.Contains(app, "<h1>Example</h1>") {
+		t.Errorf("app/app.vue = %q", app)
+	}
+	if test := files["tests/app.test.ts"]; !strings.Contains(test, `toContain("Example")`) {
+		t.Errorf("tests/app.test.ts = %q", test)
+	}
+}
+
 func TestPythonLibrary(t *testing.T) {
 	t.Parallel()
 
