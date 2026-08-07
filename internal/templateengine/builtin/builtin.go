@@ -253,6 +253,48 @@ func VueLibrary() (fs.FS, templateengine.Blueprint) {
 	}
 }
 
+// NextApp returns the built-in Next.js application proof bundle.
+func NextApp() (fs.FS, templateengine.Blueprint) {
+	source, err := fs.Sub(templates, "templates")
+	if err != nil {
+		panic("embedded template subtree is invalid: " + err.Error())
+	}
+	return source, templateengine.Blueprint{
+		ID:       "aruo/next-app",
+		Language: "typescript",
+		Files: []templateengine.FileSpec{
+			{Source: "next/app/README.md.tmpl", Destination: "README.md", Template: true},
+			{Source: "next/app/package.json.tmpl", Destination: "package.json", Template: true},
+			{Source: "next/app/tsconfig.json", Destination: "tsconfig.json"},
+			{Source: "next/app/next.config.ts", Destination: "next.config.ts"},
+			{Source: "next/app/vitest.config.ts", Destination: "vitest.config.ts"},
+			{Source: "next/app/gitignore", Destination: ".gitignore"},
+			{Source: "foundation/LICENSE.tmpl", Destination: "LICENSE", Template: true},
+			{Source: "foundation/CHANGELOG.md", Destination: "CHANGELOG.md"},
+			{Source: "foundation/ROADMAP.md", Destination: "ROADMAP.md"},
+			{Source: "foundation/SECURITY.md.tmpl", Destination: "SECURITY.md", Template: true},
+			{Source: "foundation/CONTRIBUTING.md", Destination: "CONTRIBUTING.md"},
+			{Source: "foundation/CODE_OF_CONDUCT.md", Destination: "CODE_OF_CONDUCT.md"},
+			{Source: "foundation/editorconfig", Destination: ".editorconfig"},
+			{Source: "foundation/aruo.yaml.tmpl", Destination: "aruo.yaml", Template: true},
+			{Source: "foundation/docs-README.md.tmpl", Destination: "docs/README.md", Template: true},
+			{Source: "foundation/issue-bug.yml", Destination: ".github/ISSUE_TEMPLATE/bug.yml"},
+			{Source: "foundation/issue-feature.yml", Destination: ".github/ISSUE_TEMPLATE/feature.yml"},
+			{Source: "foundation/pull-request.md", Destination: ".github/pull_request_template.md"},
+			{Source: "js/library/dependabot.yml", Destination: ".github/dependabot.yml"},
+			{Source: "foundation/pr-title.yml", Destination: ".github/workflows/pr-title.yml"},
+			{Source: "foundation/release.yml", Destination: ".github/workflows/release.yml"},
+			{Source: "js/library/release-please-config.json", Destination: "release-please-config.json"},
+			{Source: "foundation/release-please-manifest.json", Destination: ".release-please-manifest.json"},
+			{Source: "next/app/ci.yml", Destination: ".github/workflows/ci.yml"},
+			{Source: "next/app/Makefile", Destination: "Makefile"},
+			{Source: "next/app/layout.tsx.tmpl", Destination: "app/layout.tsx", Template: true},
+			{Source: "next/app/page.tsx.tmpl", Destination: "app/page.tsx", Template: true},
+			{Source: "next/app/page.test.tsx.tmpl", Destination: "app/page.test.tsx", Template: true},
+		},
+	}
+}
+
 // PythonLibrary returns the built-in Python library proof bundle.
 func PythonLibrary() (fs.FS, templateengine.Blueprint) {
 	source, err := fs.Sub(templates, "templates")

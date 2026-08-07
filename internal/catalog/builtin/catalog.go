@@ -22,6 +22,7 @@ func New() (*catalog.Memory, error) {
 	reactSource, reactBlueprint := templatebuiltin.ReactApp()
 	nuxtSource, nuxtBlueprint := templatebuiltin.NuxtApp()
 	vueSource, vueBlueprint := templatebuiltin.VueLibrary()
+	nextSource, nextBlueprint := templatebuiltin.NextApp()
 	return catalog.NewMemory(
 		catalog.Entry{
 			ID:             "go-library",
@@ -176,6 +177,32 @@ func New() (*catalog.Memory, error) {
 				ModuleLabel:       "npm package name",
 				ModuleDescription: `This is written to package.json as "name".`,
 				ModuleExample:     "my-library",
+			},
+		},
+		catalog.Entry{
+			ID:             "next-app",
+			Name:           "Next.js application",
+			Language:       "typescript",
+			Kind:           "app",
+			Description:    "A production-ready Next.js application with CI, governance, security, and documentation",
+			Licenses:       []string{"MIT"},
+			DefaultLicense: "MIT",
+			Source:         nextSource,
+			Blueprint:      nextBlueprint,
+			Defaults: map[string]any{
+				"IncludeInstall": false,
+				"TemplateID":     "next-app",
+			},
+			Prepare: prepareJSLibrary,
+			NextSteps: []string{
+				"npm install",
+				"npm run dev",
+				"git init && git add .",
+			},
+			Prompts: catalog.ProjectPrompts{
+				ModuleLabel:       "npm package name",
+				ModuleDescription: `This is written to package.json as "name" (the app is private and not published).`,
+				ModuleExample:     "my-app",
 			},
 		},
 		catalog.Entry{

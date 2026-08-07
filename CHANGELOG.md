@@ -16,6 +16,7 @@ The format follows [Keep a Changelog 2.0.0](https://keepachangelog.com/en/2.0.0/
 - `aruo create`'s fifth catalog entry and first `kind: app` template, `react-app`: React 19 + Vite 8 + Vitest, strict TypeScript, requires Node >=22.22.2 (jsdom's real current engine floor). Same network-dependent-install tradeoff as `ts-library`.
 - `aruo create`'s sixth catalog entry, `nuxt-app`: Nuxt 4 with server-side rendering (Nitro), tested with `@nuxt/test-utils`/Vitest/happy-dom. Same network-dependent-install tradeoff as `ts-library`/`react-app`.
 - `aruo create`'s seventh catalog entry, `vue-library`: a Vue 3 component library in Vite library mode (dual ESM/UMD output, generated `.d.ts` via vite-plugin-dts, `vue` as a peer dependency). Same network-dependent-install tradeoff as the other npm-based entries.
+- `aruo create`'s eighth catalog entry, `next-app`: Next.js 16 (App Router, Turbopack), tested with Vitest/@testing-library/react/jsdom. Pins TypeScript 5.9.3 rather than the 6.x/7.x the Vite-based entries use, matching what `create-next-app` itself currently pins. Same network-dependent-install tradeoff as the other app entries.
 
 ### Changed
 

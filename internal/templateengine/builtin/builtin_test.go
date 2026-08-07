@@ -240,6 +240,46 @@ func TestVueLibrary(t *testing.T) {
 	}
 }
 
+func TestNextApp(t *testing.T) {
+	t.Parallel()
+
+	source, blueprint := builtin.NextApp()
+	engine, err := templateengine.New(source, templateengine.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	plan, err := engine.Render(context.Background(), blueprint, templateengine.Data{
+		Project: templateengine.Project{
+			Name:        "Example",
+			Module:      "example-app",
+			Description: "An example Next.js app.",
+			License:     "MIT",
+			Language:    "typescript",
+		},
+		Variables: map[string]any{"IncludeInstall": false, "TemplateID": "next-app"},
+	})
+	if err != nil {
+		t.Fatalf("Render() error = %v", err)
+	}
+
+	files := make(map[string]string, len(plan.Files))
+	for _, file := range plan.Files {
+		files[file.Path] = string(file.Content)
+	}
+	if len(files) != 28 {
+		t.Errorf("file count = %d, want 28", len(files))
+	}
+	if pkg := files["package.json"]; !strings.Contains(pkg, `"name": "example-app"`) || !strings.Contains(pkg, `"next"`) {
+		t.Errorf("package.json = %q", pkg)
+	}
+	if page := files["app/page.tsx"]; !strings.Contains(page, "<h1>Example</h1>") {
+		t.Errorf("app/page.tsx = %q", page)
+	}
+	if layout := files["app/layout.tsx"]; !strings.Contains(layout, `title: "Example"`) {
+		t.Errorf("app/layout.tsx = %q", layout)
+	}
+}
+
 func TestPythonLibrary(t *testing.T) {
 	t.Parallel()
 
