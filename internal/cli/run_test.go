@@ -231,10 +231,10 @@ func TestRunCreateInteractive(t *testing.T) {
 	}
 	destination := t.TempDir() + "/guided"
 	input := strings.Join([]string{
-		"4", // Template: Go library. The catalog groups by kind, then ID: apps
-		// (next-app, nuxt-app, react-app) sort first, then libraries
-		// (go-library, js-library, python-library, ts-library, vue-library),
-		// putting go-library at position 4.
+		"2", // Kind: Library. Options are Application then Library.
+		"1", // Template: Go library. Within the library kind, the catalog
+		// sorts by ID: go-library, js-library, python-library,
+		// ts-library, vue-library, putting go-library at position 1.
 		"example.com/guided",
 		"A guided library.",
 		"Guided Authors",
@@ -254,7 +254,10 @@ func TestRunCreateInteractive(t *testing.T) {
 	if code != 0 {
 		t.Fatalf("Run() code = %d; stderr = %q", code, stderr.String())
 	}
-	if !strings.Contains(stderr.String(), "Go module path") ||
+	if !strings.Contains(stderr.String(), "What are you building?") ||
+		!strings.Contains(stderr.String(), "1. Application") ||
+		!strings.Contains(stderr.String(), "2. Library") ||
+		!strings.Contains(stderr.String(), "Go module path") ||
 		!strings.Contains(stderr.String(), "Creating: Go library") ||
 		!strings.Contains(stderr.String(), "Example: github.com/your-name/my-library") ||
 		!strings.Contains(stderr.String(), "Project summary:") ||

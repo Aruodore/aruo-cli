@@ -35,6 +35,16 @@ example: find the closest pattern below and match it.
   8 templates aren't "recommended vs. not," they're different ecosystems —
   this rule applies when there's a real default a user would usually want).
 
+- Before a flat list of every template gets long enough to scroll, split it:
+  `create`'s first interactive screen asks `What are you building?` with two
+  options, `Application` and `Library`, each carrying a one-line description
+  built from the real template names in that kind (`Next.js application,
+  Nuxt application, React application`) rather than a generic blurb. The
+  answer filters the second screen down to that kind's 3-5 templates. This
+  step is skipped whenever `--kind`, `--template`, or a non-interactive
+  session already answers the question, and disappears entirely if the
+  catalog ever shrinks to one kind.
+
 ## Optional fields
 
 Say `Optional` on the label itself, not buried mid-sentence in the

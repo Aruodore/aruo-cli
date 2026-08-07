@@ -186,6 +186,12 @@ func resolveTemplate(ctx context.Context, prompter tux.Prompter, templateCatalog
 	if err != nil {
 		return catalog.Entry{}, err
 	}
+	if options.templateID == "" && options.kind == "" && interactive {
+		options.kind, err = resolveKind(ctx, prompter, entries)
+		if err != nil {
+			return catalog.Entry{}, err
+		}
+	}
 	entries = filterEntries(entries, options.language, options.kind)
 	if options.templateID == "" {
 		switch {
@@ -215,6 +221,51 @@ func resolveTemplate(ctx context.Context, prompter tux.Prompter, templateCatalog
 		return catalog.Entry{}, fmt.Errorf("template %q does not match the requested language/kind filters", entry.ID)
 	}
 	return entry, nil
+}
+
+// resolveKind asks whether the user is creating an application or a library
+// before showing the full template list, so that list is filtered to the
+// 3-5 templates of the chosen kind instead of every ecosystem at once. It's
+// a no-op when the catalog only has one kind to offer.
+func resolveKind(ctx context.Context, prompter tux.Prompter, entries []catalog.Entry) (string, error) {
+	kinds := uniqueValues(entries, func(entry catalog.Entry) string { return entry.Kind })
+	if len(kinds) <= 1 {
+		return "", nil
+	}
+	options := make([]tux.Option, len(kinds))
+	for index, kind := range kinds {
+		options[index] = tux.Option{ID: tux.OptionID(kind), Label: kindLabel(kind), Description: kindEntryNames(entries, kind)}
+	}
+	selected, err := prompter.Select(ctx, tux.SelectRequest{
+		ID:      "kind",
+		Label:   "What are you building?",
+		Options: options,
+	})
+	if err != nil {
+		return "", err
+	}
+	return string(selected), nil
+}
+
+func kindLabel(kind string) string {
+	switch kind {
+	case "app":
+		return "Application"
+	case "library":
+		return "Library"
+	default:
+		return kind
+	}
+}
+
+func kindEntryNames(entries []catalog.Entry, kind string) string {
+	names := make([]string, 0, len(entries))
+	for _, entry := range entries {
+		if entry.Kind == kind {
+			names = append(names, entry.Name)
+		}
+	}
+	return strings.Join(names, ", ")
 }
 
 // resolveProjectFields fills in the module, description, and author fields,

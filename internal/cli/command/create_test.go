@@ -195,3 +195,71 @@ func TestResolveInputOptionalUnavailableWithoutDefaultReturnsEmpty(t *testing.T)
 		t.Fatalf("resolveInput() = %q, want empty string", got)
 	}
 }
+
+// stubSelectPrompter answers Select with a fixed value/error while recording
+// the request it received, since resolveKind only exercises Select.
+type stubSelectPrompter struct {
+	selectValue tux.OptionID
+	selectErr   error
+	gotRequest  tux.SelectRequest
+	tux.Prompter
+}
+
+func (s *stubSelectPrompter) Select(_ context.Context, request tux.SelectRequest) (tux.OptionID, error) {
+	s.gotRequest = request
+	return s.selectValue, s.selectErr
+}
+
+func TestResolveKindSkipsPromptWhenCatalogHasOneKind(t *testing.T) {
+	t.Parallel()
+
+	prompter := &stubSelectPrompter{selectErr: errors.New("must not be called")}
+	entries := []catalog.Entry{{ID: "go-library", Kind: "library"}}
+	got, err := resolveKind(context.Background(), prompter, entries)
+	if err != nil {
+		t.Fatalf("resolveKind() error = %v", err)
+	}
+	if got != "" {
+		t.Fatalf("resolveKind() = %q, want empty string when only one kind exists", got)
+	}
+}
+
+func TestResolveKindPromptsWithEcosystemNamesPerKind(t *testing.T) {
+	t.Parallel()
+
+	entries := []catalog.Entry{
+		{ID: "next-app", Name: "Next.js application", Kind: "app"},
+		{ID: "go-library", Name: "Go library", Kind: "library"},
+		{ID: "js-library", Name: "JavaScript library", Kind: "library"},
+	}
+	prompter := &stubSelectPrompter{selectValue: "library"}
+	got, err := resolveKind(context.Background(), prompter, entries)
+	if err != nil {
+		t.Fatalf("resolveKind() error = %v", err)
+	}
+	if got != "library" {
+		t.Fatalf("resolveKind() = %q, want %q", got, "library")
+	}
+	if len(prompter.gotRequest.Options) != 2 {
+		t.Fatalf("Select() options = %#v, want 2 kinds", prompter.gotRequest.Options)
+	}
+	app, library := prompter.gotRequest.Options[0], prompter.gotRequest.Options[1]
+	if app.ID != "app" || app.Label != "Application" || app.Description != "Next.js application" {
+		t.Errorf("app option = %+v", app)
+	}
+	if library.ID != "library" || library.Label != "Library" || library.Description != "Go library, JavaScript library" {
+		t.Errorf("library option = %+v", library)
+	}
+}
+
+func TestResolveKindPropagatesSelectError(t *testing.T) {
+	t.Parallel()
+
+	sentinel := errors.New("terminal disconnected")
+	entries := []catalog.Entry{{Kind: "app"}, {Kind: "library"}}
+	prompter := &stubSelectPrompter{selectErr: sentinel}
+	_, err := resolveKind(context.Background(), prompter, entries)
+	if !errors.Is(err, sentinel) {
+		t.Fatalf("resolveKind() error = %v, want it to propagate %v", err, sentinel)
+	}
+}
