@@ -1,0 +1,32 @@
+{
+  "name": "{{ .Project.Module }}",
+  "private": true,
+  "version": "0.0.0",
+  "description": "{{ .Project.Description }}",
+  "license": "{{ .Project.License }}",
+  "author": "{{ .Project.Author }}",
+  "type": "module",
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "test": "vitest run",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@testing-library/react": "16.3.2",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "@vitejs/plugin-react": "6.0.5",
+    "jsdom": "30.0.1",
+    "typescript": "6.0.2",
+    "vite": "8.2.1",
+    "vitest": "4.1.10"
+  }
+}

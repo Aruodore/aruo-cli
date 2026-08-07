@@ -120,6 +120,49 @@ func TestTSLibrary(t *testing.T) {
 	}
 }
 
+func TestReactApp(t *testing.T) {
+	t.Parallel()
+
+	source, blueprint := builtin.ReactApp()
+	engine, err := templateengine.New(source, templateengine.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	plan, err := engine.Render(context.Background(), blueprint, templateengine.Data{
+		Project: templateengine.Project{
+			Name:        "Example",
+			Module:      "example-app",
+			Description: "An example React app.",
+			License:     "MIT",
+			Language:    "typescript",
+		},
+		Variables: map[string]any{"IncludeInstall": false, "TemplateID": "react-app"},
+	})
+	if err != nil {
+		t.Fatalf("Render() error = %v", err)
+	}
+
+	files := make(map[string]string, len(plan.Files))
+	for _, file := range plan.Files {
+		files[file.Path] = string(file.Content)
+	}
+	if len(files) != 30 {
+		t.Errorf("file count = %d, want 30", len(files))
+	}
+	if pkg := files["package.json"]; !strings.Contains(pkg, `"name": "example-app"`) || !strings.Contains(pkg, `"react"`) {
+		t.Errorf("package.json = %q", pkg)
+	}
+	if app := files["src/App.tsx"]; !strings.Contains(app, "<h1>Example</h1>") {
+		t.Errorf("src/App.tsx = %q", app)
+	}
+	if test := files["src/App.test.tsx"]; !strings.Contains(test, `name: "Example"`) {
+		t.Errorf("src/App.test.tsx = %q", test)
+	}
+	if index := files["index.html"]; !strings.Contains(index, "<title>Example</title>") {
+		t.Errorf("index.html = %q", index)
+	}
+}
+
 func TestPythonLibrary(t *testing.T) {
 	t.Parallel()
 

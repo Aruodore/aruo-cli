@@ -19,6 +19,7 @@ func New() (*catalog.Memory, error) {
 	jsSource, jsBlueprint := templatebuiltin.JSLibrary()
 	tsSource, tsBlueprint := templatebuiltin.TSLibrary()
 	pySource, pyBlueprint := templatebuiltin.PythonLibrary()
+	reactSource, reactBlueprint := templatebuiltin.ReactApp()
 	return catalog.NewMemory(
 		catalog.Entry{
 			ID:             "go-library",
@@ -95,6 +96,32 @@ func New() (*catalog.Memory, error) {
 				ModuleLabel:       "npm package name",
 				ModuleDescription: `This is written to package.json as "name".`,
 				ModuleExample:     "my-library",
+			},
+		},
+		catalog.Entry{
+			ID:             "react-app",
+			Name:           "React application",
+			Language:       "typescript",
+			Kind:           "app",
+			Description:    "A production-ready React application with Vite, Vitest, CI, governance, security, and documentation",
+			Licenses:       []string{"MIT"},
+			DefaultLicense: "MIT",
+			Source:         reactSource,
+			Blueprint:      reactBlueprint,
+			Defaults: map[string]any{
+				"IncludeInstall": false,
+				"TemplateID":     "react-app",
+			},
+			Prepare: prepareJSLibrary,
+			NextSteps: []string{
+				"npm install",
+				"npm run dev",
+				"git init && git add .",
+			},
+			Prompts: catalog.ProjectPrompts{
+				ModuleLabel:       "npm package name",
+				ModuleDescription: `This is written to package.json as "name" (the app is private and not published).`,
+				ModuleExample:     "my-app",
 			},
 		},
 		catalog.Entry{
