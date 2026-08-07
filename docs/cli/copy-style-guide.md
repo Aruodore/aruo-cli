@@ -49,14 +49,24 @@ Good:  Label: "Short description (Optional)"
        Description: "One sentence explaining what the project does."
 ```
 
-Never encode "skipped" as a silent blank in the generated output. If a
-field is left empty, substitute a placeholder that's obviously a
-placeholder, not a value that could pass for real input:
+An early version of this defaulted to visible `TODO: ...` placeholder text
+written straight into generated files (`Copyright (c) TODO: set an
+author`). Don't do that — it reads as broken, not helpful, and it's not
+actually automatic; it just moves the manual step into the generated
+output instead of removing it. Prefer a real value derived without asking:
 
 ```
---description left blank  ->  "TODO: describe this project." (written into README.md, package.json, etc.)
---author left blank       ->  "TODO: set an author" (written into LICENSE, package.json, etc.)
+--description left blank  ->  the catalog entry's own Description
+                               ("A production-ready Go library with...")
+--author left blank       ->  `git config --get user.name`, best-effort,
+                               falling back to a genuinely empty string
+                               (not a placeholder) if git or the config
+                               entry isn't there
 ```
+
+An empty string in the output (`Copyright (c) ` with nothing after) is a
+better failure mode than fabricated text: it's honestly incomplete rather
+than looking like real, wrong content.
 
 `--module` doesn't get this treatment: it becomes a Go import path, an npm
 name, or a PyPI name in the generated project, and a wrong guess produces a

@@ -161,19 +161,26 @@ func TestRunCreateNoInputSucceedsWithoutOptionalFields(t *testing.T) {
 	if code != 0 {
 		t.Fatalf("Run() code = %d, want 0 since --description/--author are optional; stderr = %q", code, stderr.String())
 	}
+	// Description defaults to the catalog entry's own description, not a
+	// placeholder that needs manual follow-up.
 	readme, err := os.ReadFile(destination + "/README.md")
 	if err != nil {
 		t.Fatalf("read generated README.md: %v", err)
 	}
-	if !strings.Contains(string(readme), "TODO: describe this project.") {
-		t.Errorf("README.md = %q, want the --description placeholder", readme)
+	wantDescription := "A production-ready Go library with zero external dependencies, tests, CI, governance, security, and documentation"
+	if !strings.Contains(string(readme), wantDescription) {
+		t.Errorf("README.md = %q, want the go-library entry's own description", readme)
 	}
+	// Author defaults to `git config user.name` when available; either way,
+	// no visible TODO/placeholder text should land in the generated LICENSE.
+	// Asserting a specific name here would make this test depend on the
+	// test runner's git configuration, which CI environments don't reliably set.
 	license, err := os.ReadFile(destination + "/LICENSE")
 	if err != nil {
 		t.Fatalf("read generated LICENSE: %v", err)
 	}
-	if !strings.Contains(string(license), "TODO: set an author") {
-		t.Errorf("LICENSE = %q, want the --author placeholder", license)
+	if strings.Contains(string(license), "TODO") {
+		t.Errorf("LICENSE = %q, want no placeholder TODO text", license)
 	}
 }
 

@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/aruodore/aruo/internal/catalog"
 	"github.com/aruodore/aruo/internal/create"
@@ -240,11 +242,12 @@ func resolveProjectFields(ctx context.Context, prompter tux.Prompter, entry cata
 		Example:     "A Go library for reliable configuration loading",
 		Placeholder: "A Go library for reliable configuration loading",
 		Optional:    true,
-		Default:     &defaultDescription,
+		Default:     &entry.Description,
 	}, "--description")
 	if err != nil {
 		return err
 	}
+	gitAuthor := detectGitAuthor(ctx)
 	options.author, err = resolveInput(ctx, prompter, options.author, tux.InputRequest{
 		ID:          "author",
 		Label:       "Author or organization (Optional)",
@@ -252,19 +255,25 @@ func resolveProjectFields(ctx context.Context, prompter tux.Prompter, entry cata
 		Example:     "Jane Doe or Acme, Inc.",
 		Placeholder: "Jane Doe or Acme, Inc.",
 		Optional:    true,
-		Default:     &defaultAuthor,
+		Default:     &gitAuthor,
 	}, "--author")
 	return err
 }
 
-// defaultDescription and defaultAuthor fill in --description/--author when
-// left blank; both are ordinary project metadata, unlike --module, which
-// downstream templates require as a valid identifier (a Go import path, an
-// npm/PyPI package name) and cannot safely default on the caller's behalf.
-var (
-	defaultDescription = "TODO: describe this project."
-	defaultAuthor      = "TODO: set an author"
-)
+// detectGitAuthor best-effort reads the local `git config user.name` so
+// --author defaults to something real instead of a placeholder that needs
+// manual follow-up. Any failure (git missing, unset, timeout) yields an
+// empty default rather than an error; the caller treats that the same as
+// no default at all.
+func detectGitAuthor(ctx context.Context) string {
+	ctx, cancel := context.WithTimeout(ctx, 500*time.Millisecond)
+	defer cancel()
+	output, err := exec.CommandContext(ctx, "git", "config", "--get", "user.name").Output()
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(string(output))
+}
 
 // confirmCreation asks for final approval unless --yes was passed or the
 // session cannot prompt.
