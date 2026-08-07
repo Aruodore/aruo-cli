@@ -227,6 +227,47 @@ func TestNuxtAppHasRequiredFiles(t *testing.T) {
 	}
 }
 
+// TestVueLibraryHasRequiredFiles checks the generated file plan only, for
+// the same reason as TestTSLibraryHasRequiredFiles: vue/vite/vitest/
+// happy-dom must come from the network via npm install. The generated
+// project's own CI does npm ci + npm test + npm run build for real.
+func TestVueLibraryHasRequiredFiles(t *testing.T) {
+	t.Parallel()
+	templateCatalog, err := builtin.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	service, err := create.NewService(templateCatalog, create.OSWriter{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	destination := filepath.Join(t.TempDir(), "library")
+	_, err = service.Create(context.Background(), create.Request{
+		Destination: destination, TemplateID: "vue-library",
+		Project: templateengine.Project{
+			Name: "Example", Module: "example-library", Description: "An example library.",
+			Author: "Example Authors", License: "MIT", Language: "typescript",
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	required := []string{
+		"README.md", "LICENSE", "CHANGELOG.md", "ROADMAP.md", "SECURITY.md", "CONTRIBUTING.md",
+		"CODE_OF_CONDUCT.md", "aruo.yaml", "package.json", "tsconfig.json", "vite.config.ts",
+		"vitest.config.ts", "src/index.ts", "src/Greeting.vue", "src/__tests__/Greeting.test.ts", "Makefile",
+		"docs/README.md", ".github/workflows/ci.yml", ".github/pull_request_template.md",
+		".github/ISSUE_TEMPLATE/bug.yml", ".github/ISSUE_TEMPLATE/feature.yml",
+		".github/dependabot.yml", ".github/workflows/pr-title.yml", ".github/workflows/release.yml",
+		"release-please-config.json", ".release-please-manifest.json",
+	}
+	for _, name := range required {
+		if _, err := os.Stat(filepath.Join(destination, filepath.FromSlash(name))); err != nil {
+			t.Errorf("required file %s: %v", name, err)
+		}
+	}
+}
+
 func TestPythonLibraryIsProductionReadyAndBuilds(t *testing.T) {
 	t.Parallel()
 	pythonBinary, err := exec.LookPath("python3")

@@ -211,6 +211,48 @@ func NuxtApp() (fs.FS, templateengine.Blueprint) {
 	}
 }
 
+// VueLibrary returns the built-in Vue component library proof bundle.
+func VueLibrary() (fs.FS, templateengine.Blueprint) {
+	source, err := fs.Sub(templates, "templates")
+	if err != nil {
+		panic("embedded template subtree is invalid: " + err.Error())
+	}
+	return source, templateengine.Blueprint{
+		ID:       "aruo/vue-library",
+		Language: "typescript",
+		Files: []templateengine.FileSpec{
+			{Source: "vue/library/README.md.tmpl", Destination: "README.md", Template: true},
+			{Source: "vue/library/package.json.tmpl", Destination: "package.json", Template: true},
+			{Source: "vue/library/tsconfig.json", Destination: "tsconfig.json"},
+			{Source: "vue/library/vite.config.ts", Destination: "vite.config.ts"},
+			{Source: "vue/library/vitest.config.ts", Destination: "vitest.config.ts"},
+			{Source: "vue/library/gitignore", Destination: ".gitignore"},
+			{Source: "foundation/LICENSE.tmpl", Destination: "LICENSE", Template: true},
+			{Source: "foundation/CHANGELOG.md", Destination: "CHANGELOG.md"},
+			{Source: "foundation/ROADMAP.md", Destination: "ROADMAP.md"},
+			{Source: "foundation/SECURITY.md.tmpl", Destination: "SECURITY.md", Template: true},
+			{Source: "foundation/CONTRIBUTING.md", Destination: "CONTRIBUTING.md"},
+			{Source: "foundation/CODE_OF_CONDUCT.md", Destination: "CODE_OF_CONDUCT.md"},
+			{Source: "foundation/editorconfig", Destination: ".editorconfig"},
+			{Source: "foundation/aruo.yaml.tmpl", Destination: "aruo.yaml", Template: true},
+			{Source: "foundation/docs-README.md.tmpl", Destination: "docs/README.md", Template: true},
+			{Source: "foundation/issue-bug.yml", Destination: ".github/ISSUE_TEMPLATE/bug.yml"},
+			{Source: "foundation/issue-feature.yml", Destination: ".github/ISSUE_TEMPLATE/feature.yml"},
+			{Source: "foundation/pull-request.md", Destination: ".github/pull_request_template.md"},
+			{Source: "js/library/dependabot.yml", Destination: ".github/dependabot.yml"},
+			{Source: "foundation/pr-title.yml", Destination: ".github/workflows/pr-title.yml"},
+			{Source: "foundation/release.yml", Destination: ".github/workflows/release.yml"},
+			{Source: "js/library/release-please-config.json", Destination: "release-please-config.json"},
+			{Source: "foundation/release-please-manifest.json", Destination: ".release-please-manifest.json"},
+			{Source: "vue/library/ci.yml", Destination: ".github/workflows/ci.yml"},
+			{Source: "vue/library/Makefile", Destination: "Makefile"},
+			{Source: "vue/library/index.ts.tmpl", Destination: "src/index.ts", Template: true},
+			{Source: "vue/library/Greeting.vue.tmpl", Destination: "src/Greeting.vue", Template: true},
+			{Source: "vue/library/Greeting.test.ts", Destination: "src/__tests__/Greeting.test.ts"},
+		},
+	}
+}
+
 // PythonLibrary returns the built-in Python library proof bundle.
 func PythonLibrary() (fs.FS, templateengine.Blueprint) {
 	source, err := fs.Sub(templates, "templates")

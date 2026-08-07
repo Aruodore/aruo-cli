@@ -203,6 +203,43 @@ func TestNuxtApp(t *testing.T) {
 	}
 }
 
+func TestVueLibrary(t *testing.T) {
+	t.Parallel()
+
+	source, blueprint := builtin.VueLibrary()
+	engine, err := templateengine.New(source, templateengine.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	plan, err := engine.Render(context.Background(), blueprint, templateengine.Data{
+		Project: templateengine.Project{
+			Name:        "Example",
+			Module:      "example-library",
+			Description: "An example Vue library.",
+			License:     "MIT",
+			Language:    "typescript",
+		},
+		Variables: map[string]any{"IncludeInstall": true, "TemplateID": "vue-library"},
+	})
+	if err != nil {
+		t.Fatalf("Render() error = %v", err)
+	}
+
+	files := make(map[string]string, len(plan.Files))
+	for _, file := range plan.Files {
+		files[file.Path] = string(file.Content)
+	}
+	if len(files) != 28 {
+		t.Errorf("file count = %d, want 28", len(files))
+	}
+	if pkg := files["package.json"]; !strings.Contains(pkg, `"name": "example-library"`) || !strings.Contains(pkg, `"vue"`) {
+		t.Errorf("package.json = %q", pkg)
+	}
+	if greeting := files["src/Greeting.vue"]; !strings.Contains(greeting, "{{ name }}") {
+		t.Errorf("src/Greeting.vue = %q", greeting)
+	}
+}
+
 func TestPythonLibrary(t *testing.T) {
 	t.Parallel()
 

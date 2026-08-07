@@ -15,6 +15,7 @@ The format follows [Keep a Changelog 2.0.0](https://keepachangelog.com/en/2.0.0/
 - `aruo create`'s fourth catalog entry, `ts-library`: a TypeScript library template with strict type-checking. Unlike the others, its `npm install` needs the network for the real `typescript` compiler; Aruo's own test suite verifies its file plan only, and its generated CI does the real `npm ci`/`npm test` run.
 - `aruo create`'s fifth catalog entry and first `kind: app` template, `react-app`: React 19 + Vite 8 + Vitest, strict TypeScript, requires Node >=22.22.2 (jsdom's real current engine floor). Same network-dependent-install tradeoff as `ts-library`.
 - `aruo create`'s sixth catalog entry, `nuxt-app`: Nuxt 4 with server-side rendering (Nitro), tested with `@nuxt/test-utils`/Vitest/happy-dom. Same network-dependent-install tradeoff as `ts-library`/`react-app`.
+- `aruo create`'s seventh catalog entry, `vue-library`: a Vue 3 component library in Vite library mode (dual ESM/UMD output, generated `.d.ts` via vite-plugin-dts, `vue` as a peer dependency). Same network-dependent-install tradeoff as the other npm-based entries.
 
 ### Changed
 
