@@ -13,11 +13,17 @@ import (
 
 // Entry is a resolved, qualified project template.
 type Entry struct {
-	ID             string
-	Name           string
-	Language       string
-	Kind           string
-	Description    string
+	ID          string
+	Name        string
+	Language    string
+	Kind        string
+	Description string
+	// Color is the ecosystem's real brand color as a truecolor hex value
+	// (for example Go's "#00ADD8"), an identity fact like Language rather
+	// than a UI choice. Consumers with no color rendering ignore it;
+	// color-capable renderers apply it only when the active color policy
+	// permits color at all.
+	Color          string
 	Licenses       []string
 	DefaultLicense string
 	Source         fs.FS

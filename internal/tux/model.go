@@ -129,7 +129,13 @@ type Option struct {
 	ID          OptionID
 	Label       string
 	Description string
-	Disabled    bool
+	// Color is an optional truecolor hex hint (for example "#00ADD8").
+	// Adapters with no color rendering ignore it. Color-capable adapters
+	// apply it only when the active color policy and capability permit
+	// color at all; it never substitutes for Label as the only way to
+	// distinguish options.
+	Color    string
+	Disabled bool
 }
 
 // InputRequest describes one text decision.

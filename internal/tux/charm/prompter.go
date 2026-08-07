@@ -7,6 +7,7 @@ import (
 	"io"
 
 	"charm.land/huh/v2"
+	"charm.land/lipgloss/v2"
 	"github.com/aruodore/aruo/internal/tux"
 )
 
@@ -105,7 +106,7 @@ func (p *Prompter) Select(ctx context.Context, request tux.SelectRequest) (tux.O
 	if err := p.available(); err != nil {
 		return "", err
 	}
-	options := huhOptions(request.Options, nil)
+	options := p.huhOptions(request.Options, nil)
 	if len(options) == 0 {
 		return "", errors.New("selection has no enabled options")
 	}
@@ -137,7 +138,7 @@ func (p *Prompter) MultiSelect(ctx context.Context, request tux.MultiSelectReque
 	for _, id := range request.Defaults {
 		defaults[id] = struct{}{}
 	}
-	options := huhOptions(request.Options, defaults)
+	options := p.huhOptions(request.Options, defaults)
 	if len(options) == 0 && request.Minimum > 0 {
 		return nil, errors.New("selection has no enabled options")
 	}
@@ -201,7 +202,8 @@ func (p *Prompter) run(ctx context.Context, field huh.Field) error {
 	return nil
 }
 
-func huhOptions(options []tux.Option, defaults map[tux.OptionID]struct{}) []huh.Option[tux.OptionID] {
+func (p *Prompter) huhOptions(options []tux.Option, defaults map[tux.OptionID]struct{}) []huh.Option[tux.OptionID] {
+	colorEligible := p.policy.Color != tux.FeatureNever && p.capabilities.Color == tux.ColorTrueColor
 	result := make([]huh.Option[tux.OptionID], 0, len(options))
 	for _, option := range options {
 		if option.Disabled {
@@ -210,6 +212,9 @@ func huhOptions(options []tux.Option, defaults map[tux.OptionID]struct{}) []huh.
 		label := option.Label
 		if option.Description != "" {
 			label += " — " + option.Description
+		}
+		if colorEligible && option.Color != "" {
+			label = lipgloss.NewStyle().Foreground(lipgloss.Color(option.Color)).Render(label)
 		}
 		converted := huh.NewOption(label, option.ID)
 		if _, selected := defaults[option.ID]; selected {

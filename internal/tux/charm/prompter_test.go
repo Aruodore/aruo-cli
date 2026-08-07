@@ -59,8 +59,9 @@ func TestPrompterMapsCancelledContext(t *testing.T) {
 func TestHuhOptionsExcludeDisabledAndPreserveDefaults(t *testing.T) {
 	t.Parallel()
 
+	prompter := NewPrompter(strings.NewReader(""), &bytes.Buffer{}, tux.Capabilities{}, tux.Policy{})
 	defaults := map[tux.OptionID]struct{}{"go-cli": {}}
-	options := huhOptions([]tux.Option{
+	options := prompter.huhOptions([]tux.Option{
 		{ID: "go-library", Label: "Go library"},
 		{ID: "go-cli", Label: "Go CLI", Description: "Command-line application"},
 		{ID: "legacy", Label: "Legacy", Disabled: true},
@@ -70,5 +71,29 @@ func TestHuhOptionsExcludeDisabledAndPreserveDefaults(t *testing.T) {
 	}
 	if options[1].Value != "go-cli" || options[1].Key != "Go CLI — Command-line application" {
 		t.Fatalf("option = %+v", options[1])
+	}
+}
+
+func TestHuhOptionsAppliesColorOnlyWhenTrueColorAndPolicyAllow(t *testing.T) {
+	t.Parallel()
+
+	colored := []tux.Option{{ID: "go-library", Label: "Go library", Color: "#00ADD8"}}
+
+	trueColor := NewPrompter(strings.NewReader(""), &bytes.Buffer{}, tux.Capabilities{Color: tux.ColorTrueColor}, tux.Policy{})
+	options := trueColor.huhOptions(colored, nil)
+	if options[0].Key == "Go library" {
+		t.Error("huhOptions() did not style the label under true-color capability")
+	}
+
+	noColorPolicy := NewPrompter(strings.NewReader(""), &bytes.Buffer{}, tux.Capabilities{Color: tux.ColorTrueColor}, tux.Policy{Color: tux.FeatureNever})
+	options = noColorPolicy.huhOptions(colored, nil)
+	if options[0].Key != "Go library" {
+		t.Errorf("huhOptions() = %q, want unstyled when --color=never overrides true-color capability", options[0].Key)
+	}
+
+	ansi256 := NewPrompter(strings.NewReader(""), &bytes.Buffer{}, tux.Capabilities{Color: tux.ColorANSI256}, tux.Policy{})
+	options = ansi256.huhOptions(colored, nil)
+	if options[0].Key != "Go library" {
+		t.Errorf("huhOptions() = %q, want unstyled below true-color capability rather than an approximated color", options[0].Key)
 	}
 }

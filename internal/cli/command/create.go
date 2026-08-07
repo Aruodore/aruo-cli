@@ -341,7 +341,7 @@ func resolveInput(ctx context.Context, prompter tux.Prompter, value string, requ
 func templateOptions(entries []catalog.Entry) []tux.Option {
 	options := make([]tux.Option, len(entries))
 	for index, entry := range entries {
-		options[index] = tux.Option{ID: tux.OptionID(entry.ID), Label: entry.Name}
+		options[index] = tux.Option{ID: tux.OptionID(entry.ID), Label: entry.Name, Color: entry.Color}
 	}
 	return options
 }
