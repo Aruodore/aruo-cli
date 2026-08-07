@@ -12,6 +12,8 @@ This specification defines behavior; that report evaluates how to implement it.
 
 This document defines how Aruo behaves as a process inside a terminal. It is the implementation contract for signals, keyboard input, prompts, progress, output, errors, accessibility, terminal compatibility, performance, and testing.
 
+For the actual wording of prompts, confirmations, errors, and status text, see the [copy style guide](copy-style-guide.md). This document is for mechanism and behavior; that one is for the sentences that go inside them.
+
 The key words **MUST**, **MUST NOT**, **SHOULD**, **SHOULD NOT**, and **MAY** are normative.
 
 Aruo is a command-line application first. It may use inline terminal UI where that improves a decision, but it must remain predictable when redirected, automated, accessed through SSH, read with assistive technology, or run in a limited terminal. Rich presentation is an enhancement over a complete line-oriented contract.
@@ -367,12 +369,15 @@ Full-screen views MUST:
 
 ## Prompt behavior
 
+This section defines interaction *mechanism*: which widget to use, when to
+ask, when to require confirmation. For actual wording — label text, example
+phrasing, the `Optional` convention, confirmation/error/status sentences —
+see the [copy style guide](copy-style-guide.md), which is example-driven
+and gets updated first when real prompt text changes.
+
 ### General rules
 
 - Ask only questions whose answers cannot be safely derived.
-- Use ecosystem-native words, not Aruo model names.
-- Show a realistic example or concise consequence for unfamiliar inputs.
-- Put the recommended choice first and label it `Recommended` when alternatives have tradeoffs.
 - Pre-fill defaults only when accepting them is safe and unsurprising.
 - Validate locally on submission; do not flash errors on every keystroke unless validation is cheap and non-disruptive.
 - Preserve the user's input after an error and place the cursor near the problem where possible.
@@ -390,13 +395,7 @@ Full-screen views MUST:
 | Remote, destructive, security-sensitive, or hard to reverse | Name exact target and consequences; default no; typed target may be required |
 | Batch/fleet effect | Display count, scope, samples, and saved plan ID; explicit approval required |
 
-Confirmation syntax is always unambiguous:
-
-```text
-Apply these 4 changes to github.com/acme/api? [y/N]
-```
-
-Uppercase marks the default. Enter accepts the default. Localized yes/no tokens MAY be supported later, but `y`, `yes`, `n`, and `no` remain stable script-independent inputs in English mode.
+Confirmation wording is specified in the [copy style guide](copy-style-guide.md#confirmations).
 
 `--yes` skips only confirmation prompts. It does not bypass trust refusals or provide missing choices. Destructive commands MAY require a separate explicit `--force` whose help names the lost safeguard.
 
@@ -412,11 +411,14 @@ Uppercase marks the default. Enter accepts the default. Localized yes/no tokens 
 
 ### Optional questions
 
-Optional inputs say `Optional` and accept Enter to skip. Do not encode “none” as an unexplained blank. Defaults show their source when not built in, for example `main (from git config)`.
+Optional fields are a mechanism (`tux.InputRequest.Optional`/`Default`, both
+prompters accept Enter to skip and fall back to the default) plus wording
+(the `Optional` convention); see the [copy style guide](copy-style-guide.md#optional-fields)
+for the wording half.
 
 ### Prompt cancellation and EOF
 
-Ctrl+C cancels the entire invocation. Escape goes back where possible. EOF is rendered as `Input ended; project creation was cancelled` rather than a generic scanner error. Cancellation is not printed as `Error:` unless cleanup or recovery failed.
+Ctrl+C cancels the entire invocation. Escape goes back where possible. Cancellation is not printed as `Error:` unless cleanup or recovery failed. EOF wording is in the [copy style guide](copy-style-guide.md#errors).
 
 ## Progress reporting
 
@@ -549,19 +551,8 @@ Tier-one support includes Windows Terminal and PowerShell. Aruo MUST also degrad
 
 ### User-facing error anatomy
 
-An error is rendered once and includes only applicable parts:
-
-```text
-Error: could not create my-library
-
-The target already exists:
-  /work/my-library
-
-Nothing was changed.
-Choose another name, or inspect the existing directory before retrying.
-
-Debug reference: ARUO-7F3A
-```
+An error is rendered once and includes only applicable parts. See the
+[copy style guide](copy-style-guide.md#errors) for a worked example.
 
 Required qualities:
 
