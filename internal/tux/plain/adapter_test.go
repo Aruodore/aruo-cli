@@ -36,6 +36,28 @@ func TestInputRepeatsAfterValidationFailure(t *testing.T) {
 	}
 }
 
+func TestInputEmptyDefaultOmitsBracketHint(t *testing.T) {
+	t.Parallel()
+
+	var diagnostic bytes.Buffer
+	empty := ""
+	adapter := plain.New(strings.NewReader("\n"), &bytes.Buffer{}, &diagnostic, true, nil)
+	value, err := adapter.Input(context.Background(), tux.InputRequest{
+		Label:    "Author or organization",
+		Optional: true,
+		Default:  &empty,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if value != "" {
+		t.Fatalf("Input() = %q, want empty when the default itself is empty", value)
+	}
+	if got := diagnostic.String(); strings.Contains(got, "[]") {
+		t.Errorf("diagnostic = %q, want no empty-bracket hint for a blank default", got)
+	}
+}
+
 func TestSelectUsesStableID(t *testing.T) {
 	t.Parallel()
 

@@ -73,6 +73,25 @@ name, or a PyPI name in the generated project, and a wrong guess produces a
 broken `go.mod`/`package.json`/`pyproject.toml`, not just a missing detail.
 Only default a field when a wrong default is merely incomplete, not broken.
 
+A default never occupies the editable input as pre-filled text the user
+has to delete to leave the field blank. Show it as a hint instead, and
+apply it after the fact only if the user submits genuinely nothing:
+
+```
+Bad (rich prompter): input box already contains "Aruodore",
+                      cursor at the end — the user backspaces
+                      four characters to actually leave it blank.
+
+Good: Author or organization (Optional) [Aruodore]:
+      (empty input box; pressing Enter without typing
+       submits Aruodore, but the box was never occupied)
+```
+
+The plain adapter already worked this way (`Label [Default]` is
+informational text in the prompt line, not something sitting in a buffer);
+match its contract when writing another prompter rather than reinventing
+one where a default subtly requires deleting.
+
 ## Confirmations
 
 `create`'s actual confirmation today is generic — `Create this project?

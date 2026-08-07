@@ -371,7 +371,7 @@ func (a *Adapter) validationError(err error) error {
 }
 
 func inputLabel(request tux.InputRequest) string {
-	if request.Default == nil {
+	if request.Default == nil || *request.Default == "" {
 		return request.Label
 	}
 	return fmt.Sprintf("%s [%s]", request.Label, *request.Default)

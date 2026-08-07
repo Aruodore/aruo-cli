@@ -34,6 +34,29 @@ func TestAccessibleInputUsesAruoRequest(t *testing.T) {
 	}
 }
 
+func TestAccessibleInputSubmittingEmptyUsesDefaultWithoutPreFilling(t *testing.T) {
+	t.Parallel()
+
+	var output bytes.Buffer
+	defaultValue := "Aruodore"
+	prompter := NewPrompter(strings.NewReader("\n"), &output, tux.Capabilities{Width: 80}, tux.Policy{
+		Mode:       tux.ModeInteractive,
+		Accessible: true,
+	})
+	value, err := prompter.Input(context.Background(), tux.InputRequest{
+		ID:       "author",
+		Label:    "Author or organization",
+		Optional: true,
+		Default:  &defaultValue,
+	})
+	if err != nil {
+		t.Fatalf("Input() error = %v, want a bare Enter on an optional field with a default to succeed", err)
+	}
+	if value != defaultValue {
+		t.Fatalf("Input() = %q, want the default %q substituted after an empty submission", value, defaultValue)
+	}
+}
+
 func TestPrompterRefusesNonInteractiveSession(t *testing.T) {
 	t.Parallel()
 

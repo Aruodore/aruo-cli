@@ -24,20 +24,24 @@ func NewPrompter(in io.Reader, out io.Writer, capabilities tux.Capabilities, pol
 	return &Prompter{in: in, out: out, capabilities: capabilities, policy: policy}
 }
 
-// Input resolves one validated line of text.
+// Input resolves one validated line of text. A default never occupies the
+// editable buffer as pre-filled text the user has to delete; it only shows
+// as placeholder hint text, and is substituted after the fact if the user
+// submits the field genuinely empty, matching the plain adapter's contract.
 func (p *Prompter) Input(ctx context.Context, request tux.InputRequest) (string, error) {
 	if err := p.available(); err != nil {
 		return "", err
 	}
 	value := ""
-	if request.Default != nil {
-		value = *request.Default
+	placeholder := request.Placeholder
+	if request.Default != nil && *request.Default != "" {
+		placeholder = *request.Default
 	}
 	field := huh.NewInput().
 		Key(request.ID).
 		Title(request.Label).
 		Description(request.Description).
-		Placeholder(request.Placeholder).
+		Placeholder(placeholder).
 		Suggestions(request.Suggestions).
 		Value(&value).
 		Validate(func(value string) error {
@@ -51,6 +55,9 @@ func (p *Prompter) Input(ctx context.Context, request tux.InputRequest) (string,
 		})
 	if err := p.run(ctx, field); err != nil {
 		return "", err
+	}
+	if value == "" && request.Default != nil {
+		value = *request.Default
 	}
 	return value, nil
 }
