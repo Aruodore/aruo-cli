@@ -186,6 +186,13 @@ func (p *Prompter) available() error {
 }
 
 func (p *Prompter) run(ctx context.Context, field huh.Field) error {
+	return p.runForm(ctx, huh.NewForm(huh.NewGroup(field)))
+}
+
+// runForm applies the shared terminal wiring and error mapping to an
+// already-built form, whether it's a single-field form from run or the
+// multi-group form Guide assembles.
+func (p *Prompter) runForm(ctx context.Context, form *huh.Form) error {
 	if err := ctx.Err(); err != nil {
 		return errors.Join(tux.ErrCancelled, err)
 	}
@@ -193,7 +200,7 @@ func (p *Prompter) run(ctx context.Context, field huh.Field) error {
 	if width <= 0 {
 		width = 80
 	}
-	form := huh.NewForm(huh.NewGroup(field)).
+	form = form.
 		WithInput(p.in).
 		WithOutput(p.out).
 		WithWidth(width).

@@ -9,6 +9,9 @@ type Prompter interface {
 	Confirm(context.Context, ConfirmRequest) (bool, error)
 	Select(context.Context, SelectRequest) (OptionID, error)
 	MultiSelect(context.Context, MultiSelectRequest) ([]OptionID, error)
+	// Guide runs a multi-screen flow as one session, letting the user move
+	// backward across screens rather than only within one prompt.
+	Guide(context.Context, []Step) (Answers, error)
 }
 
 // Presenter renders semantic results and diagnostics.

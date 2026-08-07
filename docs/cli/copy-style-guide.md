@@ -102,6 +102,29 @@ informational text in the prompt line, not something sitting in a buffer);
 match its contract when writing another prompter rather than reinventing
 one where a default subtly requires deleting.
 
+## Back-navigation
+
+`create`'s guided flow (`Prompter.Guide`) lets a user return to an earlier
+screen instead of only being able to move forward. The rich prompter gets
+this for free from Huh's own `shift+tab`, with no copy of its own to write
+— its default help bar already advertises `shift+tab back`. The accessible
+adapter has no such built-in, so it prints one line before the first
+question, and only when there's more than one question to navigate between:
+
+```
+Type back at any prompt to return to the previous question.
+```
+
+Typing `back` (case-insensitive, trimmed) at any prompt in that flow is a
+reserved navigation command, not a literal value — it never becomes a
+project name, module path, description, or author. That's a deliberate
+trade-off: if a user genuinely wants the literal text "back" as a value,
+the corresponding flag (`--name`, `--module`, `--description`, `--author`)
+bypasses the prompt entirely and takes the value as given. Revisiting an
+already-answered screen shows that answer as its default (`[Aruodore]`,
+`(default)` on a list), so pressing Enter alone keeps it rather than
+forcing a retype.
+
 ## Confirmations
 
 `create`'s actual confirmation today is generic — `Create this project?

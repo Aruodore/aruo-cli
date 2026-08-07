@@ -227,6 +227,227 @@ func (a *Adapter) MultiSelect(ctx context.Context, request tux.MultiSelectReques
 	}
 }
 
+// Guide runs a multi-screen flow as one session. Typing "back" (case
+// insensitive) at any prompt returns to the previous visible step instead
+// of being taken as that step's value. A step that genuinely needs the
+// literal text "back" can still be supplied via its flag, bypassing the
+// prompt entirely.
+func (a *Adapter) Guide(ctx context.Context, steps []tux.Step) (tux.Answers, error) {
+	if !a.inputEnabled {
+		return nil, tux.ErrUnavailable
+	}
+	if err := ctx.Err(); err != nil {
+		return nil, errors.Join(tux.ErrCancelled, err)
+	}
+	if countVisibleSteps(steps) > 1 {
+		if _, err := fmt.Fprintln(a.diagnostic, "Type back at any prompt to return to the previous question."); err != nil {
+			return nil, err
+		}
+	}
+	answers := make(tux.Answers, len(steps))
+	index := 0
+	for index < len(steps) {
+		step := steps[index]
+		if step.Skip != nil && step.Skip() {
+			index++
+			continue
+		}
+		var (
+			value any
+			back  bool
+			err   error
+		)
+		switch step.Kind {
+		case tux.StepSelect:
+			value, back, err = a.guideSelectStep(ctx, step, answers)
+		case tux.StepConfirm:
+			value, back, err = a.guideConfirmStep(ctx, step, answers)
+		default:
+			value, back, err = a.guideInputStep(ctx, step, answers)
+		}
+		if err != nil {
+			return nil, err
+		}
+		if back {
+			prev := prevVisibleStep(steps, index)
+			if prev < 0 {
+				if _, err := fmt.Fprintln(a.diagnostic, "Already at the first question."); err != nil {
+					return nil, err
+				}
+				continue
+			}
+			index = prev
+			continue
+		}
+		answers[step.ID] = value
+		index++
+	}
+	return answers, nil
+}
+
+// guideInputStep prompts for step's Input request, recognizing "back" as a
+// navigation command rather than a literal value. A previous answer for
+// this step (from before the user went back) becomes the default, so a
+// bare Enter on revisit keeps it.
+func (a *Adapter) guideInputStep(ctx context.Context, step tux.Step, answers tux.Answers) (string, bool, error) {
+	request := step.Input(answers)
+	if previous, ok := answers[step.ID].(string); ok {
+		request.Default = &previous
+	}
+	for {
+		if err := ctx.Err(); err != nil {
+			return "", false, errors.Join(tux.ErrCancelled, err)
+		}
+		if err := a.writePrompt(request.Description, request.Example, inputLabel(request)); err != nil {
+			return "", false, err
+		}
+		raw, err := a.scan()
+		if err != nil {
+			return "", false, err
+		}
+		trimmed := strings.TrimSpace(raw)
+		if isBackCommand(trimmed) {
+			return "", true, nil
+		}
+		answer := trimmed
+		if answer == "" && request.Default != nil {
+			answer = *request.Default
+		}
+		if answer == "" && !request.Optional {
+			if err := a.validationError(fmt.Errorf("%s is required", request.Label)); err != nil {
+				return "", false, err
+			}
+			continue
+		}
+		if request.Validate != nil {
+			if err := request.Validate(answer); err != nil {
+				if writeErr := a.validationError(err); writeErr != nil {
+					return "", false, writeErr
+				}
+				continue
+			}
+		}
+		return answer, false, nil
+	}
+}
+
+// guideSelectStep mirrors guideInputStep for a Select step.
+func (a *Adapter) guideSelectStep(ctx context.Context, step tux.Step, answers tux.Answers) (tux.OptionID, bool, error) {
+	request := step.Select(answers)
+	options := enabledOptions(request.Options)
+	if len(options) == 0 {
+		return "", false, errors.New("selection has no enabled options")
+	}
+	defaultID := request.Default
+	if previous, ok := answers[step.ID].(tux.OptionID); ok {
+		defaultID = &previous
+	}
+	for {
+		if err := a.writeOptions(request.Description, request.Label, options, defaultID); err != nil {
+			return "", false, err
+		}
+		raw, err := a.readChoice(ctx)
+		if err != nil {
+			return "", false, err
+		}
+		trimmed := strings.TrimSpace(raw)
+		if isBackCommand(trimmed) {
+			return "", true, nil
+		}
+		answer := trimmed
+		if answer == "" && defaultID != nil {
+			answer = string(*defaultID)
+		}
+		selected, ok := resolveOption(answer, options)
+		if !ok {
+			if err := a.validationError(errors.New("enter an option number or identifier")); err != nil {
+				return "", false, err
+			}
+			continue
+		}
+		if request.Validate != nil {
+			if err := request.Validate(selected); err != nil {
+				if writeErr := a.validationError(err); writeErr != nil {
+					return "", false, writeErr
+				}
+				continue
+			}
+		}
+		return selected, false, nil
+	}
+}
+
+// guideConfirmStep mirrors Confirm's own y/n handling (including its
+// delegation to the Input primitives), adding back-detection and
+// per-visit default injection the same way the other two guide steps do.
+func (a *Adapter) guideConfirmStep(ctx context.Context, step tux.Step, answers tux.Answers) (bool, bool, error) {
+	request := step.Confirm(answers)
+	defaultValue := request.Default
+	if previous, ok := answers[step.ID].(bool); ok {
+		defaultValue = previous
+	}
+	defaultLabel := "y/N"
+	if defaultValue {
+		defaultLabel = "Y/n"
+	}
+	inputStep := tux.Step{
+		ID: step.ID,
+		Input: func(tux.Answers) tux.InputRequest {
+			return tux.InputRequest{
+				Label:       request.Label + " [" + defaultLabel + "]",
+				Description: request.Description,
+				Optional:    true,
+			}
+		},
+	}
+	for {
+		answer, back, err := a.guideInputStep(ctx, inputStep, tux.Answers{})
+		if err != nil {
+			return false, false, err
+		}
+		if back {
+			return false, true, nil
+		}
+		switch strings.ToLower(strings.TrimSpace(answer)) {
+		case "":
+			return defaultValue, false, nil
+		case "y", "yes":
+			return true, false, nil
+		case "n", "no":
+			return false, false, nil
+		default:
+			if err := a.validationError(errors.New("enter yes or no")); err != nil {
+				return false, false, err
+			}
+		}
+	}
+}
+
+// isBackCommand reports whether a scanned line is the reserved navigation
+// keyword rather than a literal value.
+func isBackCommand(value string) bool {
+	return strings.EqualFold(value, "back")
+}
+
+func prevVisibleStep(steps []tux.Step, from int) int {
+	for i := from - 1; i >= 0; i-- {
+		if steps[i].Skip == nil || !steps[i].Skip() {
+			return i
+		}
+	}
+	return -1
+}
+
+func countVisibleSteps(steps []tux.Step) int {
+	count := 0
+	for _, step := range steps {
+		if step.Skip == nil || !step.Skip() {
+			count++
+		}
+	}
+	return count
+}
+
 // Message writes one durable semantic message.
 func (a *Adapter) Message(ctx context.Context, message tux.Message) error {
 	if err := ctx.Err(); err != nil {

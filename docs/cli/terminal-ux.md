@@ -45,9 +45,25 @@ for measured evidence.
   adapters. `TERM=dumb`, `--accessible`/`ARUO_ACCESSIBLE`, and non-interactive
   or non-human-format sessions deterministically select the plain adapter.
 - Prompts (`internal/tux/charm` via Huh v2, `internal/tux/plain` reference)
-  reached by `create`'s name/module/description/author/template/confirm
+  reached by `create`'s name/kind/template/module/description/author/confirm
   flow: text input, confirm, and single-select with descriptions and
   defaults.
+- `Prompter.Guide` (`internal/tux/charm/guide.go`, `internal/tux/plain`):
+  runs create's whole flow as one session with real backward navigation
+  across every screen, not only within one field. The rich adapter builds
+  one continuous multi-group Huh form (native `shift+tab`, per the
+  Keyboard interaction specification's Text-fields table); the accessible
+  adapter recognizes the literal word `back` at any prompt. A step whose
+  answer isn't needed (already supplied by a flag, or the catalog only has
+  one kind) is skipped in both directions transparently. Two accepted,
+  documented quirks: (1) the accessible `back` keyword can't be told apart
+  from someone genuinely wanting to type the word "back" as a value — use
+  the corresponding flag to bypass the prompt if that's a real need; (2) if
+  you go back and change an earlier answer (kind) that narrows a later
+  Select's options (template), Huh clamps the highlighted option's cursor
+  *index* into the new list rather than resetting it to the first option —
+  you'll see whichever option that lands on highlighted, not necessarily
+  a sensible default, before you choose and press Enter.
 - Output (`internal/tux/charm` via Lip Gloss v2, `internal/tux/plain`
   reference): semantic messages (info/success/warning/note), width-aware
   tables that drop lower-priority columns before truncating, and one
@@ -114,7 +130,13 @@ any command's behavior until one calls them.
   Huh/Bubble Tea component behavior is unit-tested in `internal/tux/charm`,
   and the underlying session/lifecycle wiring is qualification-tested in
   `internal/cli` and `cmd/aruo`, but no test drives real keystrokes through a
-  real terminal device end to end.
+  real terminal device end to end. `Prompter.Guide`'s rich-adapter tests
+  (`internal/tux/charm/guide_test.go`) work around this differently: `huh.Form`
+  implements `tea.Model`, so the tests call `Form.Update` directly with real
+  `tea.KeyPressMsg` values (including `shift+tab`) and drain the resulting
+  `tea.Cmd` chain synchronously, without a PTY or a running Bubble Tea
+  program. This exercises real keystroke-driven navigation and Huh's
+  `OptionsFunc` reactivity, just not through an actual terminal device.
 - Localization: all prompt/output prose is hardcoded English.
 - Windows and macOS are cross-compiled and vetted in CI
   (`GOOS=windows|darwin`), not run; no ConPTY, Terminal.app, or

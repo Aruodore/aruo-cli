@@ -190,6 +190,38 @@ type MultiSelectRequest struct {
 	Validate    func([]OptionID) error
 }
 
+// Answers accumulates resolved values from a guided flow (Prompter.Guide),
+// keyed by each Step's ID, so a later step's request can react to an
+// earlier answer -- for example narrowing a template list to the chosen
+// project kind. A step that was skipped has no entry.
+type Answers map[string]any
+
+// StepKind selects which prompt primitive a Step renders as.
+type StepKind uint8
+
+const (
+	StepInput StepKind = iota
+	StepSelect
+	StepConfirm
+)
+
+// Step describes one question in a multi-screen guided flow that supports
+// moving backward across the whole flow, not only within one prompt. The
+// Input/Select/Confirm builder matching Kind is called fresh each time the
+// step is (re)shown, so its request can read earlier Answers.
+type Step struct {
+	ID      string
+	Kind    StepKind
+	Input   func(Answers) InputRequest
+	Select  func(Answers) SelectRequest
+	Confirm func(Answers) ConfirmRequest
+	// Skip reports whether to bypass this step entirely, in both
+	// directions. Evaluated once per Guide call: every skip condition
+	// Aruo has today is a static flag decided before the guide starts,
+	// not something that changes based on answers gathered mid-flow.
+	Skip func() bool
+}
+
 // TaskEventKind identifies a transition in a long-running task.
 type TaskEventKind string
 

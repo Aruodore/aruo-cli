@@ -235,6 +235,11 @@ func TestRunCreateInteractive(t *testing.T) {
 		"1", // Template: Go library. Within the library kind, the catalog
 		// sorts by ID: go-library, js-library, python-library,
 		// ts-library, vue-library, putting go-library at position 1.
+		"back", // On the module screen: go back to the template screen
+		// instead, proving Guide's back-navigation works end to end
+		// through create's real wiring, not just in adapter-level tests.
+		"", // Bare Enter on the revisited template screen keeps the
+		// prior answer (go-library) as its default.
 		"example.com/guided",
 		"A guided library.",
 		"Guided Authors",
@@ -264,6 +269,12 @@ func TestRunCreateInteractive(t *testing.T) {
 		!strings.Contains(stderr.String(), "Create this project?") ||
 		!strings.Contains(stdout.String(), "Created go-library") {
 		t.Errorf("stdout=%q stderr=%q", stdout.String(), stderr.String())
+	}
+	if got := strings.Count(stderr.String(), "Template\n"); got != 2 {
+		t.Errorf("stderr shows the Template screen %d times, want 2 (once forward, once after going back): %q", got, stderr.String())
+	}
+	if !strings.Contains(stderr.String(), "1. Go library (default)") {
+		t.Errorf("stderr = %q, want the revisited template screen to show the prior answer as its default", stderr.String())
 	}
 	if !strings.Contains(stderr.String(), "Creating: Go library\n\nThis is written to go.mod") {
 		t.Errorf("stderr = %q, want the module screen not to repeat the catalog entry's long description already shown on the template picker", stderr.String())

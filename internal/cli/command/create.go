@@ -121,32 +121,36 @@ func runCreate(ctx context.Context, factory sessionFactory, templateCatalog cata
 	prompter := terminal.Prompter()
 	interactive := terminal.Policy().Mode == tux.ModeInteractive
 
-	if options.destination == "" {
-		options.name, err = resolveInput(ctx, prompter, options.name, tux.InputRequest{
-			ID:          "name",
-			Label:       "Project name",
-			Description: "Aruo will create a new folder with this name.",
-			Example:     "my-library",
-		}, "name-or-path argument")
-		if err != nil {
-			return err
+	var entry catalog.Entry
+	if interactive {
+		entry, err = runGuide(ctx, prompter, templateCatalog, &options)
+	} else {
+		if options.destination == "" {
+			options.name, err = resolveInput(ctx, prompter, options.name, tux.InputRequest{
+				ID:          "name",
+				Label:       "Project name",
+				Description: "Aruo will create a new folder with this name.",
+				Example:     "my-library",
+			}, "name-or-path argument")
+			if err != nil {
+				return err
+			}
+			options.destination = options.name
 		}
-		options.destination = options.name
+		entry, err = resolveTemplate(ctx, templateCatalog, &options)
+		if err == nil {
+			err = resolveProjectFields(ctx, prompter, entry, &options)
+		}
 	}
-
-	entry, err := resolveTemplate(ctx, prompter, templateCatalog, interactive, &options)
 	if err != nil {
 		return err
 	}
+
 	if options.name == "" {
 		options.name = filepath.Base(filepath.Clean(options.destination))
 	}
 	if options.name == "." {
 		return errors.New("cannot infer a project name for the current directory; provide --name")
-	}
-
-	if err = resolveProjectFields(ctx, prompter, entry, interactive, &options); err != nil {
-		return err
 	}
 	if options.license == "" {
 		options.license = entry.DefaultLicense
@@ -156,10 +160,6 @@ func runCreate(ctx context.Context, factory sessionFactory, templateCatalog cata
 	}
 	variables, err := parseVariables(options.variables)
 	if err != nil {
-		return err
-	}
-
-	if err = confirmCreation(ctx, prompter, entry, options, interactive); err != nil {
 		return err
 	}
 
@@ -178,39 +178,26 @@ func runCreate(ctx context.Context, factory sessionFactory, templateCatalog cata
 	return presentCreated(ctx, terminal.Presenter(), options.destination, result)
 }
 
-// resolveTemplate applies options.language/options.kind filters, resolves
-// options.templateID (prompting when more than one template matches and the
-// session is interactive), and returns the matching catalog entry.
-func resolveTemplate(ctx context.Context, prompter tux.Prompter, templateCatalog catalog.Catalog, interactive bool, options *createOptions) (catalog.Entry, error) {
+// resolveTemplate applies options.language/options.kind filters and
+// resolves options.templateID for a non-interactive session, where an
+// empty or ambiguous match can only be resolved through the --template
+// flag -- there's no prompter to fall back on. The interactive session
+// resolves the same fields through runGuide's "kind" and "template" steps
+// instead.
+func resolveTemplate(ctx context.Context, templateCatalog catalog.Catalog, options *createOptions) (catalog.Entry, error) {
 	entries, err := templateCatalog.List(ctx)
 	if err != nil {
 		return catalog.Entry{}, err
 	}
-	if options.templateID == "" && options.kind == "" && interactive {
-		options.kind, err = resolveKind(ctx, prompter, entries)
-		if err != nil {
-			return catalog.Entry{}, err
-		}
-	}
 	entries = filterEntries(entries, options.language, options.kind)
 	if options.templateID == "" {
-		switch {
-		case len(entries) == 0:
+		switch len(entries) {
+		case 0:
 			return catalog.Entry{}, errors.New("no templates match the requested language/kind filters")
-		case len(entries) == 1:
+		case 1:
 			options.templateID = entries[0].ID
-		case !interactive:
-			return catalog.Entry{}, errors.New("--template is required when multiple templates match")
 		default:
-			selected, selectErr := prompter.Select(ctx, tux.SelectRequest{
-				ID:      "template",
-				Label:   "Template",
-				Options: templateOptions(entries),
-			})
-			if selectErr != nil {
-				return catalog.Entry{}, selectErr
-			}
-			options.templateID = string(selected)
+			return catalog.Entry{}, errors.New("--template is required when multiple templates match")
 		}
 	}
 	entry, err := templateCatalog.Resolve(ctx, options.templateID)
@@ -223,63 +210,16 @@ func resolveTemplate(ctx context.Context, prompter tux.Prompter, templateCatalog
 	return entry, nil
 }
 
-// resolveKind asks whether the user is creating an application or a library
-// before showing the full template list, so that list is filtered to the
-// 3-5 templates of the chosen kind instead of every ecosystem at once. It's
-// a no-op when the catalog only has one kind to offer.
-func resolveKind(ctx context.Context, prompter tux.Prompter, entries []catalog.Entry) (string, error) {
-	kinds := uniqueValues(entries, func(entry catalog.Entry) string { return entry.Kind })
-	if len(kinds) <= 1 {
-		return "", nil
-	}
-	options := make([]tux.Option, len(kinds))
-	for index, kind := range kinds {
-		options[index] = tux.Option{ID: tux.OptionID(kind), Label: kindLabel(kind), Description: kindEntryNames(entries, kind)}
-	}
-	selected, err := prompter.Select(ctx, tux.SelectRequest{
-		ID:      "kind",
-		Label:   "What are you building?",
-		Options: options,
-	})
-	if err != nil {
-		return "", err
-	}
-	return string(selected), nil
-}
-
-func kindLabel(kind string) string {
-	switch kind {
-	case "app":
-		return "Application"
-	case "library":
-		return "Library"
-	default:
-		return kind
-	}
-}
-
-func kindEntryNames(entries []catalog.Entry, kind string) string {
-	names := make([]string, 0, len(entries))
-	for _, entry := range entries {
-		if entry.Kind == kind {
-			names = append(names, entry.Name)
-		}
-	}
-	return strings.Join(names, ", ")
-}
-
-// resolveProjectFields fills in the module, description, and author fields,
-// prompting for whichever were not supplied as flags.
-func resolveProjectFields(ctx context.Context, prompter tux.Prompter, entry catalog.Entry, interactive bool, options *createOptions) error {
-	moduleDescription := entry.Prompts.ModuleDescription
-	if interactive {
-		moduleDescription = fmt.Sprintf("Creating: %s\n\n%s", entry.Name, moduleDescription)
-	}
+// resolveProjectFields fills in the module, description, and author
+// fields for a non-interactive session; resolveInput requires each via
+// its flag unless the field is optional, in which case a real default is
+// derived automatically (detectGitAuthor, catalog.Entry.Description).
+func resolveProjectFields(ctx context.Context, prompter tux.Prompter, entry catalog.Entry, options *createOptions) error {
 	var err error
 	options.module, err = resolveInput(ctx, prompter, options.module, tux.InputRequest{
 		ID:          "module",
 		Label:       moduleLabel(entry),
-		Description: moduleDescription,
+		Description: entry.Prompts.ModuleDescription,
 		Example:     entry.Prompts.ModuleExample,
 		Placeholder: entry.Prompts.ModuleExample,
 	}, "--module")
@@ -324,30 +264,6 @@ func detectGitAuthor(ctx context.Context) string {
 		return ""
 	}
 	return strings.TrimSpace(string(output))
-}
-
-// confirmCreation asks for final approval unless --yes was passed or the
-// session cannot prompt.
-func confirmCreation(ctx context.Context, prompter tux.Prompter, entry catalog.Entry, options createOptions, interactive bool) error {
-	if options.yes || !interactive {
-		return nil
-	}
-	summary := fmt.Sprintf(
-		"Project summary:\n  Name:        %s\n  Template:    %s\n  Location:    %s\n  %s: %s\n  License:     %s",
-		options.name, entry.Name, options.destination, moduleLabel(entry), options.module, options.license,
-	)
-	confirmed, err := prompter.Confirm(ctx, tux.ConfirmRequest{
-		ID:          "confirm",
-		Label:       "Create this project?",
-		Description: summary,
-	})
-	if err != nil {
-		return err
-	}
-	if !confirmed {
-		return errors.New("creation cancelled")
-	}
-	return nil
 }
 
 func moduleLabel(entry catalog.Entry) string {

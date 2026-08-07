@@ -3,6 +3,7 @@ package command
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/aruodore/aruo/internal/catalog"
@@ -196,70 +197,188 @@ func TestResolveInputOptionalUnavailableWithoutDefaultReturnsEmpty(t *testing.T)
 	}
 }
 
-// stubSelectPrompter answers Select with a fixed value/error while recording
-// the request it received, since resolveKind only exercises Select.
-type stubSelectPrompter struct {
-	selectValue tux.OptionID
-	selectErr   error
-	gotRequest  tux.SelectRequest
+// fakeCatalog is a minimal catalog.Catalog over an in-memory entry list,
+// so runGuide's step-building logic can be tested without depending on
+// the real builtin catalog's specific templates.
+type fakeCatalog struct {
+	entries []catalog.Entry
+}
+
+func (f fakeCatalog) List(context.Context) ([]catalog.Entry, error) { return f.entries, nil }
+
+func (f fakeCatalog) Resolve(_ context.Context, id string) (catalog.Entry, error) {
+	for _, entry := range f.entries {
+		if entry.ID == id {
+			return entry, nil
+		}
+	}
+	return catalog.Entry{}, fmt.Errorf("unknown template %q", id)
+}
+
+// stubGuidePrompter answers Guide with a fixed Answers/error while
+// recording the steps it received, so a test can drive individual step
+// builders directly without a real terminal. When set, inspect runs
+// before Guide returns -- runGuide mutates its createOptions immediately
+// after Guide returns, and a Step's Skip/request builder reads that same
+// struct live, so assertions about pre-mutation state (like whether a
+// step was offered because no flag answered it yet) must run inside
+// inspect rather than after runGuide has fully returned.
+type stubGuidePrompter struct {
+	answers  tux.Answers
+	err      error
+	gotSteps []tux.Step
+	inspect  func([]tux.Step)
 	tux.Prompter
 }
 
-func (s *stubSelectPrompter) Select(_ context.Context, request tux.SelectRequest) (tux.OptionID, error) {
-	s.gotRequest = request
-	return s.selectValue, s.selectErr
+func (s *stubGuidePrompter) Guide(_ context.Context, steps []tux.Step) (tux.Answers, error) {
+	s.gotSteps = steps
+	if s.inspect != nil {
+		s.inspect(steps)
+	}
+	return s.answers, s.err
 }
 
-func TestResolveKindSkipsPromptWhenCatalogHasOneKind(t *testing.T) {
+func findGuideStep(t *testing.T, steps []tux.Step, id string) tux.Step {
+	t.Helper()
+	for _, step := range steps {
+		if step.ID == id {
+			return step
+		}
+	}
+	t.Fatalf("no step with ID %q among %d steps", id, len(steps))
+	return tux.Step{}
+}
+
+func TestRunGuideSkipsKindStepWhenCatalogHasOneKind(t *testing.T) {
 	t.Parallel()
 
-	prompter := &stubSelectPrompter{selectErr: errors.New("must not be called")}
-	entries := []catalog.Entry{{ID: "go-library", Kind: "library"}}
-	got, err := resolveKind(context.Background(), prompter, entries)
-	if err != nil {
-		t.Fatalf("resolveKind() error = %v", err)
+	templateCatalog := fakeCatalog{entries: []catalog.Entry{{ID: "go-library", Kind: "library", Licenses: []string{"MIT"}, DefaultLicense: "MIT"}}}
+	prompter := &stubGuidePrompter{answers: tux.Answers{"template": tux.OptionID("go-library"), "confirm": true}}
+	prompter.inspect = func(steps []tux.Step) {
+		kind := findGuideStep(t, steps, "kind")
+		if kind.Skip == nil || !kind.Skip() {
+			t.Error("kind step Skip() = false, want true when the catalog only has one kind")
+		}
 	}
-	if got != "" {
-		t.Fatalf("resolveKind() = %q, want empty string when only one kind exists", got)
+	options := &createOptions{module: "example.com/x"}
+	if _, err := runGuide(context.Background(), prompter, templateCatalog, options); err != nil {
+		t.Fatalf("runGuide() error = %v", err)
 	}
 }
 
-func TestResolveKindPromptsWithEcosystemNamesPerKind(t *testing.T) {
+func TestRunGuideKindStepOffersEcosystemNamesPerKind(t *testing.T) {
 	t.Parallel()
 
-	entries := []catalog.Entry{
-		{ID: "next-app", Name: "Next.js application", Kind: "app"},
-		{ID: "go-library", Name: "Go library", Kind: "library"},
-		{ID: "js-library", Name: "JavaScript library", Kind: "library"},
+	templateCatalog := fakeCatalog{entries: []catalog.Entry{
+		{ID: "next-app", Name: "Next.js application", Kind: "app", Licenses: []string{"MIT"}, DefaultLicense: "MIT"},
+		{ID: "go-library", Name: "Go library", Kind: "library", Licenses: []string{"MIT"}, DefaultLicense: "MIT"},
+		{ID: "js-library", Name: "JavaScript library", Kind: "library", Licenses: []string{"MIT"}, DefaultLicense: "MIT"},
+	}}
+	prompter := &stubGuidePrompter{answers: tux.Answers{"kind": tux.OptionID("library"), "template": tux.OptionID("go-library"), "confirm": true}}
+	prompter.inspect = func(steps []tux.Step) {
+		kind := findGuideStep(t, steps, "kind")
+		if kind.Skip != nil && kind.Skip() {
+			t.Fatal("kind step Skip() = true, want false with two kinds present")
+		}
+		request := kind.Select(tux.Answers{})
+		if len(request.Options) != 2 {
+			t.Fatalf("kind options = %#v, want 2 kinds", request.Options)
+		}
+		app, library := request.Options[0], request.Options[1]
+		if app.ID != "app" || app.Label != "Application" || app.Description != "Next.js application" {
+			t.Errorf("app option = %+v", app)
+		}
+		if library.ID != "library" || library.Label != "Library" || library.Description != "Go library, JavaScript library" {
+			t.Errorf("library option = %+v", library)
+		}
 	}
-	prompter := &stubSelectPrompter{selectValue: "library"}
-	got, err := resolveKind(context.Background(), prompter, entries)
-	if err != nil {
-		t.Fatalf("resolveKind() error = %v", err)
-	}
-	if got != "library" {
-		t.Fatalf("resolveKind() = %q, want %q", got, "library")
-	}
-	if len(prompter.gotRequest.Options) != 2 {
-		t.Fatalf("Select() options = %#v, want 2 kinds", prompter.gotRequest.Options)
-	}
-	app, library := prompter.gotRequest.Options[0], prompter.gotRequest.Options[1]
-	if app.ID != "app" || app.Label != "Application" || app.Description != "Next.js application" {
-		t.Errorf("app option = %+v", app)
-	}
-	if library.ID != "library" || library.Label != "Library" || library.Description != "Go library, JavaScript library" {
-		t.Errorf("library option = %+v", library)
+	options := &createOptions{module: "example.com/x"}
+	if _, err := runGuide(context.Background(), prompter, templateCatalog, options); err != nil {
+		t.Fatalf("runGuide() error = %v", err)
 	}
 }
 
-func TestResolveKindPropagatesSelectError(t *testing.T) {
+func TestRunGuideTemplateStepNarrowsToChosenKind(t *testing.T) {
+	t.Parallel()
+
+	templateCatalog := fakeCatalog{entries: []catalog.Entry{
+		{ID: "next-app", Kind: "app", Licenses: []string{"MIT"}, DefaultLicense: "MIT"},
+		{ID: "go-library", Kind: "library", Licenses: []string{"MIT"}, DefaultLicense: "MIT"},
+		{ID: "js-library", Kind: "library", Licenses: []string{"MIT"}, DefaultLicense: "MIT"},
+	}}
+	prompter := &stubGuidePrompter{answers: tux.Answers{"kind": tux.OptionID("library"), "template": tux.OptionID("go-library")}}
+	options := &createOptions{yes: true, module: "example.com/x"}
+	if _, err := runGuide(context.Background(), prompter, templateCatalog, options); err != nil {
+		t.Fatalf("runGuide() error = %v", err)
+	}
+	template := findGuideStep(t, prompter.gotSteps, "template")
+	request := template.Select(tux.Answers{"kind": tux.OptionID("library")})
+	if len(request.Options) != 2 {
+		t.Fatalf("template options = %#v, want the 2 library templates only", request.Options)
+	}
+	for _, option := range request.Options {
+		if option.ID == "next-app" {
+			t.Errorf("template options include %q, want it narrowed away once kind=library", option.ID)
+		}
+	}
+}
+
+func TestRunGuideCopiesAnswersBackIntoOptionsAndResolvesEntry(t *testing.T) {
+	t.Parallel()
+
+	templateCatalog := fakeCatalog{entries: []catalog.Entry{
+		{ID: "go-library", Name: "Go library", Kind: "library", Licenses: []string{"MIT"}, DefaultLicense: "MIT"},
+	}}
+	prompter := &stubGuidePrompter{answers: tux.Answers{
+		"name":        "my-app",
+		"template":    tux.OptionID("go-library"),
+		"module":      "example.com/my-app",
+		"description": "A test project.",
+		"author":      "Jane Doe",
+		"confirm":     true,
+	}}
+	options := &createOptions{}
+	entry, err := runGuide(context.Background(), prompter, templateCatalog, options)
+	if err != nil {
+		t.Fatalf("runGuide() error = %v", err)
+	}
+	if entry.ID != "go-library" {
+		t.Errorf("entry.ID = %q, want go-library", entry.ID)
+	}
+	if options.name != "my-app" || options.destination != "my-app" {
+		t.Errorf("options.name/destination = %q/%q, want my-app/my-app", options.name, options.destination)
+	}
+	if options.templateID != "go-library" || options.module != "example.com/my-app" ||
+		options.description != "A test project." || options.author != "Jane Doe" {
+		t.Errorf("options = %+v, want the Guide answers copied in", options)
+	}
+}
+
+func TestRunGuideReturnsCancelledWhenConfirmDeclined(t *testing.T) {
+	t.Parallel()
+
+	templateCatalog := fakeCatalog{entries: []catalog.Entry{
+		{ID: "go-library", Kind: "library", Licenses: []string{"MIT"}, DefaultLicense: "MIT"},
+	}}
+	prompter := &stubGuidePrompter{answers: tux.Answers{
+		"name": "my-app", "template": tux.OptionID("go-library"), "module": "example.com/my-app", "confirm": false,
+	}}
+	options := &createOptions{}
+	_, err := runGuide(context.Background(), prompter, templateCatalog, options)
+	if err == nil || err.Error() != "creation cancelled" {
+		t.Fatalf("runGuide() error = %v, want \"creation cancelled\"", err)
+	}
+}
+
+func TestRunGuidePropagatesGuideError(t *testing.T) {
 	t.Parallel()
 
 	sentinel := errors.New("terminal disconnected")
-	entries := []catalog.Entry{{Kind: "app"}, {Kind: "library"}}
-	prompter := &stubSelectPrompter{selectErr: sentinel}
-	_, err := resolveKind(context.Background(), prompter, entries)
+	templateCatalog := fakeCatalog{entries: []catalog.Entry{{ID: "go-library", Kind: "library"}}}
+	prompter := &stubGuidePrompter{err: sentinel}
+	_, err := runGuide(context.Background(), prompter, templateCatalog, &createOptions{})
 	if !errors.Is(err, sentinel) {
-		t.Fatalf("resolveKind() error = %v, want it to propagate %v", err, sentinel)
+		t.Fatalf("runGuide() error = %v, want it to propagate %v", err, sentinel)
 	}
 }

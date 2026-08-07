@@ -124,6 +124,159 @@ func TestPresenterKeepsDiagnosticsOffResultStream(t *testing.T) {
 	}
 }
 
+func nameStep() tux.Step {
+	return tux.Step{
+		ID:   "name",
+		Kind: tux.StepInput,
+		Input: func(tux.Answers) tux.InputRequest {
+			return tux.InputRequest{Label: "Project name"}
+		},
+	}
+}
+
+func kindStep(skip func() bool) tux.Step {
+	return tux.Step{
+		ID:   "kind",
+		Kind: tux.StepSelect,
+		Select: func(tux.Answers) tux.SelectRequest {
+			return tux.SelectRequest{
+				Label: "What are you building?",
+				Options: []tux.Option{
+					{ID: "app", Label: "Application"},
+					{ID: "library", Label: "Library"},
+				},
+			}
+		},
+		Skip: skip,
+	}
+}
+
+func confirmStep() tux.Step {
+	return tux.Step{
+		ID:   "confirm",
+		Kind: tux.StepConfirm,
+		Confirm: func(tux.Answers) tux.ConfirmRequest {
+			return tux.ConfirmRequest{Label: "Create this project?"}
+		},
+	}
+}
+
+func TestGuideLinearHappyPath(t *testing.T) {
+	t.Parallel()
+
+	var diagnostic bytes.Buffer
+	adapter := plain.New(strings.NewReader("my-app\n2\nyes\n"), &bytes.Buffer{}, &diagnostic, true, nil)
+	answers, err := adapter.Guide(context.Background(), []tux.Step{nameStep(), kindStep(nil), confirmStep()})
+	if err != nil {
+		t.Fatalf("Guide() error = %v", err)
+	}
+	if answers["name"] != "my-app" {
+		t.Errorf("answers[name] = %v, want my-app", answers["name"])
+	}
+	if answers["kind"] != tux.OptionID("library") {
+		t.Errorf("answers[kind] = %v, want library", answers["kind"])
+	}
+	if answers["confirm"] != true {
+		t.Errorf("answers[confirm] = %v, want true", answers["confirm"])
+	}
+	if !strings.Contains(diagnostic.String(), "Type back at any prompt to return to the previous question.") {
+		t.Errorf("diagnostic = %q, want the back-navigation tip", diagnostic.String())
+	}
+}
+
+func TestGuideBackReturnsToPreviousStepWithPriorAnswerAsDefault(t *testing.T) {
+	t.Parallel()
+
+	var diagnostic bytes.Buffer
+	// name=my-app, then on the kind step type "back", re-see name with
+	// "my-app" as the default (bare Enter keeps it), then answer kind=1
+	// (app) and confirm.
+	adapter := plain.New(strings.NewReader("my-app\nback\n\n1\nyes\n"), &bytes.Buffer{}, &diagnostic, true, nil)
+	answers, err := adapter.Guide(context.Background(), []tux.Step{nameStep(), kindStep(nil), confirmStep()})
+	if err != nil {
+		t.Fatalf("Guide() error = %v", err)
+	}
+	if answers["name"] != "my-app" {
+		t.Fatalf("answers[name] = %v, want my-app to survive a bare Enter on revisit", answers["name"])
+	}
+	if answers["kind"] != tux.OptionID("app") {
+		t.Fatalf("answers[kind] = %v, want app", answers["kind"])
+	}
+	if !strings.Contains(diagnostic.String(), "Project name [my-app]:") {
+		t.Errorf("diagnostic = %q, want the revisit prompt to show the prior answer as its default", diagnostic.String())
+	}
+}
+
+func TestGuideBackAtFirstStepPrintsNoticeAndReprompts(t *testing.T) {
+	t.Parallel()
+
+	var diagnostic bytes.Buffer
+	adapter := plain.New(strings.NewReader("back\nmy-app\n2\nyes\n"), &bytes.Buffer{}, &diagnostic, true, nil)
+	answers, err := adapter.Guide(context.Background(), []tux.Step{nameStep(), kindStep(nil), confirmStep()})
+	if err != nil {
+		t.Fatalf("Guide() error = %v", err)
+	}
+	if answers["name"] != "my-app" {
+		t.Fatalf("answers[name] = %v, want my-app", answers["name"])
+	}
+	if !strings.Contains(diagnostic.String(), "Already at the first question.") {
+		t.Errorf("diagnostic = %q, want a notice instead of erroring", diagnostic.String())
+	}
+}
+
+func TestGuideSkipsStepInBothDirections(t *testing.T) {
+	t.Parallel()
+
+	var diagnostic bytes.Buffer
+	// kind is always skipped; going "back" from confirm must land on name,
+	// not the hidden kind step.
+	adapter := plain.New(strings.NewReader("my-app\nback\nrenamed\nyes\n"), &bytes.Buffer{}, &diagnostic, true, nil)
+	answers, err := adapter.Guide(context.Background(), []tux.Step{
+		nameStep(),
+		kindStep(func() bool { return true }),
+		confirmStep(),
+	})
+	if err != nil {
+		t.Fatalf("Guide() error = %v", err)
+	}
+	if _, answered := answers["kind"]; answered {
+		t.Errorf("answers[kind] = %v, want the skipped step to have no entry", answers["kind"])
+	}
+	if answers["name"] != "renamed" {
+		t.Fatalf("answers[name] = %v, want renamed after going back and re-answering", answers["name"])
+	}
+	if strings.Contains(diagnostic.String(), "What are you building?") {
+		t.Errorf("diagnostic = %q, want the skipped kind step never rendered", diagnostic.String())
+	}
+}
+
+func TestGuideOmitsTipWithOnlyOneVisibleStep(t *testing.T) {
+	t.Parallel()
+
+	var diagnostic bytes.Buffer
+	adapter := plain.New(strings.NewReader("my-app\n"), &bytes.Buffer{}, &diagnostic, true, nil)
+	_, err := adapter.Guide(context.Background(), []tux.Step{
+		nameStep(),
+		kindStep(func() bool { return true }),
+	})
+	if err != nil {
+		t.Fatalf("Guide() error = %v", err)
+	}
+	if strings.Contains(diagnostic.String(), "Type back") {
+		t.Errorf("diagnostic = %q, want no back-navigation tip when only one step is visible", diagnostic.String())
+	}
+}
+
+func TestGuideDisabledReturnsUnavailable(t *testing.T) {
+	t.Parallel()
+
+	adapter := plain.New(strings.NewReader("ignored\n"), &bytes.Buffer{}, &bytes.Buffer{}, false, nil)
+	_, err := adapter.Guide(context.Background(), []tux.Step{nameStep()})
+	if !errors.Is(err, tux.ErrUnavailable) {
+		t.Fatalf("Guide() error = %v, want ErrUnavailable", err)
+	}
+}
+
 func TestProgressWritesOnlyDurableTransitions(t *testing.T) {
 	t.Parallel()
 
