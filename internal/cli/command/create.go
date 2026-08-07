@@ -51,7 +51,7 @@ func newCreate(factory sessionFactory, templateCatalog catalog.Catalog, creator 
 	flags.StringVar(&options.language, "language", "", "filter templates by language")
 	flags.StringVar(&options.kind, "kind", "", "filter templates by project kind")
 	flags.StringVar(&options.name, "name", "", "project name (normally inferred; useful when creating in '.')")
-	flags.StringVar(&options.module, "module", "", "Go module path for Go templates (for example, github.com/you/project)")
+	flags.StringVar(&options.module, "module", "", "package or module identifier for the template's ecosystem (for example, a Go module path or an npm package name)")
 	flags.StringVar(&options.description, "description", "", "one-line project description")
 	flags.StringVar(&options.author, "author", "", "copyright holder and security contact")
 	flags.StringVar(&options.license, "license", "", "SPDX license identifier (defaults to the template recommendation)")
@@ -235,8 +235,8 @@ func resolveProjectFields(ctx context.Context, prompter tux.Prompter, entry cata
 	}
 	options.description, err = resolveInput(ctx, prompter, options.description, tux.InputRequest{
 		ID:          "description",
-		Label:       "Short description",
-		Description: "One sentence explaining what the project does. Optional; leave blank to fill in later.",
+		Label:       "Short description (Optional)",
+		Description: "One sentence explaining what the project does.",
 		Example:     "A Go library for reliable configuration loading",
 		Placeholder: "A Go library for reliable configuration loading",
 		Optional:    true,
@@ -247,8 +247,8 @@ func resolveProjectFields(ctx context.Context, prompter tux.Prompter, entry cata
 	}
 	options.author, err = resolveInput(ctx, prompter, options.author, tux.InputRequest{
 		ID:          "author",
-		Label:       "Author or organization",
-		Description: "Used in the license and project metadata. Optional; leave blank to fill in later.",
+		Label:       "Author or organization (Optional)",
+		Description: "Used in the license and project metadata.",
 		Example:     "Jane Doe or Acme, Inc.",
 		Placeholder: "Jane Doe or Acme, Inc.",
 		Optional:    true,
