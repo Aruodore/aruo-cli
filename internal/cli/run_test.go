@@ -255,11 +255,15 @@ func TestRunCreateInteractive(t *testing.T) {
 		t.Fatalf("Run() code = %d; stderr = %q", code, stderr.String())
 	}
 	if !strings.Contains(stderr.String(), "Go module path") ||
+		!strings.Contains(stderr.String(), "Creating: Go library") ||
 		!strings.Contains(stderr.String(), "Example: github.com/your-name/my-library") ||
 		!strings.Contains(stderr.String(), "Project summary:") ||
 		!strings.Contains(stderr.String(), "Create this project?") ||
 		!strings.Contains(stdout.String(), "Created go-library") {
 		t.Errorf("stdout=%q stderr=%q", stdout.String(), stderr.String())
+	}
+	if !strings.Contains(stderr.String(), "Creating: Go library\n\nThis is written to go.mod") {
+		t.Errorf("stderr = %q, want the module screen not to repeat the catalog entry's long description already shown on the template picker", stderr.String())
 	}
 }
 

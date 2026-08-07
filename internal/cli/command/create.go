@@ -222,7 +222,7 @@ func resolveTemplate(ctx context.Context, prompter tux.Prompter, templateCatalog
 func resolveProjectFields(ctx context.Context, prompter tux.Prompter, entry catalog.Entry, interactive bool, options *createOptions) error {
 	moduleDescription := entry.Prompts.ModuleDescription
 	if interactive {
-		moduleDescription = fmt.Sprintf("Creating: %s\n%s\n\n%s", entry.Name, entry.Description, moduleDescription)
+		moduleDescription = fmt.Sprintf("Creating: %s\n\n%s", entry.Name, moduleDescription)
 	}
 	var err error
 	options.module, err = resolveInput(ctx, prompter, options.module, tux.InputRequest{
