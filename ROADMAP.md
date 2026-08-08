@@ -2,7 +2,7 @@
 
 ## Current stage
 
-Aruo is in **Phase 0: repository and contract design**. Production code is deliberately deferred until core schemas, threat boundaries, acceptance fixtures, and ADRs are reviewed.
+Aruo is pre-0.1 but no longer pre-implementation: `aruo create` (guided and flag-driven project creation from a growing template catalog) and `aruo doctor` (versioned repository health scoring) are real, tested commands — see [README.md](README.md) for exactly what they do today. Everything below is what's still ahead, not a description of a frozen design-only phase.
 
 ## 0.1 — prove the model
 

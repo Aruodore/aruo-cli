@@ -1,6 +1,6 @@
 # Contributing to Aruo
 
-Thank you for helping build durable open-source engineering infrastructure. During Phase 0, changes should improve research, requirements, schemas, ADRs, RFCs, fixtures, or documentation. Production implementation starts only after its RFC is accepted.
+Thank you for helping build durable open-source engineering infrastructure. `aruo create` and `aruo doctor` are real, shipped commands — see [README.md](README.md) — and take contributions like any other production code, following the workflow below. Substantial or compatibility-affecting changes (a new command, a breaking flag/schema change, a new lifecycle capability) should still go through the [RFC process](rfcs/README.md) first; incremental work on what already exists (a new catalog template, a doctor check, a bug fix, docs) doesn't need one.
 
 ## Before you begin
 
