@@ -189,10 +189,10 @@ func TestNuxtApp(t *testing.T) {
 	for _, file := range plan.Files {
 		files[file.Path] = string(file.Content)
 	}
-	if len(files) != 27 {
-		t.Errorf("file count = %d, want 27", len(files))
+	if len(files) != 28 {
+		t.Errorf("file count = %d, want 28", len(files))
 	}
-	if pkg := files["package.json"]; !strings.Contains(pkg, `"name": "example-app"`) || !strings.Contains(pkg, `"nuxt"`) {
+	if pkg := files["package.json"]; !strings.Contains(pkg, `"name": "example-app"`) || !strings.Contains(pkg, `"nuxt"`) || !strings.Contains(pkg, `"@nuxt/ui"`) {
 		t.Errorf("package.json = %q", pkg)
 	}
 	if app := files["app/app.vue"]; !strings.Contains(app, "<h1>Example</h1>") {

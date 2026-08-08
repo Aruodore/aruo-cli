@@ -207,6 +207,7 @@ func NuxtApp() (fs.FS, templateengine.Blueprint) {
 			{Source: "nuxt/app/Makefile", Destination: "Makefile"},
 			{Source: "nuxt/app/app.vue.tmpl", Destination: "app/app.vue", Template: true},
 			{Source: "nuxt/app/app.test.ts.tmpl", Destination: "tests/app.test.ts", Template: true},
+			{Source: "nuxt/app/main.css", Destination: "app/assets/css/main.css"},
 		},
 	}
 }

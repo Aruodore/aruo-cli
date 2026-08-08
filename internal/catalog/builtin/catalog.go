@@ -137,7 +137,7 @@ func New() (*catalog.Memory, error) {
 			Name:           "Nuxt application",
 			Language:       "typescript",
 			Kind:           "app",
-			Description:    "A production-ready Nuxt 4 application with server-side rendering, tests, CI, governance, security, and documentation",
+			Description:    "A production-ready Nuxt 4 application with server-side rendering, Nuxt UI components, tests, CI, governance, security, and documentation",
 			Color:          "#00DC82",
 			Licenses:       []string{"MIT"},
 			DefaultLicense: "MIT",
