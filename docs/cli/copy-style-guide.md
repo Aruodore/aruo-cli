@@ -72,16 +72,27 @@ output instead of removing it. Prefer a real value derived without asking:
                                falling back to a genuinely empty string
                                (not a placeholder) if git or the config
                                entry isn't there
+--module left blank       ->  the project's own name (the go.mod module
+                               path / package.json "name" / pyproject.toml
+                               "name" all start out equal to it)
 ```
 
 An empty string in the output (`Copyright (c) ` with nothing after) is a
 better failure mode than fabricated text: it's honestly incomplete rather
 than looking like real, wrong content.
 
-`--module` doesn't get this treatment: it becomes a Go import path, an npm
-name, or a PyPI name in the generated project, and a wrong guess produces a
-broken `go.mod`/`package.json`/`pyproject.toml`, not just a missing detail.
-Only default a field when a wrong default is merely incomplete, not broken.
+`--module` isn't just defaulted, it isn't asked about at all — there's no
+module/package-name screen in the guided flow anymore, interactive or not.
+It silently becomes the project's own name unless `--module` is passed
+explicitly. This is a real, deliberate exception to "only default a field
+when a wrong default is merely incomplete, not broken": a bare project name
+is a valid `go.mod` module path, `name` in `package.json`, and `name` in
+`pyproject.toml` for every template today, so it's not *broken* — it's just
+not the ideal value for a Go module meant to be published (`go get`-able
+projects want a domain-qualified path like `github.com/you/name`, which
+this can't guess). Asking the same question twice — once for the project
+name, once for the package name — was judged worse than that gap; pass
+`--module` explicitly for a real import path.
 
 A default never occupies the editable input as pre-filled text the user
 has to delete to leave the field blank. Show it as a hint instead, and

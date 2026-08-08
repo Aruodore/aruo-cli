@@ -51,6 +51,16 @@ func runGuide(ctx context.Context, prompter tux.Prompter, templateCatalog catalo
 		}
 		return ""
 	}
+	resolveName := func(answers tux.Answers) string {
+		name := options.name
+		if value, ok := answers["name"].(string); ok && value != "" {
+			name = value
+		}
+		if name == "" {
+			name = filepath.Base(filepath.Clean(effectiveDestination(answers)))
+		}
+		return name
+	}
 
 	steps := []tux.Step{
 		{
@@ -92,21 +102,6 @@ func runGuide(ctx context.Context, prompter tux.Prompter, templateCatalog catalo
 			},
 		},
 		{
-			ID:   "module",
-			Kind: tux.StepInput,
-			Skip: func() bool { return options.module != "" },
-			Input: func(answers tux.Answers) tux.InputRequest {
-				entry := resolveEntry(answers)
-				return tux.InputRequest{
-					ID:          "module",
-					Label:       moduleLabel(entry),
-					Description: fmt.Sprintf("Creating: %s\n\n%s", entry.Name, entry.Prompts.ModuleDescription),
-					Example:     entry.Prompts.ModuleExample,
-					Placeholder: entry.Prompts.ModuleExample,
-				}
-			},
-		},
-		{
 			ID:   "description",
 			Kind: tux.StepInput,
 			Skip: func() bool { return options.description != "" },
@@ -145,17 +140,11 @@ func runGuide(ctx context.Context, prompter tux.Prompter, templateCatalog catalo
 			Skip: func() bool { return options.yes },
 			Confirm: func(answers tux.Answers) tux.ConfirmRequest {
 				entry := resolveEntry(answers)
-				name := options.name
-				if value, ok := answers["name"].(string); ok && value != "" {
-					name = value
-				}
+				name := resolveName(answers)
 				destination := effectiveDestination(answers)
-				if name == "" {
-					name = filepath.Base(filepath.Clean(destination))
-				}
 				module := options.module
-				if value, ok := answers["module"].(string); ok {
-					module = value
+				if module == "" {
+					module = name
 				}
 				license := options.license
 				if license == "" {
@@ -187,9 +176,7 @@ func runGuide(ctx context.Context, prompter tux.Prompter, templateCatalog catalo
 		}
 	}
 	if options.module == "" {
-		if value, ok := answers["module"].(string); ok {
-			options.module = value
-		}
+		options.module = resolveName(answers)
 	}
 	if options.description == "" {
 		if value, ok := answers["description"].(string); ok {

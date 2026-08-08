@@ -115,7 +115,7 @@ func TestCreateDisablesPromptsInCI(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	stdin := ttyReader{Reader: strings.NewReader("must not be read"), fd: 0}
 	code := cli.Run(context.Background(), []string{
-		"create", t.TempDir() + "/ci-blocked", "--template", "go-library",
+		"create", "--template", "go-library",
 	}, cli.Dependencies{
 		Build:       buildinfo.Info{Version: "test"},
 		Catalog:     templateCatalog,
@@ -128,7 +128,7 @@ func TestCreateDisablesPromptsInCI(t *testing.T) {
 	if code == 0 {
 		t.Fatalf("Run() code = 0, want non-zero under CI; stdout = %q", stdout.String())
 	}
-	if !strings.Contains(stderr.String(), "Go module path is required; provide --module") {
+	if !strings.Contains(stderr.String(), "Project name is required; provide name-or-path argument") {
 		t.Fatalf("stderr = %q, want a fast failure instead of a CI prompt", stderr.String())
 	}
 }

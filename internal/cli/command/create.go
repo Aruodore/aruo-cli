@@ -211,21 +211,22 @@ func resolveTemplate(ctx context.Context, templateCatalog catalog.Catalog, optio
 }
 
 // resolveProjectFields fills in the module, description, and author
-// fields for a non-interactive session; resolveInput requires each via
-// its flag unless the field is optional, in which case a real default is
-// derived automatically (detectGitAuthor, catalog.Entry.Description).
+// fields for a non-interactive session. --module never prompts even
+// interactively; it silently defaults to the project's own name, since
+// asking for it separately is redundant -- pass --module explicitly for a
+// real Go import path like github.com/you/name. description/author use
+// resolveInput, which requires each via its flag unless the field is
+// optional, in which case a real default is derived automatically
+// (detectGitAuthor, catalog.Entry.Description).
 func resolveProjectFields(ctx context.Context, prompter tux.Prompter, entry catalog.Entry, options *createOptions) error {
-	var err error
-	options.module, err = resolveInput(ctx, prompter, options.module, tux.InputRequest{
-		ID:          "module",
-		Label:       moduleLabel(entry),
-		Description: entry.Prompts.ModuleDescription,
-		Example:     entry.Prompts.ModuleExample,
-		Placeholder: entry.Prompts.ModuleExample,
-	}, "--module")
-	if err != nil {
-		return err
+	if options.module == "" {
+		name := options.name
+		if name == "" {
+			name = filepath.Base(filepath.Clean(options.destination))
+		}
+		options.module = name
 	}
+	var err error
 	options.description, err = resolveInput(ctx, prompter, options.description, tux.InputRequest{
 		ID:          "description",
 		Label:       "Short description (Optional)",

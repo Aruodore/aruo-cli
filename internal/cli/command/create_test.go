@@ -333,10 +333,13 @@ func TestRunGuideCopiesAnswersBackIntoOptionsAndResolvesEntry(t *testing.T) {
 	prompter := &stubGuidePrompter{answers: tux.Answers{
 		"name":        "my-app",
 		"template":    tux.OptionID("go-library"),
-		"module":      "example.com/my-app",
 		"description": "A test project.",
 		"author":      "Jane Doe",
 		"confirm":     true,
+		// No "module" answer at all: there's no module step to produce
+		// one anymore. Even if a stub Guide somehow returned one, it
+		// must be ignored -- module always defaults to the name.
+		"module": "should-be-ignored",
 	}}
 	options := &createOptions{}
 	entry, err := runGuide(context.Background(), prompter, templateCatalog, options)
@@ -349,7 +352,10 @@ func TestRunGuideCopiesAnswersBackIntoOptionsAndResolvesEntry(t *testing.T) {
 	if options.name != "my-app" || options.destination != "my-app" {
 		t.Errorf("options.name/destination = %q/%q, want my-app/my-app", options.name, options.destination)
 	}
-	if options.templateID != "go-library" || options.module != "example.com/my-app" ||
+	if options.module != "my-app" {
+		t.Errorf("options.module = %q, want it to default to the project name, ignoring any stray Guide answer", options.module)
+	}
+	if options.templateID != "go-library" ||
 		options.description != "A test project." || options.author != "Jane Doe" {
 		t.Errorf("options = %+v, want the Guide answers copied in", options)
 	}
@@ -362,7 +368,7 @@ func TestRunGuideReturnsCancelledWhenConfirmDeclined(t *testing.T) {
 		{ID: "go-library", Kind: "library", Licenses: []string{"MIT"}, DefaultLicense: "MIT"},
 	}}
 	prompter := &stubGuidePrompter{answers: tux.Answers{
-		"name": "my-app", "template": tux.OptionID("go-library"), "module": "example.com/my-app", "confirm": false,
+		"name": "my-app", "template": tux.OptionID("go-library"), "confirm": false,
 	}}
 	options := &createOptions{}
 	_, err := runGuide(context.Background(), prompter, templateCatalog, options)

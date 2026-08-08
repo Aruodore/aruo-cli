@@ -70,7 +70,6 @@ func TestReadmeQuickStartWorkflowMatchesDocumentedOutput(t *testing.T) {
 	code := cli.Run(context.Background(), []string{
 		"create", destination,
 		"--template", "go-library",
-		"--module", "github.com/you/my-library",
 		"--no-input",
 	}, deps)
 	if code != 0 {
@@ -78,6 +77,15 @@ func TestReadmeQuickStartWorkflowMatchesDocumentedOutput(t *testing.T) {
 	}
 	if !strings.Contains(createOut.String(), "Created go-library with 24 files") {
 		t.Errorf("create stdout = %q, want the README's documented file count", createOut.String())
+	}
+	// README's Example workflow omits --module entirely, relying on it
+	// defaulting to the project's own name ("my-library" here).
+	goMod, err := os.ReadFile(filepath.Join(destination, "go.mod"))
+	if err != nil {
+		t.Fatalf("read generated go.mod: %v", err)
+	}
+	if !strings.Contains(string(goMod), "module my-library\n") {
+		t.Errorf("go.mod = %q, want the README's documented \"ok  my-library\" go test line to match a real module default", goMod)
 	}
 
 	var doctorOut, doctorErr bytes.Buffer
@@ -116,7 +124,6 @@ func TestReadmeGeneratedProjectStructureMatchesDocumentedTree(t *testing.T) {
 	code := cli.Run(context.Background(), []string{
 		"create", destination,
 		"--template", "go-library",
-		"--module", "github.com/you/my-library",
 		"--no-input",
 	}, deps)
 	if code != 0 {

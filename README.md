@@ -7,7 +7,7 @@
 ```sh
 git clone https://github.com/Aruodore/aruo-cli.git aruo && cd aruo
 go build -o "$HOME/.local/bin/aruo" ./cmd/aruo
-aruo create my-library --template go-library --module github.com/you/my-library
+aruo create my-library --template go-library
 cd my-library && go test ./... && aruo doctor
 ```
 
@@ -17,7 +17,7 @@ Most generators stop after copying files, so the CI workflow, security policy, a
 
 ## What works today
 
-- **`aruo create`** — 8 templates across Go, JavaScript, TypeScript, and Python, including React, Vue, Nuxt, and Next.js application scaffolds. A guided interactive flow (kind → template → module → description → author → confirm) with real backward navigation across every screen, or fully non-interactive via flags for scripting/CI. Every template ships CI, a license, a security policy, governance files, dependency automation, and tests that run for real — not placeholders.
+- **`aruo create`** — 8 templates across Go, JavaScript, TypeScript, and Python, including React, Vue, Nuxt, and Next.js application scaffolds. A guided interactive flow (kind → template → description → author → confirm) with real backward navigation across every screen, or fully non-interactive via flags for scripting/CI. The module/package name is never asked for separately — it defaults to the project's own name; pass `--module` for a real Go import path. Every template ships CI, a license, a security policy, governance files, dependency automation, and tests that run for real — not placeholders.
 - **`aruo doctor`** — scores any repository 0–100 against versioned policy `aruo.repository-health/v1` across seven categories (completeness, documentation, CI, tests, license, security, GitHub configuration), with human or JSON output and a configurable failure threshold for CI gating.
 - Accessible and scriptable by design: a line-oriented fallback adapter, `NO_COLOR`/`--color`/`--motion` support, and clean non-interactive behavior everywhere `create`/`doctor` are used from a script.
 
@@ -60,7 +60,7 @@ None of these exist today. They're listed so you don't go looking for something 
 
 ```sh
 aruo version
-aruo create my-library --template go-library --module github.com/you/my-library
+aruo create my-library --template go-library
 cd my-library
 go test ./...
 aruo doctor
@@ -73,7 +73,7 @@ That's install → verify → create → inspect the result, using only commands
 A real, unedited run of the commands above:
 
 ```text
-$ aruo create my-library --template go-library --module github.com/you/my-library
+$ aruo create my-library --template go-library
 ✓ Created go-library with 24 files at ./my-library
 
 Next steps:
@@ -82,7 +82,7 @@ Next steps:
   git init && git add .
 
 $ cd my-library && go test ./...
-ok  	github.com/you/my-library	0.003s
+ok  	my-library	0.002s
 
 $ aruo doctor
 Repository health: 99/100 (A)
@@ -110,12 +110,12 @@ Run `aruo <command> --help` for the authoritative, always-current flag list; thi
 
 Creates a new project from a catalog template. Refuses a destination with real content in it; an existing but empty directory (most commonly `.`) is fine.
 
-**Key flags:** `--template <id>` (skip the picker), `--language`/`--kind` (filter the catalog), `--module` (Go module path / npm package name / PyPI name, ecosystem-dependent), `--description`, `--author`, `--license`, `--set key=value` (template variables), `-y`/`--yes` (accept the confirmation), `--no-input` (fail instead of prompting — for CI).
+**Key flags:** `--template <id>` (skip the picker), `--language`/`--kind` (filter the catalog), `--module` (Go module path / npm package name / PyPI name, ecosystem-dependent — defaults to the project's own name, since asking for it twice is redundant; override it for a real Go import path like `github.com/you/name`), `--description`, `--author`, `--license`, `--set key=value` (template variables), `-y`/`--yes` (accept the confirmation), `--no-input` (fail instead of prompting — for CI).
 
 ```sh
 aruo create                                   # fully interactive, guided
-aruo create my-library --template go-library --module github.com/you/my-library
-aruo create my-tool --template python-library --module my-tool --no-input --yes
+aruo create my-library --template go-library                       # --module defaults to my-library
+aruo create my-tool --template python-library --no-input --yes     # --module defaults to my-tool
 aruo create . --name my-tool --template go-library --module github.com/you/my-tool --no-input --yes
 ```
 
