@@ -10,7 +10,7 @@ import (
 
 	"charm.land/bubbles/v2/spinner"
 	tea "charm.land/bubbletea/v2"
-	"github.com/aruodore/aruo/internal/tux"
+	"github.com/aruodore/aruo-cli/internal/tux"
 )
 
 // Progress renders task events in one Bubble Tea-owned terminal region.

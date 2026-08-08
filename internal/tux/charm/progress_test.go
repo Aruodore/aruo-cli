@@ -10,7 +10,7 @@ import (
 	"time"
 
 	tea "charm.land/bubbletea/v2"
-	"github.com/aruodore/aruo/internal/tux"
+	"github.com/aruodore/aruo-cli/internal/tux"
 )
 
 func TestProgressModelRendersNestedTasks(t *testing.T) {

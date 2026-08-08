@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/aruodore/aruo/internal/tux"
+	"github.com/aruodore/aruo-cli/internal/tux"
 	xterm "golang.org/x/term"
 )
 

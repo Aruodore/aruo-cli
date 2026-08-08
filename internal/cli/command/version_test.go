@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/aruodore/aruo/internal/buildinfo"
+	"github.com/aruodore/aruo-cli/internal/buildinfo"
 )
 
 func TestVersionCommandPrintsVersion(t *testing.T) {

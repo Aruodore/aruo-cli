@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/aruodore/aruo/internal/tux"
+	"github.com/aruodore/aruo-cli/internal/tux"
 )
 
 func TestAccessibleInputUsesAruoRequest(t *testing.T) {

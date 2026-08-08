@@ -8,7 +8,7 @@ import (
 
 	"charm.land/huh/v2"
 	"charm.land/lipgloss/v2"
-	"github.com/aruodore/aruo/internal/tux"
+	"github.com/aruodore/aruo-cli/internal/tux"
 )
 
 // Prompter adapts Huh forms to Aruo prompt requests.

@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/aruodore/aruo/internal/templateengine"
-	"github.com/aruodore/aruo/internal/templateengine/builtin"
+	"github.com/aruodore/aruo-cli/internal/templateengine"
+	"github.com/aruodore/aruo-cli/internal/templateengine/builtin"
 )
 
 func TestGoLibrary(t *testing.T) {

@@ -7,14 +7,14 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/aruodore/aruo/internal/buildinfo"
-	"github.com/aruodore/aruo/internal/catalog"
-	"github.com/aruodore/aruo/internal/cli/command"
-	"github.com/aruodore/aruo/internal/cli/iostreams"
-	"github.com/aruodore/aruo/internal/create"
-	"github.com/aruodore/aruo/internal/doctor"
-	"github.com/aruodore/aruo/internal/tux"
-	"github.com/aruodore/aruo/internal/tux/term"
+	"github.com/aruodore/aruo-cli/internal/buildinfo"
+	"github.com/aruodore/aruo-cli/internal/catalog"
+	"github.com/aruodore/aruo-cli/internal/cli/command"
+	"github.com/aruodore/aruo-cli/internal/cli/iostreams"
+	"github.com/aruodore/aruo-cli/internal/create"
+	"github.com/aruodore/aruo-cli/internal/doctor"
+	"github.com/aruodore/aruo-cli/internal/tux"
+	"github.com/aruodore/aruo-cli/internal/tux/term"
 )
 
 // Dependencies contains process-level resources. Command constructors receive

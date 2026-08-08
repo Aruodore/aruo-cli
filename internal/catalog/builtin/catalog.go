@@ -6,9 +6,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/aruodore/aruo/internal/catalog"
-	"github.com/aruodore/aruo/internal/templateengine"
-	templatebuiltin "github.com/aruodore/aruo/internal/templateengine/builtin"
+	"github.com/aruodore/aruo-cli/internal/catalog"
+	"github.com/aruodore/aruo-cli/internal/templateengine"
+	templatebuiltin "github.com/aruodore/aruo-cli/internal/templateengine/builtin"
 )
 
 var nonIdentifier = regexp.MustCompile(`[^a-zA-Z0-9_]+`)

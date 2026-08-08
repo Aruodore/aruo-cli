@@ -8,7 +8,7 @@ import (
 	"io/fs"
 	"sort"
 
-	"github.com/aruodore/aruo/internal/templateengine"
+	"github.com/aruodore/aruo-cli/internal/templateengine"
 )
 
 // Entry is a resolved, qualified project template.

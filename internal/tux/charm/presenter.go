@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"charm.land/lipgloss/v2"
-	"github.com/aruodore/aruo/internal/tux"
+	"github.com/aruodore/aruo-cli/internal/tux"
 )
 
 // Presenter renders capability-aware human output with semantic styles.

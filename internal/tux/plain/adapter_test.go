@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/aruodore/aruo/internal/tux"
-	"github.com/aruodore/aruo/internal/tux/plain"
+	"github.com/aruodore/aruo-cli/internal/tux"
+	"github.com/aruodore/aruo-cli/internal/tux/plain"
 )
 
 func TestInputRepeatsAfterValidationFailure(t *testing.T) {

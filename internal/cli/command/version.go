@@ -3,7 +3,7 @@ package command
 import (
 	"fmt"
 
-	"github.com/aruodore/aruo/internal/buildinfo"
+	"github.com/aruodore/aruo-cli/internal/buildinfo"
 	"github.com/spf13/cobra"
 )
 

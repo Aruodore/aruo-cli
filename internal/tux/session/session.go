@@ -7,11 +7,11 @@ import (
 	"io"
 	"sync"
 
-	"github.com/aruodore/aruo/internal/tux"
-	"github.com/aruodore/aruo/internal/tux/charm"
-	"github.com/aruodore/aruo/internal/tux/plain"
-	"github.com/aruodore/aruo/internal/tux/policy"
-	"github.com/aruodore/aruo/internal/tux/term"
+	"github.com/aruodore/aruo-cli/internal/tux"
+	"github.com/aruodore/aruo-cli/internal/tux/charm"
+	"github.com/aruodore/aruo-cli/internal/tux/plain"
+	"github.com/aruodore/aruo-cli/internal/tux/policy"
+	"github.com/aruodore/aruo-cli/internal/tux/term"
 )
 
 // Session resolves capabilities and policy once and exposes the adapters

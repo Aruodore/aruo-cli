@@ -6,11 +6,11 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/aruodore/aruo/internal/tux"
-	"github.com/aruodore/aruo/internal/tux/charm"
-	"github.com/aruodore/aruo/internal/tux/plain"
-	"github.com/aruodore/aruo/internal/tux/policy"
-	"github.com/aruodore/aruo/internal/tux/session"
+	"github.com/aruodore/aruo-cli/internal/tux"
+	"github.com/aruodore/aruo-cli/internal/tux/charm"
+	"github.com/aruodore/aruo-cli/internal/tux/plain"
+	"github.com/aruodore/aruo-cli/internal/tux/policy"
+	"github.com/aruodore/aruo-cli/internal/tux/session"
 )
 
 type stream struct{ fd uintptr }

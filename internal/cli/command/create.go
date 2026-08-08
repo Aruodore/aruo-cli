@@ -10,10 +10,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aruodore/aruo/internal/catalog"
-	"github.com/aruodore/aruo/internal/create"
-	"github.com/aruodore/aruo/internal/templateengine"
-	"github.com/aruodore/aruo/internal/tux"
+	"github.com/aruodore/aruo-cli/internal/catalog"
+	"github.com/aruodore/aruo-cli/internal/create"
+	"github.com/aruodore/aruo-cli/internal/templateengine"
+	"github.com/aruodore/aruo-cli/internal/tux"
 	"github.com/spf13/cobra"
 )
 

@@ -5,9 +5,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/aruodore/aruo/internal/cli/iostreams"
-	"github.com/aruodore/aruo/internal/clierror"
-	"github.com/aruodore/aruo/internal/doctor"
+	"github.com/aruodore/aruo-cli/internal/cli/iostreams"
+	"github.com/aruodore/aruo-cli/internal/clierror"
+	"github.com/aruodore/aruo-cli/internal/doctor"
 )
 
 // zeroCheckService builds a doctor.Service with no registered checks, so

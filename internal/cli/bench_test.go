@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/aruodore/aruo/internal/buildinfo"
-	"github.com/aruodore/aruo/internal/cli"
-	"github.com/aruodore/aruo/internal/cli/iostreams"
+	"github.com/aruodore/aruo-cli/internal/buildinfo"
+	"github.com/aruodore/aruo-cli/internal/cli"
+	"github.com/aruodore/aruo-cli/internal/cli/iostreams"
 )
 
 // BenchmarkRunVersion measures command-tree construction and execution

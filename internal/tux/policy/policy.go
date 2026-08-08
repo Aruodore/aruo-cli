@@ -4,7 +4,7 @@ package policy
 import (
 	"strings"
 
-	"github.com/aruodore/aruo/internal/tux"
+	"github.com/aruodore/aruo-cli/internal/tux"
 )
 
 // Overrides contains command-line choices that take precedence over environment hints.

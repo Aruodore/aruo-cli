@@ -5,7 +5,7 @@ import (
 	"embed"
 	"io/fs"
 
-	"github.com/aruodore/aruo/internal/templateengine"
+	"github.com/aruodore/aruo-cli/internal/templateengine"
 )
 
 //go:embed templates

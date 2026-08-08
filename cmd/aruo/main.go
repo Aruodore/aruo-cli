@@ -6,14 +6,14 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/aruodore/aruo/internal/buildinfo"
-	catalogbuiltin "github.com/aruodore/aruo/internal/catalog/builtin"
-	"github.com/aruodore/aruo/internal/cli"
-	"github.com/aruodore/aruo/internal/cli/iostreams"
-	"github.com/aruodore/aruo/internal/create"
-	"github.com/aruodore/aruo/internal/doctor"
-	"github.com/aruodore/aruo/internal/tux/lifecycle"
-	"github.com/aruodore/aruo/internal/tux/term"
+	"github.com/aruodore/aruo-cli/internal/buildinfo"
+	catalogbuiltin "github.com/aruodore/aruo-cli/internal/catalog/builtin"
+	"github.com/aruodore/aruo-cli/internal/cli"
+	"github.com/aruodore/aruo-cli/internal/cli/iostreams"
+	"github.com/aruodore/aruo-cli/internal/create"
+	"github.com/aruodore/aruo-cli/internal/doctor"
+	"github.com/aruodore/aruo-cli/internal/tux/lifecycle"
+	"github.com/aruodore/aruo-cli/internal/tux/term"
 )
 
 // terminalResetSequence shows the cursor, exits the alternate screen, and

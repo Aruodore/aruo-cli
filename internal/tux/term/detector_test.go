@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/aruodore/aruo/internal/tux"
-	tuxterm "github.com/aruodore/aruo/internal/tux/term"
+	"github.com/aruodore/aruo-cli/internal/tux"
+	tuxterm "github.com/aruodore/aruo-cli/internal/tux/term"
 )
 
 type stream struct{ fd uintptr }

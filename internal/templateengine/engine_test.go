@@ -11,7 +11,7 @@ import (
 	"testing"
 	"testing/fstest"
 
-	"github.com/aruodore/aruo/internal/templateengine"
+	"github.com/aruodore/aruo-cli/internal/templateengine"
 )
 
 func TestRenderSubstitutionConditionRawModeAndOrder(t *testing.T) {

@@ -3,7 +3,7 @@ package command
 import (
 	"testing"
 
-	"github.com/aruodore/aruo/internal/tux"
+	"github.com/aruodore/aruo-cli/internal/tux"
 )
 
 func TestParseFeaturePolicy(t *testing.T) {

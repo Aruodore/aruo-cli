@@ -3,8 +3,8 @@ package policy_test
 import (
 	"testing"
 
-	"github.com/aruodore/aruo/internal/tux"
-	"github.com/aruodore/aruo/internal/tux/policy"
+	"github.com/aruodore/aruo-cli/internal/tux"
+	"github.com/aruodore/aruo-cli/internal/tux/policy"
 )
 
 func TestResolve(t *testing.T) {

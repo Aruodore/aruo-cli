@@ -8,9 +8,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/aruodore/aruo/internal/clierror"
-	"github.com/aruodore/aruo/internal/doctor"
-	"github.com/aruodore/aruo/internal/tux"
+	"github.com/aruodore/aruo-cli/internal/clierror"
+	"github.com/aruodore/aruo-cli/internal/doctor"
+	"github.com/aruodore/aruo-cli/internal/tux"
 	"github.com/spf13/cobra"
 )
 

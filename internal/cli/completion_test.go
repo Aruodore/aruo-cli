@@ -9,11 +9,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/aruodore/aruo/internal/buildinfo"
-	catalogbuiltin "github.com/aruodore/aruo/internal/catalog/builtin"
-	"github.com/aruodore/aruo/internal/cli"
-	"github.com/aruodore/aruo/internal/cli/iostreams"
-	"github.com/aruodore/aruo/internal/create"
+	"github.com/aruodore/aruo-cli/internal/buildinfo"
+	catalogbuiltin "github.com/aruodore/aruo-cli/internal/catalog/builtin"
+	"github.com/aruodore/aruo-cli/internal/cli"
+	"github.com/aruodore/aruo-cli/internal/cli/iostreams"
+	"github.com/aruodore/aruo-cli/internal/create"
 )
 
 // unreadableStdin fails the test if completion ever reads from stdin;

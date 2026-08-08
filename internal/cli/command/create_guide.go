@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/aruodore/aruo/internal/catalog"
-	"github.com/aruodore/aruo/internal/tux"
+	"github.com/aruodore/aruo-cli/internal/catalog"
+	"github.com/aruodore/aruo-cli/internal/tux"
 )
 
 // runGuide drives the entire interactive create flow -- project name,

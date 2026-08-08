@@ -8,8 +8,8 @@ import (
 	"maps"
 	"path/filepath"
 
-	"github.com/aruodore/aruo/internal/catalog"
-	"github.com/aruodore/aruo/internal/templateengine"
+	"github.com/aruodore/aruo-cli/internal/catalog"
+	"github.com/aruodore/aruo-cli/internal/templateengine"
 )
 
 // Request contains resolved command input independent of presentation.

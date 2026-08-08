@@ -1,4 +1,4 @@
-module github.com/aruodore/aruo
+module github.com/aruodore/aruo-cli
 
 go 1.26.0
 

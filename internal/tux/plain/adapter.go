@@ -11,7 +11,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/aruodore/aruo/internal/tux"
+	"github.com/aruodore/aruo-cli/internal/tux"
 )
 
 // SecretReader reads a value without exposing it through the ordinary line reader.

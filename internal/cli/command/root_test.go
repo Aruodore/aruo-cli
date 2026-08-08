@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/aruodore/aruo/internal/buildinfo"
-	"github.com/aruodore/aruo/internal/cli/iostreams"
-	"github.com/aruodore/aruo/internal/tux"
+	"github.com/aruodore/aruo-cli/internal/buildinfo"
+	"github.com/aruodore/aruo-cli/internal/cli/iostreams"
+	"github.com/aruodore/aruo-cli/internal/tux"
 )
 
 // fakeProbe reports a fixed, non-terminal environment so session.New never

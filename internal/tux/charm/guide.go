@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"charm.land/huh/v2"
-	"github.com/aruodore/aruo/internal/tux"
+	"github.com/aruodore/aruo-cli/internal/tux"
 )
 
 // guideField tracks one step's bound Go value alongside its ID, so a later

@@ -8,10 +8,10 @@ import (
 	"testing"
 	"testing/fstest"
 
-	"github.com/aruodore/aruo/internal/catalog/builtin"
-	"github.com/aruodore/aruo/internal/create"
-	"github.com/aruodore/aruo/internal/doctor"
-	"github.com/aruodore/aruo/internal/templateengine"
+	"github.com/aruodore/aruo-cli/internal/catalog/builtin"
+	"github.com/aruodore/aruo-cli/internal/create"
+	"github.com/aruodore/aruo-cli/internal/doctor"
+	"github.com/aruodore/aruo-cli/internal/templateengine"
 )
 
 func TestGeneratedRepositoryScoresA(t *testing.T) {

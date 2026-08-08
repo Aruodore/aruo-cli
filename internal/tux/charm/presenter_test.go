@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/aruodore/aruo/internal/tux"
-	"github.com/aruodore/aruo/internal/tux/charm"
+	"github.com/aruodore/aruo-cli/internal/tux"
+	"github.com/aruodore/aruo-cli/internal/tux/charm"
 )
 
 func TestMessageDegradesWithoutColorOrUnicode(t *testing.T) {

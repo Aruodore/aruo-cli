@@ -25,9 +25,9 @@ builds:
     ldflags:
       - >-
         -s -w
-        -X github.com/aruodore/aruo/internal/buildinfo.version={{ .Version }}
-        -X github.com/aruodore/aruo/internal/buildinfo.commit={{ .Commit }}
-        -X github.com/aruodore/aruo/internal/buildinfo.date={{ .Date }}
+        -X github.com/aruodore/aruo-cli/internal/buildinfo.version={{ .Version }}
+        -X github.com/aruodore/aruo-cli/internal/buildinfo.commit={{ .Commit }}
+        -X github.com/aruodore/aruo-cli/internal/buildinfo.date={{ .Date }}
 
 archives:
   - id: default
