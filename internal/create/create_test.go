@@ -9,9 +9,9 @@ import (
 	"testing"
 	"testing/fstest"
 
-	"github.com/aruodore/aruo/internal/catalog"
-	"github.com/aruodore/aruo/internal/create"
-	"github.com/aruodore/aruo/internal/templateengine"
+	"github.com/aruodore/aruo-cli/internal/catalog"
+	"github.com/aruodore/aruo-cli/internal/create"
+	"github.com/aruodore/aruo-cli/internal/templateengine"
 )
 
 func TestServiceCreatesRepository(t *testing.T) {
@@ -49,12 +49,65 @@ func TestServiceCreatesRepository(t *testing.T) {
 	}
 }
 
-func TestOSWriterRefusesExistingDestination(t *testing.T) {
+func TestOSWriterRefusesExistingFileDestination(t *testing.T) {
 	t.Parallel()
-	destination := t.TempDir()
+	destination := filepath.Join(t.TempDir(), "already-a-file")
+	if err := os.WriteFile(destination, []byte("x"), 0o600); err != nil {
+		t.Fatal(err)
+	}
 	err := (create.OSWriter{}).Write(context.Background(), destination, templateengine.Plan{})
 	if err == nil || !strings.Contains(err.Error(), "already exists") {
 		t.Fatalf("Write() error = %v", err)
+	}
+}
+
+func TestOSWriterRefusesNonEmptyExistingDirectory(t *testing.T) {
+	t.Parallel()
+	destination := t.TempDir()
+	if err := os.WriteFile(filepath.Join(destination, "existing"), []byte("x"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	err := (create.OSWriter{}).Write(context.Background(), destination, templateengine.Plan{
+		Files: []templateengine.File{{Path: "README.md", Content: []byte("hi"), Mode: 0o644}},
+	})
+	if err == nil || !strings.Contains(err.Error(), "already exists and is not empty") {
+		t.Fatalf("Write() error = %v", err)
+	}
+	if _, statErr := os.Stat(filepath.Join(destination, "README.md")); !errors.Is(statErr, os.ErrNotExist) {
+		t.Fatalf("README.md stat error = %v, want the refused write to leave the directory untouched", statErr)
+	}
+}
+
+// TestOSWriterAdoptsExistingEmptyDirectory covers the "aruo create ." case:
+// the destination already exists (the current directory always does) but
+// is empty, so Write must populate it in place instead of refusing it.
+func TestOSWriterAdoptsExistingEmptyDirectory(t *testing.T) {
+	t.Parallel()
+	destination := t.TempDir()
+	err := (create.OSWriter{}).Write(context.Background(), destination, templateengine.Plan{
+		Files: []templateengine.File{
+			{Path: "README.md", Content: []byte("hi"), Mode: 0o644},
+			{Path: "src/main.go", Content: []byte("package main"), Mode: 0o644},
+		},
+	})
+	if err != nil {
+		t.Fatalf("Write() error = %v", err)
+	}
+	content, err := os.ReadFile(filepath.Join(destination, "README.md"))
+	if err != nil || string(content) != "hi" {
+		t.Fatalf("README.md = %q, err = %v", content, err)
+	}
+	if _, statErr := os.Stat(filepath.Join(destination, "src", "main.go")); statErr != nil {
+		t.Fatalf("src/main.go stat error = %v", statErr)
+	}
+	entries, err := os.ReadDir(destination)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, entry := range entries {
+		if strings.HasPrefix(entry.Name(), ".aruo-create-") {
+			t.Errorf("staging directory %q leaked into the adopted destination", entry.Name())
+		}
 	}
 }
 

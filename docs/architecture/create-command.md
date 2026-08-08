@@ -2,7 +2,7 @@
 
 ## Contract
 
-`aruo create [directory]` creates a new repository from one qualified catalog entry. It supports guided input and complete flag-driven automation. It never modifies an existing destination, downloads an unpinned template, runs generated code, installs dependencies, initializes Git, or publishes anything.
+`aruo create [directory]` creates a new repository from one qualified catalog entry. It supports guided input and complete flag-driven automation. It never modifies or overwrites existing content at the destination, downloads an unpinned template, runs generated code, installs dependencies, initializes Git, or publishes anything. An existing destination is accepted only when it's an empty directory (most commonly `.`, since the current directory always already exists); anything with content in it is refused.
 
 ```text
 Cobra adapter → input resolver → catalog selection → template renderer
@@ -14,7 +14,7 @@ Cobra adapter → input resolver → catalog selection → template renderer
                                       success + next steps
 ```
 
-The command package owns flags and prompts only. `internal/create` owns validation, catalog-neutral planning, and application orchestration. The built-in catalog owns language and workload assumptions. The template engine remains a pure renderer. The filesystem writer stages a complete tree in a sibling temporary directory, applies portable modes, then renames it to the requested destination.
+The command package owns flags and prompts only. `internal/create` owns validation, catalog-neutral planning, and application orchestration. The built-in catalog owns language and workload assumptions. The template engine remains a pure renderer. The filesystem writer stages a complete tree in a sibling temporary directory, applies portable modes, then commits it to the requested destination: a single directory rename when the destination doesn't exist yet, or an individual per-entry move into the destination (with best-effort rollback if one fails partway) when it's an existing empty directory that can't itself be replaced by rename.
 
 ## UX decisions
 
@@ -23,7 +23,7 @@ The command package owns flags and prompts only. `internal/create` owns validati
 - `--no-input` never reads stdin. Missing required input is an actionable error naming the flag. (`--non-interactive` is a deprecated alias that still works.)
 - `--yes` accepts the final creation confirmation; it does not invent identity or publishing decisions.
 - `--template` is the stable automation selector. `--language` and `--kind` filter catalog discovery without embedding language branches in the command.
-- Existing destinations fail, even if empty. A future `init` command will own adoption of existing directories.
+- An existing destination is accepted only when it's an empty directory (the common case: `.`); anything with content in it fails. A future `init` command will own adoption of a directory that already has real content in it.
 - Success output is concise and includes `cd`, native validation, and Git initialization as explicit next steps.
 
 ## Catalog contract
@@ -40,10 +40,10 @@ Generated content is still user-owned. `.aruo.yaml` records template identity an
 
 ## Failure and safety
 
-All input and rendering validation happens before filesystem mutation. Writes reject absolute/traversal paths and unsupported modes. The destination parent must exist. If staging fails or cancellation occurs, the temporary tree is removed. The final rename is same-parent and atomic where the platform filesystem supports atomic directory rename. No partial destination is intentionally exposed.
+All input and rendering validation happens before filesystem mutation. Writes reject absolute/traversal paths and unsupported modes. The destination parent must exist. If staging fails or cancellation occurs, the temporary tree is removed. Committing to a brand-new destination is a single same-parent rename, atomic where the platform filesystem supports atomic directory rename. Committing into an already-existing empty directory can't use that same trick (a directory can't be renamed onto one that already exists, and the destination may be `.` itself, which can never be replaced) — entries move in individually instead, with every already-moved entry rolled back if a later one fails, so a failed commit still leaves no partial destination, just via a different mechanism than the brand-new-directory case.
 
 Crash-left staging directories are recognizable by the `.aruo-create-*` prefix and may be safely inspected or removed. Symlink creation is unsupported in the first version.
 
 ## Extension rules
 
-Add a language or workload by registering a qualified catalog entry, not by branching in `create`. Add an input through its entry schema. Add post-generation work as visible future plan operations, never renderer hooks. Add an overwrite/adopt behavior only through a separate reviewed workflow with conflict and recovery semantics.
+Add a language or workload by registering a qualified catalog entry, not by branching in `create`. Add an input through its entry schema. Add post-generation work as visible future plan operations, never renderer hooks. Writing into an already-existing *empty* directory is the one narrow exception already supported (no conflict is possible when there's nothing there to conflict with); add any broader overwrite/adopt behavior over a directory that already has real content in it only through a separate reviewed workflow with conflict and recovery semantics.

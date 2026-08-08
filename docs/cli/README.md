@@ -39,7 +39,7 @@ aruo create ./my-library \
   --no-input
 ```
 
-Use `--language` and `--kind` to filter catalog entries, `--set key=value` for declared template variables, and `--yes` to accept interactive confirmation. Creation refuses every existing destination.
+Use `--language` and `--kind` to filter catalog entries, `--set key=value` for declared template variables, and `--yes` to accept interactive confirmation. Creation accepts an existing destination only when it's an empty directory (for example `.`); anything with content in it is refused.
 
 ### Doctor
 
