@@ -32,7 +32,7 @@ example: find the closest pattern below and match it.
 
 - If one option among several has a clear recommendation, put it first and
   say `Recommended`. Don't do this for genuinely unrelated choices (Aruo's
-  8 templates aren't "recommended vs. not," they're different ecosystems —
+  9 templates aren't "recommended vs. not," they're different ecosystems —
   this rule applies when there's a real default a user would usually want).
 
 - Before a flat list of every template gets long enough to scroll, split it:

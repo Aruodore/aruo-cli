@@ -22,6 +22,7 @@ func New() (*catalog.Memory, error) {
 	reactSource, reactBlueprint := templatebuiltin.ReactApp()
 	nuxtSource, nuxtBlueprint := templatebuiltin.NuxtApp()
 	vueSource, vueBlueprint := templatebuiltin.VueLibrary()
+	vueAppSource, vueAppBlueprint := templatebuiltin.VueApp()
 	nextSource, nextBlueprint := templatebuiltin.NextApp()
 	return catalog.NewMemory(
 		catalog.Entry{
@@ -183,6 +184,33 @@ func New() (*catalog.Memory, error) {
 				ModuleLabel:       "npm package name",
 				ModuleDescription: `This is written to package.json as "name".`,
 				ModuleExample:     "my-library",
+			},
+		},
+		catalog.Entry{
+			ID:             "vue-app",
+			Name:           "Vue application",
+			Language:       "typescript",
+			Kind:           "app",
+			Description:    "A production-ready Vue 3 application built with Vite and Vitest, tests, CI, governance, security, and documentation",
+			Color:          "#42B883",
+			Licenses:       []string{"MIT"},
+			DefaultLicense: "MIT",
+			Source:         vueAppSource,
+			Blueprint:      vueAppBlueprint,
+			Defaults: map[string]any{
+				"IncludeInstall": false,
+				"TemplateID":     "vue-app",
+			},
+			Prepare: prepareJSLibrary,
+			NextSteps: []string{
+				"npm install",
+				"npm run dev",
+				"git init && git add .",
+			},
+			Prompts: catalog.ProjectPrompts{
+				ModuleLabel:       "npm package name",
+				ModuleDescription: `This is written to package.json as "name" (the app is private and not published).`,
+				ModuleExample:     "my-app",
 			},
 		},
 		catalog.Entry{

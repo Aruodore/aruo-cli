@@ -1,0 +1,32 @@
+{
+  "name": "{{ .Project.Module }}",
+  "private": true,
+  "version": "0.0.0",
+  "description": "{{ .Project.Description }}",
+  "license": "{{ .Project.License }}",
+  "author": "{{ .Project.Author }}",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --build && vite build",
+    "test": "vitest run",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "3.5.41"
+  },
+  "devDependencies": {
+    "@types/node": "26.1.2",
+    "@vitejs/plugin-vue": "6.0.8",
+    "@vue/test-utils": "2.4.11",
+    "@vue/tsconfig": "0.9.1",
+    "happy-dom": "20.11.1",
+    "typescript": "6.0.2",
+    "vite": "8.2.1",
+    "vitest": "4.1.10",
+    "vue-tsc": "3.3.9"
+  }
+}
