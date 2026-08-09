@@ -18,7 +18,7 @@ Narrative troubleshooting remains hand-written.
 
 ## Implemented surface
 
-The pre-0.1 implementation exposes `aruo`, `aruo help`, `aruo version`, `aruo create`, and the read-only repository health command `aruo doctor`. The broader model below remains a design target. See [CLI Application Architecture](../architecture/cli-application.md), [Create Command Architecture](../architecture/create-command.md), and [Repository Doctor Architecture](../architecture/doctor.md).
+The current implementation exposes `aruo`, `aruo help`, `aruo version`, `aruo create`, and the read-only repository health command `aruo doctor`. The broader model below remains a design target. See [CLI Application Architecture](../architecture/cli-application.md), [Create Command Architecture](../architecture/create-command.md), and [Repository Doctor Architecture](../architecture/doctor.md).
 
 ### Create
 
