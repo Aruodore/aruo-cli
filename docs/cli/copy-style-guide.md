@@ -4,7 +4,7 @@ This is the short reference for the actual words Aruo shows a user: prompt
 labels, descriptions, examples, confirmations, errors, and status text. The
 [Terminal UX specification](terminal-ux.md) is the normative contract for
 *mechanism and behavior* (which widget to use, how cancellation propagates,
-what a screen reader needs); this page is for *wording* — the sentences that
+what a screen reader needs); this page is for *wording*: the sentences that
 go inside that mechanism. If a rule needs a `MUST`/`SHOULD` and a paragraph
 of justification, it belongs in the spec, not here. This page works by
 example: find the closest pattern below and match it.
@@ -28,12 +28,12 @@ example: find the closest pattern below and match it.
   word choice belongs.
 
 - Every prompt shows a realistic `Example`, not an abstract placeholder like
-  `<value>` or `foo`. Use a name a real project would actually have.
+  `<value>` or `foo`. Use a name a real project would have.
 
 - If one option among several has a clear recommendation, put it first and
-  say `Recommended`. Don't do this for genuinely unrelated choices (Aruo's
-  9 templates aren't "recommended vs. not," they're different ecosystems —
-  this rule applies when there's a real default a user would usually want).
+  say `Recommended`. Don't do this for unrelated choices. Aruo's 9 templates
+  aren't "recommended vs. not," they're different ecosystems; this rule
+  applies when there's a real default a user would usually want.
 
 - Before a flat list of every template gets long enough to scroll, split it:
   `create`'s first interactive screen asks `What are you building?` with two
@@ -48,7 +48,7 @@ example: find the closest pattern below and match it.
 ## Optional fields
 
 Say `Optional` on the label itself, not buried mid-sentence in the
-description — a user scanning prompts reads the label first.
+description. A user scanning prompts reads the label first.
 
 ```
 Bad:   Label: "Short description"
@@ -61,15 +61,15 @@ Good:  Label: "Short description (Optional)"
 
 An early version of this defaulted to visible `TODO: ...` placeholder text
 written straight into generated files (`Copyright (c) TODO: set an
-author`). Don't do that — it reads as broken, not helpful, and it's not
-actually automatic; it just moves the manual step into the generated
-output instead of removing it. Prefer a real value derived without asking:
+author`). Don't do that: it reads as broken, not helpful, and it's not
+automatic; it just moves the manual step into the generated output instead
+of removing it. Prefer a real value derived without asking:
 
 ```
 --description left blank  ->  the catalog entry's own Description
                                ("A production-ready Go library with...")
 --author left blank       ->  `git config --get user.name`, best-effort,
-                               falling back to a genuinely empty string
+                               falling back to an empty string
                                (not a placeholder) if git or the config
                                entry isn't there
 --module left blank       ->  the project's own name (the go.mod module
@@ -78,30 +78,30 @@ output instead of removing it. Prefer a real value derived without asking:
 ```
 
 An empty string in the output (`Copyright (c) ` with nothing after) is a
-better failure mode than fabricated text: it's honestly incomplete rather
-than looking like real, wrong content.
+better failure mode than fabricated text: it's incomplete rather than
+looking like plausible but wrong content.
 
-`--module` isn't just defaulted, it isn't asked about at all — there's no
+`--module` isn't just defaulted, it isn't asked about at all: there's no
 module/package-name screen in the guided flow anymore, interactive or not.
 It silently becomes the project's own name unless `--module` is passed
-explicitly. This is a real, deliberate exception to "only default a field
-when a wrong default is merely incomplete, not broken": a bare project name
-is a valid `go.mod` module path, `name` in `package.json`, and `name` in
-`pyproject.toml` for every template today, so it's not *broken* — it's just
-not the ideal value for a Go module meant to be published (`go get`-able
+explicitly. This is a deliberate exception to "only default a field when a
+wrong default is merely incomplete, not broken": a bare project name is a
+valid `go.mod` module path, `name` in `package.json`, and `name` in
+`pyproject.toml` for every template today, so it's not *broken*, just not
+the ideal value for a Go module meant to be published (`go get`-able
 projects want a domain-qualified path like `github.com/you/name`, which
-this can't guess). Asking the same question twice — once for the project
-name, once for the package name — was judged worse than that gap; pass
+this can't guess). Asking the same question twice, once for the project
+name and once for the package name, was judged worse than that gap. Pass
 `--module` explicitly for a real import path.
 
 A default never occupies the editable input as pre-filled text the user
 has to delete to leave the field blank. Show it as a hint instead, and
-apply it after the fact only if the user submits genuinely nothing:
+apply it after the fact only if the user submits nothing:
 
 ```
 Bad (rich prompter): input box already contains "Aruodore",
-                      cursor at the end — the user backspaces
-                      four characters to actually leave it blank.
+                      cursor at the end; the user backspaces
+                      four characters to leave it blank.
 
 Good: Author or organization (Optional) [Aruodore]:
       (empty input box; pressing Enter without typing
@@ -117,8 +117,8 @@ one where a default subtly requires deleting.
 
 `create`'s guided flow (`Prompter.Guide`) lets a user return to an earlier
 screen instead of only being able to move forward. The rich prompter gets
-this for free from Huh's own `shift+tab`, with no copy of its own to write
-— its default help bar already advertises `shift+tab back`. The accessible
+this for free from Huh's own `shift+tab`, with no copy of its own to write.
+Its default help bar already advertises `shift+tab back`. The accessible
 adapter has no such built-in, so it prints one line before the first
 question, and only when there's more than one question to navigate between:
 
@@ -127,9 +127,9 @@ Type back at any prompt to return to the previous question.
 ```
 
 Typing `back` (case-insensitive, trimmed) at any prompt in that flow is a
-reserved navigation command, not a literal value — it never becomes a
+reserved navigation command, not a literal value: it never becomes a
 project name, module path, description, or author. That's a deliberate
-trade-off: if a user genuinely wants the literal text "back" as a value,
+trade-off: if a user wants the literal text "back" as a value,
 the corresponding flag (`--name`, `--module`, `--description`, `--author`)
 bypasses the prompt entirely and takes the value as given. Revisiting an
 already-answered screen shows that answer as its default (`[Aruodore]`,
@@ -138,23 +138,23 @@ forcing a retype.
 
 ## Confirmations
 
-`create`'s actual confirmation today is generic — `Create this project?
+`create`'s confirmation today is generic: `Create this project?
 [y/N]`, preceded by a summary block naming the destination, template, and
-license — not target/count-specific, since there's exactly one confirmation
-in the product right now. Once a command confirms an *effect* rather than a
-one-time creation, name the exact target and count:
+license. It isn't target/count-specific, since there's exactly one
+confirmation in the product right now. Once a command confirms an
+*effect* rather than a one-time creation, name the exact target and count:
 
 ```
 Apply these 4 changes to github.com/acme/api? [y/N]
 ```
 
-Uppercase marks the default; Enter accepts it. Use `y`/`yes`/`n`/`no` — they
+Uppercase marks the default; Enter accepts it. Use `y`/`yes`/`n`/`no`: they
 stay stable across locales even before Aruo supports translated prompts.
 
 ## Errors
 
-Today's actual renderer (`internal/cli/run.go`) is one line —
-`fmt.Fprintf(ErrOut, "Error: %v\n", err)` — so the entire error *is* the
+Today's renderer (`internal/cli/run.go`) is one line,
+`fmt.Fprintf(ErrOut, "Error: %v\n", err)`, so the entire error *is* the
 wrapped Go error string. That constrains the writing more, not less: it has
 to say everything in one plain-language sentence, since there's no second
 line to fall back on.
@@ -166,8 +166,8 @@ Error: unknown flag: --bogus-flag
 Error: end of input
 ```
 
-That last one is what a closed/EOF stdin actually produces today
-(`tux.ErrEndOfInput`, unwrapped by the same one-line renderer) — not a
+That last one is what a closed/EOF stdin produces today
+(`tux.ErrEndOfInput`, unwrapped by the same one-line renderer), not a
 friendlier "Input ended; project creation was cancelled" message.
 `terminal-ux.md` names that friendlier wording as the target; nothing
 renders it yet, so don't assume it exists when writing code that expects
@@ -181,30 +181,30 @@ a specific EOF message.
   --module`), rather than a bare fact with no path forward.
 - An expected cancellation prints `Cancelled.`, never a red `Error:` line.
 
-**Not implemented yet** — planned, multi-line anatomy (separate cause,
+**Not implemented yet**: planned, multi-line anatomy (separate cause,
 consequence, and next-action lines, a debug reference) from
-`terminal-ux.md`'s "User-facing error anatomy": don't write code today as
+`terminal-ux.md`'s "User-facing error anatomy". Don't write code today as
 though this format exists. When it lands, this section should show the
 real multi-line output, not the aspirational one.
 
 ## Status and progress text
 
-No command calls `ProgressSink`/`Session.Progress()` yet — `create`'s write
+No command calls `ProgressSink`/`Session.Progress()` yet: `create`'s write
 and `doctor`'s audit both finish under the "<200ms: no progress" threshold
 `terminal-ux.md` itself sets, so there's no live progress text to check
 against reality today. When a command's work is slow enough to need it,
 name the actual work, not a generic wait state (`Downloading blueprint`,
-not `Please wait...`) — but until then this is a rule for the future, not a
+not `Please wait...`). Until then this is a rule for the future, not a
 description of current output.
 
-The one status line that *is* real is the final success message, and it's
-a genuine, verified example:
+The one status line that *is* real is the final success message, shown
+below:
 
 ```
 Created go-library with 24 files at ./my-library
 ```
 
-A durable summary a user could paste into a chat, not just a checkmark —
+A durable summary a user could paste into a chat, not just a checkmark:
 `presentCreated` in `internal/cli/command/create.go`.
 
 ## Cancellation messages
@@ -215,8 +215,8 @@ Cancelled.
 ```
 
 Both verbatim (`internal/tux/lifecycle/manager.go`, `internal/cli/run.go`):
-three ASCII periods, not a Unicode ellipsis (`…`) — match what's actually
-printed, not what reads better in prose. `terminal-ux.md`'s per-outcome
+three ASCII periods, not a Unicode ellipsis (`…`), matching what's printed
+rather than what reads better in prose. `terminal-ux.md`'s per-outcome
 variants (`Cancelled. No repository changes were applied.` /
 `Cancelled after 3 of 5 operations...`) are the target once a command has
 partial-completion states to distinguish; today every cancellation prints
@@ -227,6 +227,6 @@ the same plain `Cancelled.`
 When you add a template, a prompt, or a command, and you catch yourself
 writing wording that doesn't match a pattern above: fix the pattern here
 too, in the same change. This page is only useful if it reflects what the
-CLI actually says — see the [terminal UX specification's implementation
+CLI says. See the [terminal UX specification's implementation
 status](terminal-ux.md#implementation-status-2026-08-06) for the equivalent
 discipline applied to behavior.

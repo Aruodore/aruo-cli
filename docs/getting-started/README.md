@@ -1,7 +1,9 @@
 # Getting started
 
-Aruo has no production release yet. Contributors can run the current checkout
-directly:
+This page is for contributors working from a checkout. To install a release,
+see the [README](../../README.md#installation).
+
+Run commands directly from the checkout:
 
 ```sh
 go run ./cmd/aruo help
@@ -17,12 +19,11 @@ go build -o "$HOME/.local/bin/aruo" ./cmd/aruo
 aruo version
 ```
 
-`$HOME/.local/bin` must be on `PATH`. The binary reports version `dev` because
-it is built from an unreleased checkout; rebuild it after pulling changes.
+`$HOME/.local/bin` must be on `PATH`. A binary built this way always reports
+version `dev`; rebuild it after pulling changes. See the README's
+[Quick start](../../README.md#quick-start) for the same workflow against a
+release binary instead.
 
-The future production quick start will cover verified release installation, an
-initial workflow on a disposable repository, expected output, cleanup, and the
-next two workflows. It must finish in five minutes on each tier-1 platform and
-run in release CI.
-
-For now, start with the [project vision](../design-principles/vision.md) and [architecture](../architecture/README.md). Do not install unofficial packages using the Aruo name.
+Start with the [project vision](../design-principles/vision.md) and
+[architecture](../architecture/README.md). Do not install unofficial packages
+using the Aruo name.

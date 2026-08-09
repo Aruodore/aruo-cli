@@ -2,7 +2,7 @@
 
 ## Current stage
 
-Aruo is pre-0.1 but no longer pre-implementation: `aruo create` (guided and flag-driven project creation from a growing template catalog) and `aruo doctor` (versioned repository health scoring) are real, tested commands — see [README.md](README.md) for exactly what they do today. Everything below is what's still ahead, not a description of a frozen design-only phase.
+Aruo is at [v0.1.0](https://github.com/Aruodore/aruo-cli/releases/tag/v0.1.0), pre-1.0: `aruo create` (guided and flag-driven project creation from a growing template catalog) and `aruo doctor` (versioned repository health scoring) are real, tested commands. See [README.md](README.md) for exactly what they do today. Everything below is what's still ahead, not a description of a frozen design-only phase.
 
 ## 0.1 — prove the model
 

@@ -62,7 +62,7 @@ Cobra is a presentation dependency. It provides mature parsing, nested help, sug
 
 The root owns stable global behavior. Commands own their local flags. Persistent flags are rare because they create implicit coupling. Automatic completion is disabled until Aruo deliberately designs and tests that public surface.
 
-The current pre-0.1 public tree is intentionally limited to:
+The current public tree is intentionally limited to:
 
 ```text
 aruo
