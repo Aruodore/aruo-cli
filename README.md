@@ -2,7 +2,7 @@
 
 **A CLI that scaffolds production-ready software projects — real CI, governance, security policy, and documentation from the first commit — and audits any repository's engineering health against a versioned policy.**
 
-> **Status: pre-0.1, unreleased, repository currently private.** `aruo create` and `aruo doctor` are real, tested commands used throughout this document; every command and output shown below was run against the current checkout. No version has been tagged and no binary has been published anywhere yet — see [Installation](#installation) for exactly what that means today. If you're reading this outside the repository itself, the clone URL below won't resolve for you yet.
+> **Status: [v0.1.0](https://github.com/Aruodore/aruo-cli/releases/tag/v0.1.0), pre-1.0, marked as a pre-release.** `aruo create` and `aruo doctor` are real, tested commands used throughout this document; every command and output shown below was run against the current checkout. The repository is public and the first tagged release is out, with prebuilt binaries — see [Installation](#installation) for how to get one. Expect breaking changes before 1.0.
 
 ```sh
 git clone https://github.com/Aruodore/aruo-cli.git aruo && cd aruo
@@ -25,7 +25,27 @@ Everything else referenced elsewhere in this repository's docs (`inspect`, `chec
 
 ## Installation
 
-Aruo has no tagged release, no published binary, and is not on any package manager yet. The module path is `github.com/aruodore/aruo-cli`, matching this repository exactly — confirmed clear of any naming conflict on the public Go module proxy — so `go install` will work correctly once the repository is public and has a tagged release; it just can't yet. The only way to run Aruo today is to build it from source.
+Aruo isn't on any package manager yet, but a tagged release with prebuilt binaries is available.
+
+### Download a release binary
+
+Grab the archive for your platform from the [v0.1.0 release](https://github.com/Aruodore/aruo-cli/releases/tag/v0.1.0) (Linux/macOS/Windows × amd64/arm64), verify it against `checksums.txt`, then extract and put `aruo` on your `PATH`. Each archive ships alongside an SBOM and a [GitHub build provenance attestation](https://github.com/Aruodore/aruo-cli/attestations).
+
+```sh
+curl -sSfL -o aruo.tar.gz https://github.com/Aruodore/aruo-cli/releases/download/v0.1.0/aruo_0.1.0_linux_amd64.tar.gz
+tar xzf aruo.tar.gz
+install aruo "$HOME/.local/bin/aruo"
+```
+
+`aruo version` on a release binary prints the real tagged version (`aruo version 0.1.0`), unlike a source build (below), which always reports `dev`.
+
+### `go install`
+
+```sh
+go install github.com/aruodore/aruo-cli/cmd/aruo@latest
+```
+
+Works now that the module is public and tagged. Like any source build, the resulting binary reports `aruo version dev` — version stamping only happens in the GoReleaser-built release binaries above, not in `go build`/`go install`.
 
 ### Build from source
 
@@ -39,7 +59,7 @@ go build -o "$HOME/.local/bin/aruo" ./cmd/aruo
 
 - **Installed to:** wherever you point `-o`; the example above uses `$HOME/.local/bin/aruo`. Make sure that directory is on `PATH`.
 - **Supported platforms:** Linux, macOS, and Windows all build and pass the full test suite in CI (`ubuntu-latest`, `macos-latest`, `windows-latest`); `amd64` and `arm64` both build via the pinned GoReleaser config, though only Linux/`amd64` has been run interactively during development.
-- **Verify:** `aruo version` should print `aruo version dev` — every locally built binary reports `dev` since no release has embedded a real version yet.
+- **Verify:** `aruo version` should print `aruo version dev` — source builds always report `dev`; only the release binaries above embed a real version.
 - **Upgrade:** `git pull && go build -o "$HOME/.local/bin/aruo" ./cmd/aruo` — there's no update mechanism beyond rebuilding.
 - **Uninstall:** delete the binary you built (e.g. `rm "$HOME/.local/bin/aruo"`); nothing else is installed on your system.
 
@@ -49,8 +69,6 @@ None of these exist today. They're listed so you don't go looking for something 
 
 | Method | Status |
 | --- | --- |
-| GitHub Releases (prebuilt binaries) | Planned — GoReleaser is fully configured (`.goreleaser.yaml`: Linux/macOS/Windows × amd64/arm64, SBOMs, checksums) and wired to CI, but only runs once `release-please` cuts the first real tag. Nothing has been published. |
-| `go install github.com/aruodore/aruo-cli/cmd/aruo@latest` | Not yet — the repository is private and unreleased, so there's nothing for it to fetch. No naming conflict blocks it; it should work as soon as both of those change. |
 | Homebrew | Not configured. No `brews:` block in the release config. |
 | Scoop / Winget | Not configured. |
 | AUR / Nix | Not configured. |
