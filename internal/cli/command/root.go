@@ -25,11 +25,11 @@ type sessionFactory struct {
 	global      *globalOptions
 }
 
-// build resolves the terminal session for one command's output format.
+// build resolves the terminal session used to render human output.
 // forceNoInput additionally disables input, satisfying a command's own
 // deprecated non-interactive flag without changing global policy.
-func (f sessionFactory) build(ctx context.Context, format tux.OutputFormat, forceNoInput bool) (*session.Session, error) {
-	overrides, err := f.global.overrides(format)
+func (f sessionFactory) build(ctx context.Context, forceNoInput bool) (*session.Session, error) {
+	overrides, err := f.global.overrides()
 	if err != nil {
 		return nil, err
 	}

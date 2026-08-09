@@ -44,7 +44,7 @@ func TestParseFeaturePolicyRejectsUnknownValue(t *testing.T) {
 func TestGlobalOptionsOverridesDefaults(t *testing.T) {
 	t.Parallel()
 
-	overrides, err := newGlobalOptions().overrides(tux.OutputHuman)
+	overrides, err := newGlobalOptions().overrides()
 	if err != nil {
 		t.Fatalf("overrides() error = %v", err)
 	}
@@ -62,7 +62,7 @@ func TestGlobalOptionsOverridesNoInputWinsWhenBothSet(t *testing.T) {
 	options := newGlobalOptions()
 	options.noInput = true
 	options.interactive = true
-	overrides, err := options.overrides(tux.OutputHuman)
+	overrides, err := options.overrides()
 	if err != nil {
 		t.Fatalf("overrides() error = %v", err)
 	}
@@ -76,7 +76,7 @@ func TestGlobalOptionsOverridesInteractiveForcesInput(t *testing.T) {
 
 	options := newGlobalOptions()
 	options.interactive = true
-	overrides, err := options.overrides(tux.OutputHuman)
+	overrides, err := options.overrides()
 	if err != nil {
 		t.Fatalf("overrides() error = %v", err)
 	}
@@ -90,7 +90,7 @@ func TestGlobalOptionsOverridesRejectsInvalidColor(t *testing.T) {
 
 	options := newGlobalOptions()
 	options.color = "purple"
-	if _, err := options.overrides(tux.OutputHuman); err == nil {
+	if _, err := options.overrides(); err == nil {
 		t.Fatal("overrides() error = nil, want error for invalid --color value")
 	}
 }
@@ -100,7 +100,7 @@ func TestGlobalOptionsOverridesRejectsInvalidMotion(t *testing.T) {
 
 	options := newGlobalOptions()
 	options.motion = "sometimes"
-	if _, err := options.overrides(tux.OutputHuman); err == nil {
+	if _, err := options.overrides(); err == nil {
 		t.Fatal("overrides() error = nil, want error for invalid --motion value")
 	}
 }

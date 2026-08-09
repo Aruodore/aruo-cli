@@ -113,7 +113,7 @@ func uniqueValues(entries []catalog.Entry, field func(catalog.Entry) string) []s
 }
 
 func runCreate(ctx context.Context, factory sessionFactory, templateCatalog catalog.Catalog, creator *create.Service, options createOptions) error {
-	terminal, err := factory.build(ctx, tux.OutputHuman, options.nonInteractive)
+	terminal, err := factory.build(ctx, options.nonInteractive)
 	if err != nil {
 		return err
 	}

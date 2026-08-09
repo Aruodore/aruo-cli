@@ -40,7 +40,7 @@ func newDoctor(factory sessionFactory, service *doctor.Service) *cobra.Command {
 			}
 			switch options.format {
 			case "human":
-				terminal, sessionErr := factory.build(ctx, tux.OutputHuman, false)
+				terminal, sessionErr := factory.build(ctx, false)
 				if sessionErr != nil {
 					return sessionErr
 				}

@@ -37,9 +37,11 @@ func (g *globalOptions) register(root *cobra.Command) {
 	_ = root.RegisterFlagCompletionFunc("motion", featurePolicyCompletions)
 }
 
-// overrides converts the resolved flags into policy overrides for one command's format.
-func (g *globalOptions) overrides(format tux.OutputFormat) (policy.Overrides, error) {
-	result := policy.Overrides{Format: format}
+// overrides converts the resolved flags into policy overrides for a human session.
+// Every command's JSON/machine output path renders directly and never builds a
+// session, so this always resolves the human format.
+func (g *globalOptions) overrides() (policy.Overrides, error) {
+	result := policy.Overrides{Format: tux.OutputHuman}
 	if g.accessible {
 		accessible := true
 		result.Accessible = &accessible

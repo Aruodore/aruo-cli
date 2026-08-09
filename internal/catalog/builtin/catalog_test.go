@@ -48,7 +48,7 @@ func TestGoLibraryIsProductionReadyAndBuilds(t *testing.T) {
 	}
 	command := exec.CommandContext(context.Background(), "go", "test", "./...")
 	command.Dir = destination
-	command.Env = append(os.Environ(), "GOTOOLCHAIN=local", "GOCACHE=/tmp/aruo-generated-gocache")
+	command.Env = append(os.Environ(), "GOTOOLCHAIN=local", "GOCACHE="+filepath.Join(t.TempDir(), "gocache"))
 	if output, err := command.CombinedOutput(); err != nil {
 		t.Fatalf("generated project go test: %v\n%s", err, output)
 	}

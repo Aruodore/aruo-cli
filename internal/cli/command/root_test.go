@@ -52,7 +52,7 @@ func TestSessionFactoryBuildForceNoInputOverridesGlobalPolicy(t *testing.T) {
 		probe:       fakeProbe{},
 		global:      newGlobalOptions(),
 	}
-	terminal, err := factory.build(context.Background(), tux.OutputHuman, true)
+	terminal, err := factory.build(context.Background(), true)
 	if err != nil {
 		t.Fatalf("build() error = %v", err)
 	}
@@ -73,7 +73,7 @@ func TestSessionFactoryBuildPropagatesInvalidGlobalFlags(t *testing.T) {
 		probe:       fakeProbe{},
 		global:      global,
 	}
-	if _, err := factory.build(context.Background(), tux.OutputHuman, false); err == nil {
+	if _, err := factory.build(context.Background(), false); err == nil {
 		t.Fatal("build() error = nil, want the invalid --color value to surface")
 	}
 }
