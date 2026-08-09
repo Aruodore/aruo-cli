@@ -4,6 +4,14 @@ All notable changes to Aruo will be documented in this file.
 
 The format follows [Keep a Changelog 2.0.0](https://keepachangelog.com/en/2.0.0/), and releases follow [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html) across the documented CLI, configuration, plan/finding schemas, plugin protocol, and supported public Go APIs.
 
+## [0.1.1](https://github.com/Aruodore/aruo-cli/compare/v0.1.0...v0.1.1) (2026-08-09)
+
+
+### Bug Fixes
+
+* **github:** stop .github/README.md from shadowing the real README ([bf0f7b1](https://github.com/Aruodore/aruo-cli/commit/bf0f7b1c07a7907dee85a8a845f41dae1f45cc88))
+* **github:** stop .github/README.md from shadowing the real README ([adce3d9](https://github.com/Aruodore/aruo-cli/commit/adce3d924c1b279c33c02de599ca3e46dd1841ff))
+
 ## 0.1.0 (2026-08-09)
 
 
