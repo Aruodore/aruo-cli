@@ -1,0 +1,7 @@
+.env
+.nuxt
+.output
+coverage
+node_modules
+*.log
+aruo.local.yaml

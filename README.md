@@ -21,7 +21,7 @@ Most generators stop after copying files, so the CI workflow, security policy, a
 
 ## What works today
 
-- **`aruo create`**: 9 templates across Go, JavaScript, TypeScript, and Python, including React, Vue, Nuxt, and Next.js application scaffolds. A guided interactive flow (kind → template → description → author → confirm) with backward navigation across every screen, or fully non-interactive via flags for scripting/CI. The module/package name is never asked for separately; it defaults to the project's own name, and `--module` overrides it with a real Go import path. Every template ships CI, a license, a security policy, governance files, dependency automation, and tests that run.
+- **`aruo create`**: 9 templates across Go, JavaScript, TypeScript, and Python, including React, Vue, Nuxt, and Next.js application baselines. A guided interactive flow (kind → template → description → author → confirm) with backward navigation across every screen, or fully non-interactive via flags for scripting/CI. The module/package name is never asked for separately; it defaults to the project's own name, and `--module` overrides it with a real Go import path. Every template ships CI, a license, a security policy, governance files, dependency automation, and tests that run.
 - **`aruo doctor`**: scores any repository 0–100 against versioned policy `aruo.repository-health/v1` across seven categories (completeness, documentation, CI, tests, license, security, GitHub configuration), with human or JSON output and a configurable failure threshold for CI gating.
 - Accessible and scriptable by design: a line-oriented fallback adapter, `NO_COLOR`/`--color`/`--motion` support, and clean non-interactive behavior everywhere `create`/`doctor` are used from a script.
 

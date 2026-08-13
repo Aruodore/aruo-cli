@@ -133,7 +133,7 @@ func containsOptionID(options []tux.Option, value any) bool {
 func TestGuideFormOptionsFuncNarrowsToKind(t *testing.T) {
 	t.Parallel()
 
-	appOptions := []tux.Option{{ID: "next-app"}, {ID: "nuxt-app"}, {ID: "react-app"}}
+	appOptions := []tux.Option{{ID: "next"}, {ID: "nuxt"}, {ID: "react"}}
 	libraryOptions := []tux.Option{{ID: "go-library"}, {ID: "js-library"}, {ID: "python-library"}, {ID: "ts-library"}, {ID: "vue-library"}}
 
 	steps := []tux.Step{

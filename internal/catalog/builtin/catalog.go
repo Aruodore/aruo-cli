@@ -106,8 +106,8 @@ func New() (*catalog.Memory, error) {
 			},
 		},
 		catalog.Entry{
-			ID:             "react-app",
-			Name:           "React application",
+			ID:             "react",
+			Name:           "React",
 			Language:       "typescript",
 			Kind:           "app",
 			Description:    "A production-ready React application built with Vite and Vitest, tests, CI, governance, security, and documentation",
@@ -118,7 +118,7 @@ func New() (*catalog.Memory, error) {
 			Blueprint:      reactBlueprint,
 			Defaults: map[string]any{
 				"IncludeInstall": false,
-				"TemplateID":     "react-app",
+				"TemplateID":     "react",
 			},
 			Prepare: prepareJSLibrary,
 			NextSteps: []string{
@@ -133,11 +133,11 @@ func New() (*catalog.Memory, error) {
 			},
 		},
 		catalog.Entry{
-			ID:             "nuxt-app",
-			Name:           "Nuxt application",
+			ID:             "nuxt",
+			Name:           "Nuxt",
 			Language:       "typescript",
 			Kind:           "app",
-			Description:    "A production-ready Nuxt 4 application with server-side rendering, Nuxt UI components, tests, CI, governance, security, and documentation",
+			Description:    "A Nuxt modular monolith with PostgreSQL, validation, structured logging, health checks, containers, tests, and an AI development contract",
 			Color:          "#00DC82",
 			Licenses:       []string{"MIT"},
 			DefaultLicense: "MIT",
@@ -145,13 +145,13 @@ func New() (*catalog.Memory, error) {
 			Blueprint:      nuxtBlueprint,
 			Defaults: map[string]any{
 				"IncludeInstall": false,
-				"TemplateID":     "nuxt-app",
+				"TemplateID":     "nuxt",
 			},
 			Prepare: prepareJSLibrary,
 			NextSteps: []string{
-				"npm install",
+				"cp .env.example .env && npm install",
+				"docker compose up -d db && npm run db:migrate",
 				"npm run dev",
-				"git init && git add .",
 			},
 			Prompts: catalog.ProjectPrompts{
 				ModuleLabel:       "npm package name",
@@ -187,8 +187,8 @@ func New() (*catalog.Memory, error) {
 			},
 		},
 		catalog.Entry{
-			ID:             "vue-app",
-			Name:           "Vue application",
+			ID:             "vue",
+			Name:           "Vue",
 			Language:       "typescript",
 			Kind:           "app",
 			Description:    "A production-ready Vue 3 application built with Vite and Vitest, tests, CI, governance, security, and documentation",
@@ -199,7 +199,7 @@ func New() (*catalog.Memory, error) {
 			Blueprint:      vueAppBlueprint,
 			Defaults: map[string]any{
 				"IncludeInstall": false,
-				"TemplateID":     "vue-app",
+				"TemplateID":     "vue",
 			},
 			Prepare: prepareJSLibrary,
 			NextSteps: []string{
@@ -214,8 +214,8 @@ func New() (*catalog.Memory, error) {
 			},
 		},
 		catalog.Entry{
-			ID:             "next-app",
-			Name:           "Next.js application",
+			ID:             "next",
+			Name:           "Next.js",
 			Language:       "typescript",
 			Kind:           "app",
 			Description:    "A production-ready Next.js application with the App Router, tests, CI, governance, security, and documentation",
@@ -226,7 +226,7 @@ func New() (*catalog.Memory, error) {
 			Blueprint:      nextBlueprint,
 			Defaults: map[string]any{
 				"IncludeInstall": false,
-				"TemplateID":     "next-app",
+				"TemplateID":     "next",
 			},
 			Prepare: prepareJSLibrary,
 			NextSteps: []string{

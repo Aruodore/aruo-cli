@@ -19,7 +19,7 @@ example: find the closest pattern below and match it.
   | Template | Label | Example shown |
   | --- | --- | --- |
   | `go-library` | `Go module path` | `github.com/your-name/my-library` |
-  | `js-library`, `ts-library`, `react-app`, ... | `npm package name` | `my-library` |
+  | `js-library`, `ts-library`, `react`, ... | `npm package name` | `my-library` |
   | `python-library` | `PyPI package name` | `my-library` |
 
   The flag's own `--help` text stays ecosystem-neutral since it's shared

@@ -1,0 +1,13 @@
+<script setup lang="ts">
+useSeoMeta({
+  title: "{{ .Project.Name }}",
+  description: "{{ .Project.Description }}",
+});
+</script>
+
+<template>
+  <main>
+    <h1>{{ .Project.Name }}</h1>
+    <p>{{ .Project.Description }}</p>
+  </main>
+</template>

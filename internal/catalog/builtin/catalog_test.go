@@ -143,7 +143,7 @@ func TestTSLibraryHasRequiredFiles(t *testing.T) {
 }
 
 // TestReactAppHasRequiredFiles checks the generated file plan only, for the
-// same reason as TestTSLibraryHasRequiredFiles: react-app's dependencies
+// same reason as TestTSLibraryHasRequiredFiles: React's dependencies
 // (react, vite, vitest, jsdom, ...) must come from the network via npm
 // install, so running that here would make this package's tests
 // non-hermetic. The generated project's own CI does npm ci + npm test +
@@ -160,7 +160,7 @@ func TestReactAppHasRequiredFiles(t *testing.T) {
 	}
 	destination := filepath.Join(t.TempDir(), "app")
 	_, err = service.Create(context.Background(), create.Request{
-		Destination: destination, TemplateID: "react-app",
+		Destination: destination, TemplateID: "react",
 		Project: templateengine.Project{
 			Name: "Example", Module: "example-app", Description: "An example app.",
 			Author: "Example Authors", License: "MIT", Language: "typescript",
@@ -202,7 +202,7 @@ func TestNuxtAppHasRequiredFiles(t *testing.T) {
 	}
 	destination := filepath.Join(t.TempDir(), "app")
 	_, err = service.Create(context.Background(), create.Request{
-		Destination: destination, TemplateID: "nuxt-app",
+		Destination: destination, TemplateID: "nuxt",
 		Project: templateengine.Project{
 			Name: "Example", Module: "example-app", Description: "An example app.",
 			Author: "Example Authors", License: "MIT", Language: "typescript",
@@ -212,13 +212,11 @@ func TestNuxtAppHasRequiredFiles(t *testing.T) {
 		t.Fatal(err)
 	}
 	required := []string{
-		"README.md", "LICENSE", "CHANGELOG.md", "ROADMAP.md", "SECURITY.md", "CONTRIBUTING.md",
-		"CODE_OF_CONDUCT.md", "aruo.yaml", "package.json", "nuxt.config.ts", "tsconfig.json",
-		"vitest.config.ts", "app/app.vue", "app/assets/css/main.css", "tests/app.test.ts", "Makefile",
-		"docs/README.md", ".github/workflows/ci.yml", ".github/pull_request_template.md",
-		".github/ISSUE_TEMPLATE/bug.yml", ".github/ISSUE_TEMPLATE/feature.yml",
-		".github/dependabot.yml", ".github/workflows/pr-title.yml", ".github/workflows/release.yml",
-		"release-please-config.json", ".release-please-manifest.json",
+		"README.md", "AGENTS.md", "aruo.yaml", ".env.example", "package.json", "Dockerfile", "compose.yaml",
+		"docs/README.md", "docs/architecture.md", "docs/operations.md", "server/utils/env.ts", "server/utils/errors.ts",
+		"server/api/health/live.get.ts", "server/api/health/ready.get.ts", "server/api/notes.post.ts",
+		"server/db/schema.ts", "server/db/migrations/0000_initial.sql", "tests/env.test.ts",
+		".github/workflows/ci.yml",
 	}
 	for _, name := range required {
 		if _, err := os.Stat(filepath.Join(destination, filepath.FromSlash(name))); err != nil {
@@ -284,7 +282,7 @@ func TestVueAppHasRequiredFiles(t *testing.T) {
 	}
 	destination := filepath.Join(t.TempDir(), "app")
 	_, err = service.Create(context.Background(), create.Request{
-		Destination: destination, TemplateID: "vue-app",
+		Destination: destination, TemplateID: "vue",
 		Project: templateengine.Project{
 			Name: "Example", Module: "example-app", Description: "An example app.",
 			Author: "Example Authors", License: "MIT", Language: "typescript",
@@ -325,7 +323,7 @@ func TestNextAppHasRequiredFiles(t *testing.T) {
 	}
 	destination := filepath.Join(t.TempDir(), "app")
 	_, err = service.Create(context.Background(), create.Request{
-		Destination: destination, TemplateID: "next-app",
+		Destination: destination, TemplateID: "next",
 		Project: templateengine.Project{
 			Name: "Example", Module: "example-app", Description: "An example app.",
 			Author: "Example Authors", License: "MIT", Language: "typescript",

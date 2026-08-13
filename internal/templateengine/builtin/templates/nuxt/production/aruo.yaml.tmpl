@@ -1,0 +1,32 @@
+apiVersion: aruo.dev/v1alpha1
+project:
+  name: {{ .Project.Name }}
+  kind: web-application
+  language: {{ .Project.Language }}
+  license: {{ .Project.License }}
+template:
+  id: {{ .Variables.TemplateID }}
+  version: builtin
+intent:
+  capabilities:
+    environment-validation:
+      status: SOLVED
+      evidence: server/utils/env.ts
+    database: { status: SOLVED, evidence: postgresql }
+    migrations: { status: SOLVED, evidence: committed-drizzle-sql }
+    api-validation: { status: SOLVED, evidence: zod-boundaries }
+    structured-logging: { status: SOLVED, evidence: json-request-logs }
+    health-checks: { status: SOLVED, evidence: live-and-ready }
+    security-headers: { status: SOLVED, evidence: server-middleware }
+    quality-gate: { status: SOLVED, evidence: npm-run-check }
+    authentication: { status: REQUIRED, reason: application-specific-identity }
+    authorization: { status: REQUIRED, reason: application-specific-policy }
+    distributed-rate-limiting:
+      status: OPTIONAL
+      reason: topology-and-risk-dependent
+    telemetry-export: { status: OPTIONAL, reason: provider-dependent }
+    backups: { status: REQUIRED, reason: operator-managed }
+    background-jobs: { status: DEFERRED, reason: no-default-workload }
+    production-readiness:
+      status: UNKNOWN
+      reason: requires-runtime-and-operator-evidence

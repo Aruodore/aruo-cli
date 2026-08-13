@@ -136,7 +136,7 @@ func TestReactApp(t *testing.T) {
 			License:     "MIT",
 			Language:    "typescript",
 		},
-		Variables: map[string]any{"IncludeInstall": false, "TemplateID": "react-app"},
+		Variables: map[string]any{"IncludeInstall": false, "TemplateID": "react"},
 	})
 	if err != nil {
 		t.Fatalf("Render() error = %v", err)
@@ -146,8 +146,8 @@ func TestReactApp(t *testing.T) {
 	for _, file := range plan.Files {
 		files[file.Path] = string(file.Content)
 	}
-	if len(files) != 30 {
-		t.Errorf("file count = %d, want 30", len(files))
+	if len(files) != 33 {
+		t.Errorf("file count = %d, want 33", len(files))
 	}
 	if pkg := files["package.json"]; !strings.Contains(pkg, `"name": "example-app"`) || !strings.Contains(pkg, `"react"`) {
 		t.Errorf("package.json = %q", pkg)
@@ -179,7 +179,7 @@ func TestNuxtApp(t *testing.T) {
 			License:     "MIT",
 			Language:    "typescript",
 		},
-		Variables: map[string]any{"IncludeInstall": false, "TemplateID": "nuxt-app"},
+		Variables: map[string]any{"IncludeInstall": false, "TemplateID": "nuxt"},
 	})
 	if err != nil {
 		t.Fatalf("Render() error = %v", err)
@@ -189,17 +189,29 @@ func TestNuxtApp(t *testing.T) {
 	for _, file := range plan.Files {
 		files[file.Path] = string(file.Content)
 	}
-	if len(files) != 28 {
-		t.Errorf("file count = %d, want 28", len(files))
+	if len(files) != 48 {
+		t.Errorf("file count = %d, want 48", len(files))
 	}
-	if pkg := files["package.json"]; !strings.Contains(pkg, `"name": "example-app"`) || !strings.Contains(pkg, `"nuxt"`) || !strings.Contains(pkg, `"@nuxt/ui"`) {
+	if pkg := files["package.json"]; !strings.Contains(pkg, `"name": "example-app"`) || !strings.Contains(pkg, `"nuxt"`) || !strings.Contains(pkg, `"check"`) {
 		t.Errorf("package.json = %q", pkg)
 	}
 	if app := files["app/app.vue"]; !strings.Contains(app, "<h1>Example</h1>") {
 		t.Errorf("app/app.vue = %q", app)
 	}
-	if test := files["tests/app.test.ts"]; !strings.Contains(test, `toContain("Example")`) {
-		t.Errorf("tests/app.test.ts = %q", test)
+	for _, path := range []string{
+		"AGENTS.md", ".env.example", "Dockerfile", "compose.yaml", "aruo.yaml",
+		"server/api/health/live.get.ts", "server/api/health/ready.get.ts", "server/middleware/security-headers.ts",
+		"server/db/migrations/0000_initial.sql", ".github/workflows/ci.yml",
+	} {
+		if _, exists := files[path]; !exists {
+			t.Errorf("missing production contract file %q", path)
+		}
+	}
+	if manifest := files["aruo.yaml"]; !strings.Contains(manifest, "status: REQUIRED") || !strings.Contains(manifest, "status: SOLVED") {
+		t.Errorf("aruo.yaml does not expose capabilities and limitations: %q", manifest)
+	}
+	if agents := files["AGENTS.md"]; !strings.Contains(agents, "Never disable validation") || !strings.Contains(agents, "server-side") {
+		t.Errorf("AGENTS.md lacks required safety constraints: %q", agents)
 	}
 }
 
@@ -256,7 +268,7 @@ func TestNextApp(t *testing.T) {
 			License:     "MIT",
 			Language:    "typescript",
 		},
-		Variables: map[string]any{"IncludeInstall": false, "TemplateID": "next-app"},
+		Variables: map[string]any{"IncludeInstall": false, "TemplateID": "next"},
 	})
 	if err != nil {
 		t.Fatalf("Render() error = %v", err)
@@ -266,8 +278,8 @@ func TestNextApp(t *testing.T) {
 	for _, file := range plan.Files {
 		files[file.Path] = string(file.Content)
 	}
-	if len(files) != 28 {
-		t.Errorf("file count = %d, want 28", len(files))
+	if len(files) != 31 {
+		t.Errorf("file count = %d, want 31", len(files))
 	}
 	if pkg := files["package.json"]; !strings.Contains(pkg, `"name": "example-app"`) || !strings.Contains(pkg, `"next"`) {
 		t.Errorf("package.json = %q", pkg)

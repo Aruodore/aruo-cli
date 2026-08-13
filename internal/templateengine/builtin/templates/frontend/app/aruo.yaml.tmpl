@@ -1,0 +1,26 @@
+apiVersion: aruo.dev/v1alpha1
+project:
+  name: {{ .Project.Name }}
+  kind: web-frontend
+  language: {{ .Project.Language }}
+  license: {{ .Project.License }}
+template:
+  id: {{ .Variables.TemplateID }}
+  version: builtin
+intent:
+  capabilities:
+    quality-gate: { status: SOLVED, evidence: npm-run-check }
+    type-safety: { status: SOLVED, evidence: strict-typescript }
+    unit-tests: { status: SOLVED, evidence: vitest }
+    production-build: { status: SOLVED, evidence: vite-build }
+    dependency-audit: { status: SOLVED, evidence: ci-high-severity-gate }
+    ai-contract: { status: SOLVED, evidence: AGENTS.md }
+    authentication: { status: REQUIRED, reason: application-specific-backend }
+    authorization: { status: REQUIRED, reason: must-be-enforced-server-side }
+    api-validation: { status: REQUIRED, reason: depends-on-api-contract }
+    deployment: { status: REQUIRED, reason: hosting-platform-not-selected }
+    observability: { status: OPTIONAL, reason: provider-and-privacy-dependent }
+    database: { status: DEFERRED, reason: frontend-has-no-database-authority }
+    production-readiness:
+      status: UNKNOWN
+      reason: requires-runtime-and-operator-evidence

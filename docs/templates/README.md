@@ -37,6 +37,12 @@ There are no hidden executable hooks. Required commands become visible typed pla
 
 See the [architecture extension checklist](../architecture/template-engine.md#extension-checklist) before expanding the renderer.
 
+## Production application baseline
+
+Every application template is a production baseline; there is no separate “production app” product. `nuxt` establishes a Nuxt modular monolith with PostgreSQL migrations, validated configuration and API input, structured request logs, liveness/readiness probes, a non-root production container, a complete local quality gate, and an `AGENTS.md` contract. Next.js carries the same intent and quality contract while leaving product-specific server capabilities explicit. React and Vue provide production-baseline frontend artifacts and mark backend-owned concerns as required instead of pretending a static client can solve them.
+
+The generated `aruo.yaml` declares both capabilities and known limitations so future `aruo doctor` policies can inspect intent without guessing from filenames. Authentication, authorization, distributed rate limiting, telemetry export, backups, and provider-specific deployment remain explicitly unconfigured. The blueprint must not imply those outcomes until it can provide behavioral evidence for them.
+
 ## Validation
 
 Each blueprint tests minimal/default/maximal supported compositions, determinism, native build/test/package/docs, platform paths/line endings, upgrades from supported versions, edited-file conflicts, and license/security rules. Unsupported combinations fail during planning with explanation and alternatives.
