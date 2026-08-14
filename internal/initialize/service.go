@@ -13,9 +13,9 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-)
 
-const contractVersion = "2"
+	"github.com/aruodore/aruo-cli/internal/contractmeta"
+)
 
 //go:embed contract
 var contractFiles embed.FS
@@ -177,13 +177,17 @@ func renderContractWithOverrides(stack Stack, overrides map[string][]byte) ([]pl
 	managed := struct {
 		ContractVersion string            `json:"contractVersion"`
 		Files           map[string]string `json:"files"`
-	}{ContractVersion: contractVersion, Files: map[string]string{}}
+	}{ContractVersion: contractmeta.CurrentVersion, Files: map[string]string{}}
 	for _, file := range files {
 		if file.path == "aruo.yaml" {
 			continue
 		}
 		sum := sha256.Sum256(file.content)
 		managed.Files[file.path] = "sha256:" + hex.EncodeToString(sum[:])
+	}
+	required, _ := contractmeta.RequiredFiles(contractmeta.CurrentVersion)
+	if err := validateManagedInventory(managed.Files, required); err != nil {
+		return nil, err
 	}
 	managedContent, err := json.MarshalIndent(managed, "", "  ")
 	if err != nil {
@@ -193,6 +197,22 @@ func renderContractWithOverrides(stack Stack, overrides map[string][]byte) ([]pl
 	files = append(files, plannedFile{path: ".aruo/managed.json", content: managedContent})
 	sort.Slice(files, func(i, j int) bool { return files[i].path < files[j].path })
 	return files, nil
+}
+
+func validateManagedInventory(files map[string]string, required []string) error {
+	expected := make(map[string]struct{}, len(required))
+	for _, path := range required {
+		expected[path] = struct{}{}
+		if files[path] == "" {
+			return fmt.Errorf("embedded contract version %s is missing managed file %q", contractmeta.CurrentVersion, path)
+		}
+	}
+	for path := range files {
+		if _, present := expected[path]; !present {
+			return fmt.Errorf("embedded contract version %s contains unexpected managed file %q", contractmeta.CurrentVersion, path)
+		}
+	}
+	return nil
 }
 
 func renderStack(stack Stack) []byte {

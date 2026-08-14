@@ -9,24 +9,13 @@ import (
 	"io/fs"
 	"sort"
 	"strings"
+
+	"github.com/aruodore/aruo-cli/internal/contractmeta"
 )
 
 type managedContract struct {
 	ContractVersion string            `json:"contractVersion"`
 	Files           map[string]string `json:"files"`
-}
-
-var requiredContractFiles = []string{
-	".aruo/contract.yaml",
-	".aruo/rules/api.md",
-	".aruo/rules/architecture.md",
-	".aruo/rules/data.md",
-	".aruo/rules/delivery.md",
-	".aruo/rules/observability.md",
-	".aruo/rules/security.md",
-	".aruo/rules/testing.md",
-	".aruo/stack.yaml",
-	"AGENTS.md",
 }
 
 func auditContract(repository Repository) (ContractReport, error) {
@@ -49,13 +38,14 @@ func auditContract(repository Repository) (ContractReport, error) {
 		addContractFinding(&report, "managed contract metadata is incomplete", "Reinitialize the contract in a clean repository or restore valid managed metadata.")
 		report.Valid = false
 	}
-	if managed.ContractVersion != "1" && managed.ContractVersion != "2" {
+	requiredFiles, supportedVersion := contractmeta.RequiredFiles(managed.ContractVersion)
+	if !supportedVersion {
 		addContractFinding(&report, fmt.Sprintf("managed contract version %q is unsupported", managed.ContractVersion), "Upgrade Aruo or restore a supported managed contract version.")
 		report.Valid = false
 	}
-	if managed.ContractVersion == "1" || managed.ContractVersion == "2" {
-		required := make(map[string]struct{}, len(requiredContractFiles))
-		for _, name := range requiredContractFiles {
+	if supportedVersion {
+		required := make(map[string]struct{}, len(requiredFiles))
+		for _, name := range requiredFiles {
 			required[name] = struct{}{}
 			if _, present := managed.Files[name]; !present {
 				addContractFinding(&report, fmt.Sprintf("managed contract file %q is absent from the manifest", name), "Restore the complete managed manifest for this contract version.")

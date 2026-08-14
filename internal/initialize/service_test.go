@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"sort"
 	"testing"
+
+	"github.com/aruodore/aruo-cli/internal/contractmeta"
 )
 
 var expectedInstalledContractPaths = []string{
@@ -79,7 +81,7 @@ func TestServicePlansAndAppliesContractWithoutChangingApplication(t *testing.T) 
 	if err := json.Unmarshal(managedContent, &managed); err != nil {
 		t.Fatal(err)
 	}
-	if managed.ContractVersion != contractVersion || len(managed.Files) != 10 || managed.Files["AGENTS.md"] == "" || managed.Files["aruo.yaml"] != "" || managed.Files[".aruo/managed.json"] != "" {
+	if managed.ContractVersion != contractmeta.CurrentVersion || len(managed.Files) != 10 || managed.Files["AGENTS.md"] == "" || managed.Files["aruo.yaml"] != "" || managed.Files[".aruo/managed.json"] != "" {
 		t.Fatalf("managed manifest = %#v, want managed AGENTS and application-owned aruo.yaml", managed)
 	}
 	for _, name := range expectedInstalledContractPaths {

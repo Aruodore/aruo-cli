@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"testing"
 	"testing/fstest"
+
+	"github.com/aruodore/aruo-cli/internal/contractmeta"
 )
 
 func TestAuditContractVerifiesCompleteManagedInventory(t *testing.T) {
@@ -18,7 +20,8 @@ func TestAuditContractVerifiesCompleteManagedInventory(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !report.Present || !report.Valid || report.BlockingFindings != 0 || len(report.Files) != len(requiredContractFiles) {
+	requiredFiles, _ := contractmeta.RequiredFiles("2")
+	if !report.Present || !report.Valid || report.BlockingFindings != 0 || len(report.Files) != len(requiredFiles) {
 		t.Fatalf("report = %#v, want complete verified contract", report)
 	}
 	for _, file := range report.Files {
@@ -103,7 +106,11 @@ func validContractRepository(t *testing.T, version string) fstest.MapFS {
 	t.Helper()
 	files := fstest.MapFS{}
 	manifest := managedContract{ContractVersion: version, Files: map[string]string{}}
-	for _, name := range requiredContractFiles {
+	requiredFiles, supported := contractmeta.RequiredFiles(version)
+	if !supported {
+		requiredFiles, _ = contractmeta.RequiredFiles(contractmeta.CurrentVersion)
+	}
+	for _, name := range requiredFiles {
 		content := []byte("managed content for " + name)
 		digest := sha256.Sum256(content)
 		manifest.Files[name] = "sha256:" + hex.EncodeToString(digest[:])
