@@ -48,7 +48,31 @@ type Report struct {
 	Grade         string          `json:"grade"`
 	Categories    []CategoryScore `json:"categories"`
 	Assessments   []Assessment    `json:"assessments"`
+	Contract      ContractReport  `json:"contract"`
 	Intent        IntentReport    `json:"intent"`
+}
+
+// ContractFile reports the integrity of one Aruo-managed file.
+type ContractFile struct {
+	Path   string `json:"path"`
+	Status string `json:"status"`
+}
+
+// ContractFinding reports an invalid or modified managed contract.
+type ContractFinding struct {
+	Severity string `json:"severity"`
+	Message  string `json:"message"`
+	Action   string `json:"action"`
+}
+
+// ContractReport audits the installed AI engineering contract independently of application intent.
+type ContractReport struct {
+	Present          bool              `json:"present"`
+	Valid            bool              `json:"valid"`
+	Version          string            `json:"version,omitempty"`
+	Files            []ContractFile    `json:"files,omitempty"`
+	Findings         []ContractFinding `json:"findings,omitempty"`
+	BlockingFindings int               `json:"blockingFindings"`
 }
 
 // CapabilityStatus is the repository's explicit production-intent vocabulary.

@@ -9,6 +9,7 @@ import (
 	"github.com/aruodore/aruo-cli/internal/cli/iostreams"
 	"github.com/aruodore/aruo-cli/internal/create"
 	"github.com/aruodore/aruo-cli/internal/doctor"
+	"github.com/aruodore/aruo-cli/internal/initialize"
 	"github.com/aruodore/aruo-cli/internal/tux"
 	"github.com/aruodore/aruo-cli/internal/tux/session"
 	"github.com/aruodore/aruo-cli/internal/tux/term"
@@ -41,7 +42,7 @@ func (f sessionFactory) build(ctx context.Context, forceNoInput bool) (*session.
 }
 
 // NewRoot constructs a fresh command tree for each invocation.
-func NewRoot(streams iostreams.IOStreams, build buildinfo.Info, templateCatalog catalog.Catalog, creator *create.Service, doctorService *doctor.Service, environment map[string]string, probe term.Probe) *cobra.Command {
+func NewRoot(streams iostreams.IOStreams, build buildinfo.Info, templateCatalog catalog.Catalog, creator *create.Service, initializer *initialize.Service, doctorService *doctor.Service, environment map[string]string, probe term.Probe) *cobra.Command {
 	global := newGlobalOptions()
 	factory := sessionFactory{streams: streams, environment: environment, probe: probe, global: global}
 
@@ -65,6 +66,9 @@ func NewRoot(streams iostreams.IOStreams, build buildinfo.Info, templateCatalog 
 	root.CompletionOptions.DisableDefaultCmd = false
 	global.register(root)
 	root.AddCommand(newVersion(build))
+	if initializer != nil {
+		root.AddCommand(newInit(factory, initializer))
+	}
 	if templateCatalog != nil && creator != nil {
 		root.AddCommand(newCreate(factory, templateCatalog, creator))
 	}

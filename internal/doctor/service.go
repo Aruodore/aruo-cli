@@ -37,6 +37,10 @@ func (s *Service) Audit(ctx context.Context, target string) (Report, error) {
 	if err != nil {
 		return Report{}, err
 	}
+	report.Contract, err = auditContract(repository)
+	if err != nil {
+		return Report{}, fmt.Errorf("audit engineering contract: %w", err)
+	}
 	report.Intent, err = auditIntent(repository)
 	if err != nil {
 		return Report{}, fmt.Errorf("audit intent manifest: %w", err)

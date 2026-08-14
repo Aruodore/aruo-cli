@@ -41,7 +41,7 @@ The score is not comparable across future policy versions without migration note
 
 ## Production intent audit
 
-When `aruo.yaml` declares `intent.capabilities`, Doctor audits that contract separately from `aruo.repository-health/v1`. This preserves score comparability while making production responsibilities visible. Report schema version 2 includes normalized declarations, evidence state, findings, and a blocking-finding count.
+When `aruo.yaml` declares `intent.capabilities`, Doctor audits that intent separately from `aruo.repository-health/v1`. This preserves score comparability while making production responsibilities visible. Report schema version 3 includes managed-contract integrity, normalized declarations, evidence state, findings, and blocking-finding counts.
 
 - `SOLVED` requires evidence. A safe repository-relative path is `VERIFIED` only when it exists; a missing or unsafe path is blocking. Semantic evidence such as `npm-run-check` is `DECLARED`, because a local static audit cannot prove its behavior.
 - `REQUIRED` is an unresolved production responsibility and is blocking. It must include a reason.

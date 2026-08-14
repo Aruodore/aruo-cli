@@ -22,7 +22,7 @@ func TestNewRootOmitsCommandsForNilDependencies(t *testing.T) {
 	t.Parallel()
 
 	root := NewRoot(iostreams.IOStreams{In: strings.NewReader(""), Out: &bytes.Buffer{}, ErrOut: &bytes.Buffer{}},
-		buildinfo.Info{Version: "dev"}, nil, nil, nil, nil, fakeProbe{})
+		buildinfo.Info{Version: "dev"}, nil, nil, nil, nil, nil, fakeProbe{})
 	root.InitDefaultCompletionCmd()
 
 	names := map[string]bool{}

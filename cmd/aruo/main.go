@@ -12,6 +12,7 @@ import (
 	"github.com/aruodore/aruo-cli/internal/cli/iostreams"
 	"github.com/aruodore/aruo-cli/internal/create"
 	"github.com/aruodore/aruo-cli/internal/doctor"
+	"github.com/aruodore/aruo-cli/internal/initialize"
 	"github.com/aruodore/aruo-cli/internal/tux/lifecycle"
 	"github.com/aruodore/aruo-cli/internal/tux/term"
 )
@@ -64,6 +65,7 @@ func run() int {
 		Build:       buildinfo.Current(),
 		Catalog:     templateCatalog,
 		Creator:     creator,
+		Init:        initialize.NewService(),
 		Doctor:      doctorService,
 		Logger:      slog.New(slog.NewTextHandler(os.Stderr, nil)),
 		Streams:     streams,

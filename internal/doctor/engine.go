@@ -55,7 +55,7 @@ func (e *Engine) Run(ctx context.Context, repositoryName string, repository Repo
 	sort.Slice(assessments, func(i, j int) bool { return assessments[i].ID < assessments[j].ID })
 
 	categoryMap := map[Category]*CategoryScore{}
-	report := Report{SchemaVersion: "2", Policy: PolicyV1, Repository: repositoryName, Assessments: assessments}
+	report := Report{SchemaVersion: "3", Policy: PolicyV1, Repository: repositoryName, Assessments: assessments}
 	for _, assessment := range assessments {
 		report.Score += assessment.Points
 		report.MaxScore += assessment.MaxPoints

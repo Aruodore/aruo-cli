@@ -82,8 +82,9 @@ for measured evidence.
   `--color=auto|always|never`, `--motion=auto|always|never`; `create`'s
   `--non-interactive` is deprecated in favor of `--no-input` but still works.
   `doctor --format human|json` uses the same adapters for human output and a
-  typed report for automation. Report schema version 2 adds production-intent
-  findings while preserving the `repository-health/v1` score.
+  typed report for automation. Report schema version 3 adds managed-contract
+  integrity and production-intent findings while preserving the
+  `repository-health/v1` score.
 - Shell completion (bash/zsh/fish/PowerShell) via Cobra, including dynamic,
   local, sub-100ms completion for `--template`/`--language`/`--kind`,
   `--format`, `--color`, and `--motion`.

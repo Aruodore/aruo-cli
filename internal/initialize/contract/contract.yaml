@@ -1,0 +1,20 @@
+apiVersion: aruo.dev/v1alpha1
+kind: EngineeringContract
+version: 1
+principles:
+  - explicit-over-implicit
+  - simple-over-clever
+  - secure-defaults
+  - observable-behavior
+  - validated-input
+  - graceful-failure
+  - tests-over-assumptions
+completion:
+  require:
+    - relevant-quality-checks-pass
+    - diff-reviewed
+    - tests-and-docs-match-behavior
+    - aruo-intent-remains-honest
+ownership:
+  managed: [AGENTS.md, .aruo]
+  applicationOwned: [aruo.yaml, application-code]

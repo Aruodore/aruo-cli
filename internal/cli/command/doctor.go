@@ -56,6 +56,9 @@ func newDoctor(factory sessionFactory, service *doctor.Service) *cobra.Command {
 			if err != nil {
 				return err
 			}
+			if report.Contract.BlockingFindings > 0 {
+				return &clierror.Error{Code: 3, Err: fmt.Errorf("repository has %d blocking contract finding(s)", report.Contract.BlockingFindings), Silent: true}
+			}
 			if report.Intent.BlockingFindings > 0 {
 				return &clierror.Error{Code: 3, Err: fmt.Errorf("repository has %d blocking intent finding(s)", report.Intent.BlockingFindings), Silent: true}
 			}
@@ -122,7 +125,31 @@ func renderDoctorHuman(ctx context.Context, presenter tux.Presenter, report doct
 			return err
 		}
 	}
+	if err := renderDoctorContract(ctx, presenter, report.Contract); err != nil {
+		return err
+	}
 	return renderDoctorIntent(ctx, presenter, report.Intent)
+}
+
+func renderDoctorContract(ctx context.Context, presenter tux.Presenter, report doctor.ContractReport) error {
+	if !report.Present {
+		return presenter.Message(ctx, tux.Message{Kind: tux.MessageInfo, Text: "AI engineering contract: not installed (run aruo init)."})
+	}
+	kind := tux.MessageSuccess
+	if !report.Valid {
+		kind = tux.MessageInfo
+	}
+	if err := presenter.Message(ctx, tux.Message{Kind: kind, Text: fmt.Sprintf("AI engineering contract: version %s, %d managed files, %d blocking findings", report.Version, len(report.Files), report.BlockingFindings)}); err != nil {
+		return err
+	}
+	if len(report.Findings) == 0 {
+		return nil
+	}
+	lines := []string{"Contract findings:"}
+	for _, finding := range report.Findings {
+		lines = append(lines, fmt.Sprintf("  - [%s] %s", finding.Severity, finding.Message), "    "+finding.Action)
+	}
+	return presenter.Message(ctx, tux.Message{Kind: tux.MessageInfo, Text: strings.Join(lines, "\n")})
 }
 
 func renderDoctorIntent(ctx context.Context, presenter tux.Presenter, report doctor.IntentReport) error {

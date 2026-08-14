@@ -36,7 +36,7 @@ func newCreate(factory sessionFactory, templateCatalog catalog.Catalog, creator 
 	options := createOptions{}
 	command := &cobra.Command{
 		Use:   "create [name-or-path]",
-		Short: "Create a production-ready project",
+		Short: "Create a project from a built-in template",
 		Example: `  aruo create my-library
   aruo create tools/my-library
   aruo create my-library --template go-library`,

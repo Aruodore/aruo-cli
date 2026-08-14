@@ -13,6 +13,7 @@ import (
 	"github.com/aruodore/aruo-cli/internal/cli/iostreams"
 	"github.com/aruodore/aruo-cli/internal/create"
 	"github.com/aruodore/aruo-cli/internal/doctor"
+	"github.com/aruodore/aruo-cli/internal/initialize"
 	"github.com/aruodore/aruo-cli/internal/tux"
 	"github.com/aruodore/aruo-cli/internal/tux/term"
 )
@@ -23,6 +24,7 @@ type Dependencies struct {
 	Build   buildinfo.Info
 	Catalog catalog.Catalog
 	Creator *create.Service
+	Init    *initialize.Service
 	Doctor  *doctor.Service
 	Logger  *slog.Logger
 	Streams iostreams.IOStreams
@@ -41,7 +43,7 @@ func Run(ctx context.Context, args []string, dependencies Dependencies) int {
 	if environment == nil {
 		environment = map[string]string{}
 	}
-	root := command.NewRoot(dependencies.Streams, dependencies.Build, dependencies.Catalog, dependencies.Creator, dependencies.Doctor, environment, dependencies.Probe)
+	root := command.NewRoot(dependencies.Streams, dependencies.Build, dependencies.Catalog, dependencies.Creator, dependencies.Init, dependencies.Doctor, environment, dependencies.Probe)
 	root.SetArgs(args)
 
 	if err := root.ExecuteContext(ctx); err != nil {

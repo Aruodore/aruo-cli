@@ -2,7 +2,7 @@
 
 ## Current stage
 
-Aruo is at [v0.1.0](https://github.com/Aruodore/aruo-cli/releases/tag/v0.1.0), pre-1.0: `aruo create` (guided and flag-driven project creation from a growing template catalog) and `aruo doctor` (versioned repository health scoring) are real, tested commands. See [README.md](README.md) for exactly what they do today. Everything below is what's still ahead, not a description of a frozen design-only phase.
+Aruo is pre-1.0. `aruo init` installs a managed AI engineering contract into an existing repository, `aruo doctor` audits that contract plus application intent and repository health, and the earlier `aruo create` catalog remains available as a secondary convenience. The next product milestone is safe managed-contract updates, not larger application templates. See [README.md](README.md) for exactly what works today.
 
 ## 0.1 — prove the model
 
@@ -41,4 +41,3 @@ Evidence-grounded architecture assistance, policy simulation, onboarding generat
 Hosted accounts, public plugin marketplace, autonomous code changes, deployment-provider abstraction, IDE daemon, and AI-generated fixes are deferred until the local deterministic engine is trustworthy.
 
 Milestones are capability gates, not date promises. See [the release process](docs/development/release.md) for release readiness.
-

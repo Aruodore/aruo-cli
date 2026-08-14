@@ -18,7 +18,7 @@ Narrative troubleshooting remains hand-written.
 
 ## Implemented surface
 
-The current implementation exposes `aruo`, `aruo help`, `aruo version`, `aruo create`, and the read-only repository health command `aruo doctor`. The broader model below remains a design target. See [CLI Application Architecture](../architecture/cli-application.md), [Create Command Architecture](../architecture/create-command.md), and [Repository Doctor Architecture](../architecture/doctor.md).
+The current implementation exposes `aruo`, `aruo help`, `aruo version`, `aruo init`, `aruo create`, and `aruo doctor`. `init` installs the managed AI engineering contract into an existing repository; `create` remains a template convenience; `doctor` audits contract integrity, application intent, and repository health. See [Init Command Architecture](../architecture/init-command.md), [Create Command Architecture](../architecture/create-command.md), and [Repository Doctor Architecture](../architecture/doctor.md).
 
 ### Create
 
