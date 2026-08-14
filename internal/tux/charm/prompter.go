@@ -41,6 +41,7 @@ func (p *Prompter) Input(ctx context.Context, request tux.InputRequest) (string,
 		Key(request.ID).
 		Title(request.Label).
 		Description(request.Description).
+		Prompt(": ").
 		Placeholder(placeholder).
 		Suggestions(request.Suggestions).
 		Value(&value).
@@ -72,6 +73,7 @@ func (p *Prompter) Secret(ctx context.Context, request tux.SecretRequest) (strin
 		Key(request.ID).
 		Title(request.Label).
 		Description(request.Description).
+		Prompt(": ").
 		EchoMode(huh.EchoModeNone).
 		Value(&value).
 		Validate(func(value string) error {
@@ -127,6 +129,9 @@ func (p *Prompter) Select(ctx context.Context, request tux.SelectRequest) (tux.O
 		Description(request.Description).
 		Options(options...).
 		Value(&value)
+	if request.HighlightActive {
+		field.WithTheme(newHighlightedHuhTheme(p.capabilities, p.policy))
+	}
 	if request.Validate != nil {
 		field.Validate(request.Validate)
 	}
@@ -204,6 +209,7 @@ func (p *Prompter) runForm(ctx context.Context, form *huh.Form) error {
 		WithInput(p.in).
 		WithOutput(p.out).
 		WithWidth(width).
+		WithTheme(newHuhTheme(p.capabilities, p.policy)).
 		WithAccessible(p.policy.Accessible)
 	if err := form.RunWithContext(ctx); err != nil {
 		switch {
@@ -217,7 +223,7 @@ func (p *Prompter) runForm(ctx context.Context, form *huh.Form) error {
 }
 
 func (p *Prompter) huhOptions(options []tux.Option, defaults map[tux.OptionID]struct{}) []huh.Option[tux.OptionID] {
-	colorEligible := p.policy.Color != tux.FeatureNever && p.capabilities.Color == tux.ColorTrueColor
+	colorEligible := p.policy.Color != tux.FeatureNever && !p.policy.Accessible && p.capabilities.Color == tux.ColorTrueColor
 	result := make([]huh.Option[tux.OptionID], 0, len(options))
 	for _, option := range options {
 		if option.Disabled {
@@ -225,7 +231,7 @@ func (p *Prompter) huhOptions(options []tux.Option, defaults map[tux.OptionID]st
 		}
 		label := option.Label
 		if option.Description != "" {
-			label += " — " + option.Description
+			label += "  " + option.Description
 		}
 		if colorEligible && option.Color != "" {
 			label = lipgloss.NewStyle().Foreground(lipgloss.Color(option.Color)).Render(label)

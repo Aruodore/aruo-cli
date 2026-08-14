@@ -1,0 +1,37 @@
+apiVersion: aruo.dev/v1alpha1
+kind: EngineeringContract
+version: 2
+normativeTerms:
+  MUST: required
+  SHOULD: default-unless-a-reason-is-recorded
+  CONDITIONAL: applies-only-when-the-named-capability-exists-or-is-changed
+principles:
+  - preserve-scope-and-existing-conventions
+  - explicit-over-implicit
+  - simple-over-clever
+  - secure-at-trust-boundaries-and-sinks
+  - evidence-over-claims
+  - failures-are-safe-and-diagnosable
+  - verification-is-proportional-to-risk
+completion:
+  require:
+    - relevant-repository-provided-checks-pass-or-unverified-results-are-reported
+    - diff-reviewed-for-scope-security-and-unintended-changes
+    - tests-and-documentation-match-changed-behavior
+    - materially-affected-aruo-intent-remains-honest
+  doNotRequire:
+    - adding-tools-or-infrastructure-solely-to-satisfy-an-inapplicable-rule
+ownership:
+  managed:
+    - AGENTS.md
+    - .aruo/contract.yaml
+    - .aruo/rules
+    - .aruo/stack.yaml
+    - .aruo/managed.json
+  applicationOwned:
+    - aruo.yaml
+    - AGENTS.local.md
+    - application-code
+  policy:
+    - preserve-application-owned-content-during-managed-updates
+    - do-not-place-application-specific-decisions-in-managed-files

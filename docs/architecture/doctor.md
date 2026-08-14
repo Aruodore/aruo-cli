@@ -10,7 +10,7 @@ The name intentionally broadens the earlier placeholder meaning of “installati
 CLI → read-only repository snapshot → check registry → typed assessments
                                                    │
                                                    ▼
-                                     score + recommendations
+                                  score + intent findings
                                       ├── human renderer
                                       └── versioned JSON
 ```
@@ -35,9 +35,24 @@ The first policy is versioned as `aruo.repository-health/v1` and totals 100 poin
 | Security | 10 | Private reporting and dependency maintenance are documented/configured |
 | GitHub | 10 | Contribution, dependency, ownership, and release automation are represented |
 
-Scores are rounded only for display; category points remain explicit. Grades are `A` (90–100), `B` (80–89), `C` (70–79), `D` (60–69), and `F` below 60. A default minimum of 80 makes `doctor` exit with findings code 3 while still producing the complete report. Operational failures remain exit 1.
+Scores are rounded only for display; category points remain explicit. Grades are `A` (90–100), `B` (80–89), `C` (70–79), `D` (60–69), and `F` below 60. A default minimum of 80, or any blocking intent finding, makes `doctor` exit with findings code 3 while still producing the complete report. Operational failures remain exit 1.
 
 The score is not comparable across future policy versions without migration notes. New rules cannot silently change v1 results; a new policy version or explicitly documented reweighting is required.
+
+## Production intent audit
+
+When `aruo.yaml` declares `intent.capabilities`, Doctor audits that intent separately from `aruo.repository-health/v1`. This preserves score comparability while making production responsibilities visible. Report schema version 3 includes managed-contract integrity, normalized declarations, evidence state, findings, and blocking-finding counts.
+
+- `SOLVED` requires evidence. A safe repository-relative path is `VERIFIED` only when it exists; a missing or unsafe path is blocking. Semantic evidence such as `npm-run-check` is `DECLARED`, because a local static audit cannot prove its behavior.
+- `REQUIRED` is an unresolved production responsibility and is blocking. It must include a reason.
+- `OPTIONAL`, `DEFERRED`, and `UNKNOWN` are non-blocking when their reason is documented. They remain visible rather than being treated as success.
+- Invalid YAML, an unsupported API version, and unknown statuses are blocking manifest errors.
+
+A missing `aruo.yaml` is visible but does not block repositories that have not adopted the Aruo intent contract. Blocking intent findings produce exit code 3 after the complete human or JSON report is written, independently of `--minimum-score`.
+
+Doctor has a deliberately small registry of safe static evidence verifiers. It can inspect package scripts for complete quality gates and framework builds, confirm a declared test runner has discoverable tests, recognize strict TypeScript configuration, find high-severity dependency auditing in CI, locate committed SQL migrations, and confirm distinct liveness/readiness handlers. These checks read bounded repository files only; they never install dependencies or execute scripts.
+
+`VERIFIED` means the declared static convention was observed, not that runtime behavior succeeded. Claims that need execution, infrastructure, provider configuration, or semantic code analysis—such as a reachable database, effective authorization, correct logs, or secure middleware behavior—remain `DECLARED` until a future verifier has honest evidence. Unknown evidence identifiers also remain `DECLARED` for forward compatibility.
 
 ## Recommendations
 

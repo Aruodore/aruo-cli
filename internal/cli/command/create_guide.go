@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
-	"strings"
 
 	"github.com/aruodore/aruo-cli/internal/catalog"
 	"github.com/aruodore/aruo-cli/internal/tux"
@@ -83,9 +82,9 @@ func runGuide(ctx context.Context, prompter tux.Prompter, templateCatalog catalo
 			Select: func(tux.Answers) tux.SelectRequest {
 				kindOptions := make([]tux.Option, len(kinds))
 				for index, kind := range kinds {
-					kindOptions[index] = tux.Option{ID: tux.OptionID(kind), Label: kindLabel(kind), Description: kindEntryNames(languageFiltered, kind)}
+					kindOptions[index] = tux.Option{ID: tux.OptionID(kind), Label: kindLabel(kind)}
 				}
-				return tux.SelectRequest{ID: "kind", Label: "What are you building?", Options: kindOptions}
+				return tux.SelectRequest{ID: "kind", Label: "What are you building?", Options: kindOptions, HighlightActive: true}
 			},
 		},
 		{
@@ -98,7 +97,7 @@ func runGuide(ctx context.Context, prompter tux.Prompter, templateCatalog catalo
 					kind = string(value)
 				}
 				matching := filterEntries(languageFiltered, "", kind)
-				return tux.SelectRequest{ID: "template", Label: "Template", Options: templateOptions(matching)}
+				return tux.SelectRequest{ID: "template", Label: "Choose a foundation", Description: "Standard includes more infrastructure. Lean keeps the core focused.", Options: templateOptions(matching)}
 			},
 		},
 		{
@@ -127,8 +126,8 @@ func runGuide(ctx context.Context, prompter tux.Prompter, templateCatalog catalo
 					ID:          "author",
 					Label:       "Author or organization (Optional)",
 					Description: "Used in the license and project metadata.",
-					Example:     "Jane Doe or Acme, Inc.",
-					Placeholder: "Jane Doe or Acme, Inc.",
+					Example:     "Your name or organization",
+					Placeholder: "Your name or organization",
 					Optional:    true,
 					Default:     &gitAuthor,
 				}
@@ -210,14 +209,4 @@ func kindLabel(kind string) string {
 	default:
 		return kind
 	}
-}
-
-func kindEntryNames(entries []catalog.Entry, kind string) string {
-	names := make([]string, 0, len(entries))
-	for _, entry := range entries {
-		if entry.Kind == kind {
-			names = append(names, entry.Name)
-		}
-	}
-	return strings.Join(names, ", ")
 }

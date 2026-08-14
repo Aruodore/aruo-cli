@@ -1,0 +1,9 @@
+apiVersion: aruo.dev/v1alpha1
+intent:
+  capabilities:
+    ai-engineering-contract:
+      status: SOLVED
+      evidence: .aruo/contract.yaml
+    production-readiness:
+      status: UNKNOWN
+      reason: requires-application-runtime-and-operator-evidence

@@ -19,7 +19,7 @@ type Entry struct {
 	Kind        string
 	Description string
 	// Color is the ecosystem's real brand color as a truecolor hex value
-	// (for example Go's "#00ADD8"), an identity fact like Language rather
+	// (for example a terminal-readable variant of Go cyan), an identity fact like Language rather
 	// than a UI choice. Consumers with no color rendering ignore it;
 	// color-capable renderers apply it only when the active color policy
 	// permits color at all.

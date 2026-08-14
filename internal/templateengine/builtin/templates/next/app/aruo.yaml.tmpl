@@ -1,0 +1,27 @@
+apiVersion: aruo.dev/v1alpha1
+project:
+  name: {{ .Project.Name }}
+  kind: web-application
+  language: {{ .Project.Language }}
+  license: {{ .Project.License }}
+template:
+  id: {{ .Variables.TemplateID }}
+  version: builtin
+intent:
+  capabilities:
+    quality-gate: { status: SOLVED, evidence: npm-run-check }
+    type-safety: { status: SOLVED, evidence: strict-typescript }
+    unit-tests: { status: SOLVED, evidence: vitest }
+    production-build: { status: SOLVED, evidence: next-build }
+    ai-contract: { status: SOLVED, evidence: AGENTS.md }
+    authentication: { status: REQUIRED, reason: application-specific-identity }
+    authorization: { status: REQUIRED, reason: application-specific-policy }
+    environment-validation:
+      { status: REQUIRED, reason: no-required-runtime-values-yet }
+    database: { status: OPTIONAL, reason: product-data-model-dependent }
+    migrations: { status: DEFERRED, reason: no-database-selected }
+    observability: { status: OPTIONAL, reason: provider-dependent }
+    deployment: { status: REQUIRED, reason: platform-not-selected }
+    production-readiness:
+      status: UNKNOWN
+      reason: requires-runtime-and-operator-evidence

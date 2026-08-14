@@ -267,11 +267,11 @@ func TestRunGuideSkipsKindStepWhenCatalogHasOneKind(t *testing.T) {
 	}
 }
 
-func TestRunGuideKindStepOffersEcosystemNamesPerKind(t *testing.T) {
+func TestRunGuideKindStepOffersConciseChoices(t *testing.T) {
 	t.Parallel()
 
 	templateCatalog := fakeCatalog{entries: []catalog.Entry{
-		{ID: "next-app", Name: "Next.js application", Kind: "app", Licenses: []string{"MIT"}, DefaultLicense: "MIT"},
+		{ID: "next", Name: "Next.js", Kind: "app", Licenses: []string{"MIT"}, DefaultLicense: "MIT"},
 		{ID: "go-library", Name: "Go library", Kind: "library", Licenses: []string{"MIT"}, DefaultLicense: "MIT"},
 		{ID: "js-library", Name: "JavaScript library", Kind: "library", Licenses: []string{"MIT"}, DefaultLicense: "MIT"},
 	}}
@@ -286,10 +286,10 @@ func TestRunGuideKindStepOffersEcosystemNamesPerKind(t *testing.T) {
 			t.Fatalf("kind options = %#v, want 2 kinds", request.Options)
 		}
 		app, library := request.Options[0], request.Options[1]
-		if app.ID != "app" || app.Label != "Application" || app.Description != "Next.js application" {
+		if app.ID != "app" || app.Label != "Application" || app.Description != "" {
 			t.Errorf("app option = %+v", app)
 		}
-		if library.ID != "library" || library.Label != "Library" || library.Description != "Go library, JavaScript library" {
+		if library.ID != "library" || library.Label != "Library" || library.Description != "" {
 			t.Errorf("library option = %+v", library)
 		}
 	}
@@ -303,7 +303,7 @@ func TestRunGuideTemplateStepNarrowsToChosenKind(t *testing.T) {
 	t.Parallel()
 
 	templateCatalog := fakeCatalog{entries: []catalog.Entry{
-		{ID: "next-app", Kind: "app", Licenses: []string{"MIT"}, DefaultLicense: "MIT"},
+		{ID: "next", Kind: "app", Licenses: []string{"MIT"}, DefaultLicense: "MIT"},
 		{ID: "go-library", Kind: "library", Licenses: []string{"MIT"}, DefaultLicense: "MIT"},
 		{ID: "js-library", Kind: "library", Licenses: []string{"MIT"}, DefaultLicense: "MIT"},
 	}}
@@ -318,7 +318,7 @@ func TestRunGuideTemplateStepNarrowsToChosenKind(t *testing.T) {
 		t.Fatalf("template options = %#v, want the 2 library templates only", request.Options)
 	}
 	for _, option := range request.Options {
-		if option.ID == "next-app" {
+		if option.ID == "next" {
 			t.Errorf("template options include %q, want it narrowed away once kind=library", option.ID)
 		}
 	}

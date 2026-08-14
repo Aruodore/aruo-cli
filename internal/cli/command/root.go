@@ -3,12 +3,14 @@ package command
 
 import (
 	"context"
+	"strings"
 
 	"github.com/aruodore/aruo-cli/internal/buildinfo"
 	"github.com/aruodore/aruo-cli/internal/catalog"
 	"github.com/aruodore/aruo-cli/internal/cli/iostreams"
 	"github.com/aruodore/aruo-cli/internal/create"
 	"github.com/aruodore/aruo-cli/internal/doctor"
+	"github.com/aruodore/aruo-cli/internal/initialize"
 	"github.com/aruodore/aruo-cli/internal/tux"
 	"github.com/aruodore/aruo-cli/internal/tux/session"
 	"github.com/aruodore/aruo-cli/internal/tux/term"
@@ -41,13 +43,14 @@ func (f sessionFactory) build(ctx context.Context, forceNoInput bool) (*session.
 }
 
 // NewRoot constructs a fresh command tree for each invocation.
-func NewRoot(streams iostreams.IOStreams, build buildinfo.Info, templateCatalog catalog.Catalog, creator *create.Service, doctorService *doctor.Service, environment map[string]string, probe term.Probe) *cobra.Command {
+func NewRoot(streams iostreams.IOStreams, build buildinfo.Info, templateCatalog catalog.Catalog, creator *create.Service, initializer *initialize.Service, doctorService *doctor.Service, environment map[string]string, probe term.Probe) *cobra.Command {
 	global := newGlobalOptions()
 	factory := sessionFactory{streams: streams, environment: environment, probe: probe, global: global}
 
 	root := &cobra.Command{
 		Use:           "aruo",
 		Short:         "Build and maintain production-quality software projects",
+		Long:          "Aruo gives developers and AI agents explicit engineering intent,\nrepeatable project creation, and evidence-based repository checks.",
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		Args:          cobra.NoArgs,
@@ -55,6 +58,25 @@ func NewRoot(streams iostreams.IOStreams, build buildinfo.Info, templateCatalog 
 			return command.Help()
 		},
 	}
+	root.SetHelpTemplate(strings.TrimSpace(`
+ARUO
+  {{if .Long}}{{.Long}}{{else}}{{.Short}}{{end}}
+
+USAGE
+  {{.UseLine}}
+{{if .HasAvailableSubCommands}}
+COMMANDS
+{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}  {{rpad .Name .NamePadding }}  {{.Short}}
+{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}
+OPTIONS
+{{.LocalFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasAvailableInheritedFlags}}
+GLOBAL OPTIONS
+{{.InheritedFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasExample}}
+EXAMPLES
+{{.Example}}{{end}}
+
+Run "{{.CommandPath}} [command] --help" for command details.
+`) + "\n")
 
 	root.SetIn(streams.In)
 	root.SetOut(streams.Out)
@@ -65,6 +87,9 @@ func NewRoot(streams iostreams.IOStreams, build buildinfo.Info, templateCatalog 
 	root.CompletionOptions.DisableDefaultCmd = false
 	global.register(root)
 	root.AddCommand(newVersion(build))
+	if initializer != nil {
+		root.AddCommand(newInit(factory, initializer))
+	}
 	if templateCatalog != nil && creator != nil {
 		root.AddCommand(newCreate(factory, templateCatalog, creator))
 	}

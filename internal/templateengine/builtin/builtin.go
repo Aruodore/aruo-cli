@@ -126,14 +126,14 @@ func TSLibrary() (fs.FS, templateengine.Blueprint) {
 	}
 }
 
-// ReactApp returns the built-in React application proof bundle.
+// ReactApp returns the built-in React application baseline.
 func ReactApp() (fs.FS, templateengine.Blueprint) {
 	source, err := fs.Sub(templates, "templates")
 	if err != nil {
 		panic("embedded template subtree is invalid: " + err.Error())
 	}
 	return source, templateengine.Blueprint{
-		ID:       "aruo/react-app",
+		ID:       "aruo/react",
 		Language: "typescript",
 		Files: []templateengine.FileSpec{
 			{Source: "react/app/README.md.tmpl", Destination: "README.md", Template: true},
@@ -151,8 +151,6 @@ func ReactApp() (fs.FS, templateengine.Blueprint) {
 			{Source: "foundation/CONTRIBUTING.md", Destination: "CONTRIBUTING.md"},
 			{Source: "foundation/CODE_OF_CONDUCT.md", Destination: "CODE_OF_CONDUCT.md"},
 			{Source: "foundation/editorconfig", Destination: ".editorconfig"},
-			{Source: "foundation/aruo.yaml.tmpl", Destination: "aruo.yaml", Template: true},
-			{Source: "foundation/docs-README.md.tmpl", Destination: "docs/README.md", Template: true},
 			{Source: "foundation/issue-bug.yml", Destination: ".github/ISSUE_TEMPLATE/bug.yml"},
 			{Source: "foundation/issue-feature.yml", Destination: ".github/ISSUE_TEMPLATE/feature.yml"},
 			{Source: "foundation/pull-request.md", Destination: ".github/pull_request_template.md"},
@@ -161,53 +159,54 @@ func ReactApp() (fs.FS, templateengine.Blueprint) {
 			{Source: "foundation/release.yml", Destination: ".github/workflows/release.yml"},
 			{Source: "js/library/release-please-config.json", Destination: "release-please-config.json"},
 			{Source: "foundation/release-please-manifest.json", Destination: ".release-please-manifest.json"},
-			{Source: "react/app/ci.yml", Destination: ".github/workflows/ci.yml"},
-			{Source: "react/app/Makefile", Destination: "Makefile"},
 			{Source: "react/app/main.tsx", Destination: "src/main.tsx"},
-			{Source: "react/app/App.tsx.tmpl", Destination: "src/App.tsx", Template: true},
-			{Source: "react/app/App.test.tsx.tmpl", Destination: "src/App.test.tsx", Template: true},
+			{Source: "frontend/app/main.css", Destination: "src/main.css"},
+			{Source: "react/app/App.tsx.tmpl", Destination: "src/app.tsx", Template: true},
+			{Source: "react/app/App.test.tsx.tmpl", Destination: "src/app.test.tsx", Template: true},
+			{Source: "frontend/app/AGENTS.md", Destination: "AGENTS.md"},
+			{Source: "frontend/app/aruo.yaml.tmpl", Destination: "aruo.yaml", Template: true},
+			{Source: "frontend/app/docs-README.md", Destination: "docs/README.md"},
+			{Source: "frontend/app/prettierignore", Destination: ".prettierignore"},
+			{Source: "frontend/app/eslint-react.config.mjs", Destination: "eslint.config.mjs"},
+			{Source: "frontend/app/ci.yml", Destination: ".github/workflows/ci.yml"},
+			{Source: "frontend/app/Makefile", Destination: "Makefile"},
 		},
 	}
 }
 
-// NuxtApp returns the built-in Nuxt application proof bundle.
+// NuxtApp returns the built-in Nuxt application baseline.
 func NuxtApp() (fs.FS, templateengine.Blueprint) {
 	source, err := fs.Sub(templates, "templates")
 	if err != nil {
 		panic("embedded template subtree is invalid: " + err.Error())
 	}
 	return source, templateengine.Blueprint{
-		ID:       "aruo/nuxt-app",
+		ID:       "aruo/nuxt",
 		Language: "typescript",
 		Files: []templateengine.FileSpec{
 			{Source: "nuxt/app/README.md.tmpl", Destination: "README.md", Template: true},
 			{Source: "nuxt/app/package.json.tmpl", Destination: "package.json", Template: true},
-			{Source: "nuxt/app/nuxt.config.ts", Destination: "nuxt.config.ts"},
 			{Source: "nuxt/app/tsconfig.json", Destination: "tsconfig.json"},
+			{Source: "nuxt/app/nuxt.config.ts", Destination: "nuxt.config.ts"},
 			{Source: "nuxt/app/vitest.config.ts", Destination: "vitest.config.ts"},
 			{Source: "nuxt/app/gitignore", Destination: ".gitignore"},
+			{Source: "nuxt/app/app.vue.tmpl", Destination: "app/app.vue", Template: true},
+			{Source: "nuxt/app/main.css", Destination: "app/assets/css/main.css"},
+			{Source: "nuxt/app/app.test.ts.tmpl", Destination: "tests/app.test.ts", Template: true},
+			{Source: "nuxt/app/Makefile", Destination: "Makefile"},
+			{Source: "nuxt/app/ci.yml", Destination: ".github/workflows/ci.yml"},
 			{Source: "foundation/LICENSE.tmpl", Destination: "LICENSE", Template: true},
-			{Source: "foundation/CHANGELOG.md", Destination: "CHANGELOG.md"},
-			{Source: "foundation/ROADMAP.md", Destination: "ROADMAP.md"},
 			{Source: "foundation/SECURITY.md.tmpl", Destination: "SECURITY.md", Template: true},
 			{Source: "foundation/CONTRIBUTING.md", Destination: "CONTRIBUTING.md"},
 			{Source: "foundation/CODE_OF_CONDUCT.md", Destination: "CODE_OF_CONDUCT.md"},
 			{Source: "foundation/editorconfig", Destination: ".editorconfig"},
-			{Source: "foundation/aruo.yaml.tmpl", Destination: "aruo.yaml", Template: true},
-			{Source: "foundation/docs-README.md.tmpl", Destination: "docs/README.md", Template: true},
-			{Source: "foundation/issue-bug.yml", Destination: ".github/ISSUE_TEMPLATE/bug.yml"},
-			{Source: "foundation/issue-feature.yml", Destination: ".github/ISSUE_TEMPLATE/feature.yml"},
+			{Source: "frontend/app/AGENTS.md", Destination: "AGENTS.md"},
+			{Source: "nuxt/app/aruo.yaml.tmpl", Destination: "aruo.yaml", Template: true},
+			{Source: "frontend/app/docs-README.md", Destination: "docs/README.md"},
+			{Source: "nuxt/app/eslint.config.mjs", Destination: "eslint.config.mjs"},
+			{Source: "nuxt/app/prettierignore", Destination: ".prettierignore"},
 			{Source: "foundation/pull-request.md", Destination: ".github/pull_request_template.md"},
 			{Source: "js/library/dependabot.yml", Destination: ".github/dependabot.yml"},
-			{Source: "foundation/pr-title.yml", Destination: ".github/workflows/pr-title.yml"},
-			{Source: "foundation/release.yml", Destination: ".github/workflows/release.yml"},
-			{Source: "js/library/release-please-config.json", Destination: "release-please-config.json"},
-			{Source: "foundation/release-please-manifest.json", Destination: ".release-please-manifest.json"},
-			{Source: "nuxt/app/ci.yml", Destination: ".github/workflows/ci.yml"},
-			{Source: "nuxt/app/Makefile", Destination: "Makefile"},
-			{Source: "nuxt/app/app.vue.tmpl", Destination: "app/app.vue", Template: true},
-			{Source: "nuxt/app/app.test.ts.tmpl", Destination: "tests/app.test.ts", Template: true},
-			{Source: "nuxt/app/main.css", Destination: "app/assets/css/main.css"},
 		},
 	}
 }
@@ -248,20 +247,20 @@ func VueLibrary() (fs.FS, templateengine.Blueprint) {
 			{Source: "vue/library/ci.yml", Destination: ".github/workflows/ci.yml"},
 			{Source: "vue/library/Makefile", Destination: "Makefile"},
 			{Source: "vue/library/index.ts.tmpl", Destination: "src/index.ts", Template: true},
-			{Source: "vue/library/Greeting.vue.tmpl", Destination: "src/Greeting.vue", Template: true},
-			{Source: "vue/library/Greeting.test.ts", Destination: "src/__tests__/Greeting.test.ts"},
+			{Source: "vue/library/Greeting.vue.tmpl", Destination: "src/greeting.vue", Template: true},
+			{Source: "vue/library/Greeting.test.ts", Destination: "src/__tests__/greeting.test.ts"},
 		},
 	}
 }
 
-// VueApp returns the built-in Vue 3 application proof bundle.
+// VueApp returns the built-in Vue application baseline.
 func VueApp() (fs.FS, templateengine.Blueprint) {
 	source, err := fs.Sub(templates, "templates")
 	if err != nil {
 		panic("embedded template subtree is invalid: " + err.Error())
 	}
 	return source, templateengine.Blueprint{
-		ID:       "aruo/vue-app",
+		ID:       "aruo/vue",
 		Language: "typescript",
 		Files: []templateengine.FileSpec{
 			{Source: "vue/app/README.md.tmpl", Destination: "README.md", Template: true},
@@ -278,8 +277,6 @@ func VueApp() (fs.FS, templateengine.Blueprint) {
 			{Source: "foundation/CONTRIBUTING.md", Destination: "CONTRIBUTING.md"},
 			{Source: "foundation/CODE_OF_CONDUCT.md", Destination: "CODE_OF_CONDUCT.md"},
 			{Source: "foundation/editorconfig", Destination: ".editorconfig"},
-			{Source: "foundation/aruo.yaml.tmpl", Destination: "aruo.yaml", Template: true},
-			{Source: "foundation/docs-README.md.tmpl", Destination: "docs/README.md", Template: true},
 			{Source: "foundation/issue-bug.yml", Destination: ".github/ISSUE_TEMPLATE/bug.yml"},
 			{Source: "foundation/issue-feature.yml", Destination: ".github/ISSUE_TEMPLATE/feature.yml"},
 			{Source: "foundation/pull-request.md", Destination: ".github/pull_request_template.md"},
@@ -288,23 +285,30 @@ func VueApp() (fs.FS, templateengine.Blueprint) {
 			{Source: "foundation/release.yml", Destination: ".github/workflows/release.yml"},
 			{Source: "js/library/release-please-config.json", Destination: "release-please-config.json"},
 			{Source: "foundation/release-please-manifest.json", Destination: ".release-please-manifest.json"},
-			{Source: "vue/app/ci.yml", Destination: ".github/workflows/ci.yml"},
-			{Source: "vue/app/Makefile", Destination: "Makefile"},
 			{Source: "vue/app/main.ts", Destination: "src/main.ts"},
-			{Source: "vue/app/App.vue.tmpl", Destination: "src/App.vue", Template: true},
-			{Source: "vue/app/App.test.ts.tmpl", Destination: "src/App.test.ts", Template: true},
+			{Source: "vue/app/env.d.ts", Destination: "src/env.d.ts"},
+			{Source: "frontend/app/main.css", Destination: "src/main.css"},
+			{Source: "vue/app/App.vue.tmpl", Destination: "src/app.vue", Template: true},
+			{Source: "vue/app/App.test.ts.tmpl", Destination: "src/app.test.ts", Template: true},
+			{Source: "frontend/app/AGENTS.md", Destination: "AGENTS.md"},
+			{Source: "frontend/app/aruo.yaml.tmpl", Destination: "aruo.yaml", Template: true},
+			{Source: "frontend/app/docs-README.md", Destination: "docs/README.md"},
+			{Source: "frontend/app/prettierignore", Destination: ".prettierignore"},
+			{Source: "frontend/app/eslint.config.mjs", Destination: "eslint.config.mjs"},
+			{Source: "frontend/app/ci.yml", Destination: ".github/workflows/ci.yml"},
+			{Source: "frontend/app/Makefile", Destination: "Makefile"},
 		},
 	}
 }
 
-// NextApp returns the built-in Next.js application proof bundle.
+// NextApp returns the built-in Next.js application baseline.
 func NextApp() (fs.FS, templateengine.Blueprint) {
 	source, err := fs.Sub(templates, "templates")
 	if err != nil {
 		panic("embedded template subtree is invalid: " + err.Error())
 	}
 	return source, templateengine.Blueprint{
-		ID:       "aruo/next-app",
+		ID:       "aruo/next",
 		Language: "typescript",
 		Files: []templateengine.FileSpec{
 			{Source: "next/app/README.md.tmpl", Destination: "README.md", Template: true},
@@ -320,8 +324,8 @@ func NextApp() (fs.FS, templateengine.Blueprint) {
 			{Source: "foundation/CONTRIBUTING.md", Destination: "CONTRIBUTING.md"},
 			{Source: "foundation/CODE_OF_CONDUCT.md", Destination: "CODE_OF_CONDUCT.md"},
 			{Source: "foundation/editorconfig", Destination: ".editorconfig"},
-			{Source: "foundation/aruo.yaml.tmpl", Destination: "aruo.yaml", Template: true},
-			{Source: "foundation/docs-README.md.tmpl", Destination: "docs/README.md", Template: true},
+			{Source: "next/app/aruo.yaml.tmpl", Destination: "aruo.yaml", Template: true},
+			{Source: "next/app/docs-README.md", Destination: "docs/README.md"},
 			{Source: "foundation/issue-bug.yml", Destination: ".github/ISSUE_TEMPLATE/bug.yml"},
 			{Source: "foundation/issue-feature.yml", Destination: ".github/ISSUE_TEMPLATE/feature.yml"},
 			{Source: "foundation/pull-request.md", Destination: ".github/pull_request_template.md"},
@@ -333,8 +337,12 @@ func NextApp() (fs.FS, templateengine.Blueprint) {
 			{Source: "next/app/ci.yml", Destination: ".github/workflows/ci.yml"},
 			{Source: "next/app/Makefile", Destination: "Makefile"},
 			{Source: "next/app/layout.tsx.tmpl", Destination: "app/layout.tsx", Template: true},
+			{Source: "frontend/app/main.css", Destination: "app/main.css"},
 			{Source: "next/app/page.tsx.tmpl", Destination: "app/page.tsx", Template: true},
 			{Source: "next/app/page.test.tsx.tmpl", Destination: "app/page.test.tsx", Template: true},
+			{Source: "next/app/AGENTS.md", Destination: "AGENTS.md"},
+			{Source: "next/app/eslint.config.mjs", Destination: "eslint.config.mjs"},
+			{Source: "next/app/prettierignore", Destination: ".prettierignore"},
 		},
 	}
 }

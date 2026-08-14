@@ -1,6 +1,6 @@
 # Configuration
 
-**Planned design, not implemented.** Nothing on this page exists in `aruo` today: there is no `aruo config` command, no `aruo.yaml`-as-live-config (the file `aruo create` writes is write-once provenance metadata that nothing reads back), no `.aruo/lock.yaml` or `.aruo/state.json`, no plugin system, and no organization-policy layer. The only real, current configuration surface is CLI flags plus four environment variables (`NO_COLOR`, `ARUO_ACCESSIBLE`, `ARUO_MOTION`, `ARUO_NO_INPUT`) — see [README.md](../../README.md#configuration) for what's actually there. Everything below is the target design this will grow into.
+**Planned design, not implemented.** Nothing below exists as a resolved configuration system today: there is no `aruo config` command, local override or precedence engine, lock/state file, plugin system, or organization-policy layer. The current `aruo.yaml` is narrower: `init` creates application-owned production intent, `create` may add template provenance, and `doctor` audits those fields without using them as runtime configuration. The only real configuration surface is CLI flags plus four environment variables (`NO_COLOR`, `ARUO_ACCESSIBLE`, `ARUO_MOTION`, `ARUO_NO_INPUT`) — see [README.md](../../README.md#configuration) for what's actually there. Everything below is the target design this will grow into.
 
 Future pages will include a minimal file, complete schema reference, organization-policy examples, migration guides, and `config explain` transcripts.
 

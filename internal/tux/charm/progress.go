@@ -94,6 +94,7 @@ type progressModel struct {
 	tasks   map[string]taskState
 	order   []string
 	unicode bool
+	theme   theme
 }
 
 func newProgressModel(capabilities tux.Capabilities) progressModel {
@@ -101,10 +102,14 @@ func newProgressModel(capabilities tux.Capabilities) progressModel {
 	if capabilities.Unicode {
 		indicator = spinner.MiniDot
 	}
+	visual := newTheme(capabilities, tux.Policy{})
+	model := spinner.New(spinner.WithSpinner(indicator))
+	model.Style = visual.accent
 	return progressModel{
-		spinner: spinner.New(spinner.WithSpinner(indicator)),
+		spinner: model,
 		tasks:   make(map[string]taskState),
 		unicode: capabilities.Unicode,
+		theme:   visual,
 	}
 }
 
@@ -185,19 +190,19 @@ func (m progressModel) taskLine(task taskState) string {
 	indicator := m.spinner.View()
 	switch task.kind {
 	case tux.TaskCompleted:
-		indicator = "done"
+		indicator = m.theme.success.Render("done")
 		if m.unicode {
-			indicator = "✓"
+			indicator = m.theme.success.Render("✓")
 		}
 	case tux.TaskFailed:
-		indicator = "failed"
+		indicator = m.theme.danger.Render("failed")
 		if m.unicode {
-			indicator = "✗"
+			indicator = m.theme.danger.Render("✗")
 		}
 	case tux.TaskCancelled:
-		indicator = "cancelled"
+		indicator = m.theme.muted.Render("cancelled")
 	case tux.TaskRetrying:
-		indicator = "retry"
+		indicator = m.theme.warning.Render("retry")
 	default:
 	}
 	line := indicator + " " + task.label

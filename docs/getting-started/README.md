@@ -8,6 +8,7 @@ Run commands directly from the checkout:
 ```sh
 go run ./cmd/aruo help
 go run ./cmd/aruo version
+go run ./cmd/aruo init --help
 go run ./cmd/aruo create --help
 go run ./cmd/aruo doctor .
 ```
@@ -17,6 +18,15 @@ For repeated local use, install a development binary:
 ```sh
 go build -o "$HOME/.local/bin/aruo" ./cmd/aruo
 aruo version
+```
+
+To install Aruo's contract into an application without touching its code or dependencies:
+
+```sh
+cd /path/to/application
+aruo init --dry-run
+aruo init --yes
+aruo doctor
 ```
 
 `$HOME/.local/bin` must be on `PATH`. A binary built this way always reports

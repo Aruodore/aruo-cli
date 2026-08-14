@@ -1,0 +1,21 @@
+apiVersion: aruo.dev/v1alpha1
+project:
+  { name: {{ .Project.Name }}, kind: web-application, language: typescript }
+template: { id: {{ .Variables.TemplateID }}, version: builtin }
+intent:
+  capabilities:
+    strict-types: { status: SOLVED, evidence: nuxt-typecheck }
+    unit-tests: { status: SOLVED, evidence: vitest }
+    production-build: { status: SOLVED, evidence: nuxt-build }
+    quality-gate: { status: SOLVED, evidence: npm-run-check }
+    ai-contract: { status: SOLVED, evidence: AGENTS.md }
+    environment-validation:
+      { status: REQUIRED, reason: add-when-runtime-values-exist }
+    authentication: { status: REQUIRED, reason: identity-method-not-selected }
+    authorization: { status: REQUIRED, reason: product-policy-required }
+    database: { status: OPTIONAL, reason: product-data-model-dependent }
+    migrations: { status: DEFERRED, reason: no-database-selected }
+    observability: { status: OPTIONAL, reason: runtime-and-provider-dependent }
+    deployment: { status: REQUIRED, reason: platform-not-selected }
+    production-readiness:
+      { status: UNKNOWN, reason: requires-runtime-and-operator-evidence }

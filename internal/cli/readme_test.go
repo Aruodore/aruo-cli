@@ -75,7 +75,7 @@ func TestReadmeQuickStartWorkflowMatchesDocumentedOutput(t *testing.T) {
 	if code != 0 {
 		t.Fatalf("create Run() code = %d; stderr = %q", code, createErr.String())
 	}
-	if !strings.Contains(createOut.String(), "Created go-library with 24 files") {
+	if !strings.Contains(createOut.String(), "Created go-library with 35 files") {
 		t.Errorf("create stdout = %q, want the README's documented file count", createOut.String())
 	}
 	// README's Example workflow omits --module entirely, relying on it
@@ -131,6 +131,16 @@ func TestReadmeGeneratedProjectStructureMatchesDocumentedTree(t *testing.T) {
 	}
 
 	want := []string{
+		".aruo/contract.yaml",
+		".aruo/managed.json",
+		".aruo/rules/api.md",
+		".aruo/rules/architecture.md",
+		".aruo/rules/data.md",
+		".aruo/rules/delivery.md",
+		".aruo/rules/observability.md",
+		".aruo/rules/security.md",
+		".aruo/rules/testing.md",
+		".aruo/stack.yaml",
 		".github/ISSUE_TEMPLATE/bug.yml",
 		".github/ISSUE_TEMPLATE/feature.yml",
 		".github/workflows/ci.yml",
@@ -140,6 +150,7 @@ func TestReadmeGeneratedProjectStructureMatchesDocumentedTree(t *testing.T) {
 		".github/pull_request_template.md",
 		"docs/README.md",
 		"aruo.yaml",
+		"AGENTS.md",
 		"CHANGELOG.md",
 		"CODE_OF_CONDUCT.md",
 		"CONTRIBUTING.md",

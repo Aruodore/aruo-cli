@@ -37,6 +37,12 @@ There are no hidden executable hooks. Required commands become visible typed pla
 
 See the [architecture extension checklist](../architecture/template-engine.md#extension-checklist) before expanding the renderer.
 
+## Production application baseline
+
+Each supported framework has one focused application template: `react`, `vue`, `next`, and `nuxt`. These templates provide strict types, tests, production-build verification, CI, governance, the managed engineering contract, and explicit application intent. They do not preinstall a database, container stack, identity system, or observability provider. Product- and operator-owned capabilities remain `REQUIRED`, `OPTIONAL`, `DEFERRED`, or `UNKNOWN` in `aruo.yaml` until evidence supports a stronger claim. See [Application templates](../application-templates.md).
+
+The generated `aruo.yaml` declares both capabilities and known limitations so future `aruo doctor` policies can inspect intent without guessing from filenames. Authentication, authorization, distributed rate limiting, telemetry export, backups, and provider-specific deployment remain explicitly unconfigured. The blueprint must not imply those outcomes until it can provide behavioral evidence for them.
+
 ## Validation
 
 Each blueprint tests minimal/default/maximal supported compositions, determinism, native build/test/package/docs, platform paths/line endings, upgrades from supported versions, edited-file conflicts, and license/security rules. Unsupported combinations fail during planning with explanation and alternatives.

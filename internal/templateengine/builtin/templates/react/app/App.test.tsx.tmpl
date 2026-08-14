@@ -1,9 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import { test, expect } from "vitest";
 
-import App from "./App.tsx";
+import App from "./app.tsx";
 
 test("renders the app heading", () => {
   render(<App />);
-  expect(screen.getByRole("heading", { name: "{{ .Project.Name }}" })).toBeTruthy();
+  expect(screen.getByRole("heading", { level: 1 })).toBeTruthy();
 });

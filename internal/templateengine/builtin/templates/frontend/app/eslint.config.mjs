@@ -1,0 +1,15 @@
+import js from "@eslint/js";
+import tseslint from "typescript-eslint";
+import vue from "eslint-plugin-vue";
+
+export default tseslint.config(
+  { ignores: ["coverage", "dist", "node_modules"] },
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+  ...vue.configs["flat/recommended"],
+  {
+    rules: {
+      "vue/singleline-html-element-content-newline": "off",
+    },
+  },
+);

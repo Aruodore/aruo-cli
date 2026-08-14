@@ -13,6 +13,7 @@ aruo/
 ├── internal/templateengine/  pure bounded renderer and embedded built-in bundles
 ├── internal/catalog/         qualified template discovery and built-in entries
 ├── internal/create/          catalog-neutral creation service and atomic writer
+├── internal/initialize/      contract detection, planning, embedded rules, and safe adoption
 ├── internal/doctor/          read-only checks, scoring, evidence, and recommendations
 ├── pkg/                      intentionally public Go APIs; empty by default
 ├── templates/                text/document templates used by blueprints

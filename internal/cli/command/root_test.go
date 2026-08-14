@@ -22,7 +22,7 @@ func TestNewRootOmitsCommandsForNilDependencies(t *testing.T) {
 	t.Parallel()
 
 	root := NewRoot(iostreams.IOStreams{In: strings.NewReader(""), Out: &bytes.Buffer{}, ErrOut: &bytes.Buffer{}},
-		buildinfo.Info{Version: "dev"}, nil, nil, nil, nil, fakeProbe{})
+		buildinfo.Info{Version: "dev"}, nil, nil, nil, nil, nil, fakeProbe{})
 	root.InitDefaultCompletionCmd()
 
 	names := map[string]bool{}
@@ -75,5 +75,26 @@ func TestSessionFactoryBuildPropagatesInvalidGlobalFlags(t *testing.T) {
 	}
 	if _, err := factory.build(context.Background(), false); err == nil {
 		t.Fatal("build() error = nil, want the invalid --color value to surface")
+	}
+}
+
+func TestRootHelpUsesAruoInformationHierarchy(t *testing.T) {
+	t.Parallel()
+
+	var output bytes.Buffer
+	root := NewRoot(iostreams.IOStreams{In: strings.NewReader(""), Out: &output, ErrOut: &bytes.Buffer{}},
+		buildinfo.Info{Version: "dev"}, nil, nil, nil, nil, nil, fakeProbe{})
+	root.SetArgs([]string{"--help"})
+	if err := root.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	got := output.String()
+	for _, section := range []string{"ARUO\n", "USAGE\n", "COMMANDS\n", "OPTIONS\n"} {
+		if !strings.Contains(got, section) {
+			t.Fatalf("help is missing %q:\n%s", section, got)
+		}
+	}
+	if strings.Contains(got, "\x1b[") {
+		t.Fatalf("help contains terminal styling in a renderer-independent path: %q", got)
 	}
 }

@@ -61,8 +61,8 @@ func TestRun(t *testing.T) {
 		wantOut     string
 		wantErrPart string
 	}{
-		{name: "root shows help", wantCode: 0, wantOut: "Usage:\n  aruo [flags]"},
-		{name: "help command", args: []string{"help"}, wantCode: 0, wantOut: "Available Commands:"},
+		{name: "root shows help", wantCode: 0, wantOut: "USAGE\n  aruo [flags]"},
+		{name: "help command", args: []string{"help"}, wantCode: 0, wantOut: "COMMANDS\n"},
 		{name: "version command", args: []string{"version"}, wantCode: 0, wantOut: "aruo version 1.2.3\n"},
 		{name: "unknown command", args: []string{"unknown"}, wantCode: 1, wantErrPart: "unknown command"},
 	}
@@ -128,7 +128,7 @@ func TestRunCreateNonInteractive(t *testing.T) {
 	if code != 0 {
 		t.Fatalf("Run() code = %d; stderr = %q", code, stderr.String())
 	}
-	if !strings.Contains(stdout.String(), "Created go-library with 24 files") {
+	if !strings.Contains(stdout.String(), "Created go-library with 35 files") {
 		t.Errorf("stdout = %q", stdout.String())
 	}
 }
@@ -308,8 +308,8 @@ func TestRunCreateInteractive(t *testing.T) {
 		!strings.Contains(stdout.String(), "Created go-library") {
 		t.Errorf("stdout=%q stderr=%q", stdout.String(), stderr.String())
 	}
-	if got := strings.Count(stderr.String(), "Template\n"); got != 2 {
-		t.Errorf("stderr shows the Template screen %d times, want 2 (once forward, once after going back): %q", got, stderr.String())
+	if got := strings.Count(stderr.String(), "Choose a foundation\n"); got != 2 {
+		t.Errorf("stderr shows the foundation screen %d times, want 2 (once forward, once after going back): %q", got, stderr.String())
 	}
 	if !strings.Contains(stderr.String(), "1. Go library (default)") {
 		t.Errorf("stderr = %q, want the revisited template screen to show the prior answer as its default", stderr.String())

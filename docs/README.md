@@ -4,9 +4,11 @@ This directory is the user and contributor documentation source. Navigation foll
 
 - [Getting started](getting-started/README.md)
 - [Architecture](architecture/README.md)
+- [Init command architecture](architecture/init-command.md)
 - [CLI reference](cli/README.md)
 - [Configuration](configuration/README.md)
 - [Templates](templates/README.md)
+- [Application templates](application-templates.md)
 - [Plugins](plugins/README.md)
 - [Development](development/README.md)
 - [Contributing](contributing/README.md)
@@ -35,4 +37,3 @@ Use the Diátaxis separation of tutorials, how-to guides, reference, and explana
 Write direct inclusive English, sentence-case headings, explicit units, stable terminology, and honest limitations. Avoid “easy,” “obvious,” and claims without evidence. Essential diagrams include prose equivalents; media has alternative text; the site targets WCAG 2.2 AA.
 
 This directory is the documentation source of truth. A future `website/` directory (see [project structure](architecture/project-structure.md)) will own rendering only, never content truth. Every docs PR receives a preview, and every section has a maintainer. Versioned documentation follows the support policy and visibly marks archived releases.
-

@@ -12,6 +12,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "check": "npm run format:check && npm run lint && npm test && npm run build",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
     "start": "next start",
     "test": "vitest run"
   },
@@ -21,6 +25,9 @@
     "react-dom": "19.2.8"
   },
   "devDependencies": {
+    "eslint": "9.39.1",
+    "eslint-config-next": "16.3.0",
+    "prettier": "3.6.2",
     "@testing-library/react": "16.3.2",
     "@types/node": "26.1.2",
     "@types/react": "19.2.18",

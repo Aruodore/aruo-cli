@@ -16,7 +16,7 @@ Aruo is a local-first modular monolith. Domain packages know nothing about termi
 
 ## Internal architecture
 
-This diagram is the target shape of the `internal/workflow` pipeline, none of which is implemented yet; see [Module responsibilities](#module-responsibilities) below for what actually exists today (`internal/cli`, `internal/create`, `internal/doctor`, `internal/templateengine`, `internal/catalog`, `internal/tux`).
+This diagram is the target shape of the `internal/workflow` pipeline, none of which is implemented yet; see [Module responsibilities](#module-responsibilities) below for what actually exists today (`internal/cli`, `internal/initialize`, `internal/create`, `internal/doctor`, `internal/templateengine`, `internal/catalog`, `internal/tux`).
 
 ```text
 cmd/aruo
@@ -67,6 +67,7 @@ Planning does not execute repository code. External effects such as publishing a
 - `internal/templateengine`, `internal/templateengine/builtin`: bounded, deterministic `fs.FS` bundle rendering into caller-owned file plans.
 - `internal/catalog`, `internal/catalog/builtin`: the embedded template catalog `aruo create` selects from.
 - `internal/doctor`: read-only repository observations, versioned checks, scoring, and remediation evidence.
+- `internal/initialize`: read-only stack detection, embedded contract planning, managed provenance, and no-overwrite repository adoption.
 - `internal/tux` and its `charm`, `plain`, `session`, `policy`, `term`, and `lifecycle` subpackages: terminal capability detection, prompt/progress adapters, and signal lifecycle. See [the terminal UX specification](../cli/terminal-ux.md) for what is wired today versus documented as a gap.
 - `internal/buildinfo`: build-time version metadata.
 - `pkg/`: reserved for intentionally supported Go libraries; empty until an API earns stability.

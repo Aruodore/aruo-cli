@@ -5,5 +5,5 @@ import Home from "./page";
 
 test("renders the app heading", () => {
   render(<Home />);
-  expect(screen.getByRole("heading", { name: "{{ .Project.Name }}" })).toBeTruthy();
+  expect(screen.getByRole("heading", { level: 1 })).toBeTruthy();
 });

@@ -7,27 +7,36 @@
   "author": "{{ .Project.Author }}",
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=22 <25"
   },
   "scripts": {
     "build": "nuxt build",
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build",
+    "check:security": "npm audit --audit-level=high",
     "dev": "nuxt dev",
-    "generate": "nuxt generate",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "test": "vitest run"
+    "test": "vitest run",
+    "typecheck": "nuxt typecheck"
   },
   "dependencies": {
-    "@nuxt/ui": "4.10.0",
     "nuxt": "4.5.2",
-    "tailwindcss": "4.3.3",
     "vue": "3.5.40",
     "vue-router": "5.2.0"
   },
   "devDependencies": {
+    "@eslint/js": "9.39.1",
+    "@nuxt/eslint-config": "1.9.0",
     "@nuxt/test-utils": "4.1.0",
     "@vue/test-utils": "2.4.11",
+    "eslint": "9.39.1",
     "happy-dom": "20.11.1",
-    "vitest": "4.1.10"
+    "prettier": "3.6.2",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10",
+    "vue-tsc": "3.3.9"
   }
 }

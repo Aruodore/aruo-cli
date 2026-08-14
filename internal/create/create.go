@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/aruodore/aruo-cli/internal/catalog"
+	"github.com/aruodore/aruo-cli/internal/initialize"
 	"github.com/aruodore/aruo-cli/internal/templateengine"
 )
 
@@ -74,6 +75,10 @@ func (s *Service) Create(ctx context.Context, request Request) (Result, error) {
 	plan, err := engine.Render(ctx, entry.Blueprint, data)
 	if err != nil {
 		return Result{}, err
+	}
+	plan, err = initialize.AugmentPlan(plan)
+	if err != nil {
+		return Result{}, fmt.Errorf("add Aruo engineering contract: %w", err)
 	}
 	destination, err := filepath.Abs(request.Destination)
 	if err != nil {

@@ -36,7 +36,7 @@ func newCreate(factory sessionFactory, templateCatalog catalog.Catalog, creator 
 	options := createOptions{}
 	command := &cobra.Command{
 		Use:   "create [name-or-path]",
-		Short: "Create a production-ready project",
+		Short: "Create a project from a built-in template",
 		Example: `  aruo create my-library
   aruo create tools/my-library
   aruo create my-library --template go-library`,
@@ -244,8 +244,8 @@ func resolveProjectFields(ctx context.Context, prompter tux.Prompter, entry cata
 		ID:          "author",
 		Label:       "Author or organization (Optional)",
 		Description: "Used in the license and project metadata.",
-		Example:     "Jane Doe or Acme, Inc.",
-		Placeholder: "Jane Doe or Acme, Inc.",
+		Example:     "Your name or organization",
+		Placeholder: "Your name or organization",
 		Optional:    true,
 		Default:     &gitAuthor,
 	}, "--author")
@@ -277,7 +277,7 @@ func moduleLabel(entry catalog.Entry) string {
 func presentCreated(ctx context.Context, presenter tux.Presenter, destination string, result create.Result) error {
 	lines := []string{fmt.Sprintf("Created %s with %d files at %s", result.TemplateID, result.FileCount, result.Destination)}
 	if len(result.NextSteps) > 0 {
-		lines = append(lines, "", "Next steps:", "  cd "+destination)
+		lines = append(lines, "", "Next", "  cd "+destination)
 		for _, step := range result.NextSteps {
 			lines = append(lines, "  "+step)
 		}

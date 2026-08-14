@@ -3,6 +3,7 @@ package builtin
 
 import (
 	"fmt"
+	"io/fs"
 	"regexp"
 	"strings"
 
@@ -31,7 +32,7 @@ func New() (*catalog.Memory, error) {
 			Language:       "go",
 			Kind:           "library",
 			Description:    "A production-ready Go library with zero external dependencies, tests, CI, governance, security, and documentation",
-			Color:          "#00ADD8",
+			Color:          "#39C6E8",
 			Licenses:       []string{"MIT"},
 			DefaultLicense: "MIT",
 			Source:         goSource,
@@ -84,7 +85,7 @@ func New() (*catalog.Memory, error) {
 			Language:       "typescript",
 			Kind:           "library",
 			Description:    "A production-ready TypeScript library with strict type-checking, tests, CI, governance, security, and documentation",
-			Color:          "#3178C6",
+			Color:          "#65AADD",
 			Licenses:       []string{"MIT"},
 			DefaultLicense: "MIT",
 			Source:         tsSource,
@@ -105,67 +106,15 @@ func New() (*catalog.Memory, error) {
 				ModuleExample:     "my-library",
 			},
 		},
-		catalog.Entry{
-			ID:             "react-app",
-			Name:           "React application",
-			Language:       "typescript",
-			Kind:           "app",
-			Description:    "A production-ready React application built with Vite and Vitest, tests, CI, governance, security, and documentation",
-			Color:          "#61DAFB",
-			Licenses:       []string{"MIT"},
-			DefaultLicense: "MIT",
-			Source:         reactSource,
-			Blueprint:      reactBlueprint,
-			Defaults: map[string]any{
-				"IncludeInstall": false,
-				"TemplateID":     "react-app",
-			},
-			Prepare: prepareJSLibrary,
-			NextSteps: []string{
-				"npm install",
-				"npm run dev",
-				"git init && git add .",
-			},
-			Prompts: catalog.ProjectPrompts{
-				ModuleLabel:       "npm package name",
-				ModuleDescription: `This is written to package.json as "name" (the app is private and not published).`,
-				ModuleExample:     "my-app",
-			},
-		},
-		catalog.Entry{
-			ID:             "nuxt-app",
-			Name:           "Nuxt application",
-			Language:       "typescript",
-			Kind:           "app",
-			Description:    "A production-ready Nuxt 4 application with server-side rendering, Nuxt UI components, tests, CI, governance, security, and documentation",
-			Color:          "#00DC82",
-			Licenses:       []string{"MIT"},
-			DefaultLicense: "MIT",
-			Source:         nuxtSource,
-			Blueprint:      nuxtBlueprint,
-			Defaults: map[string]any{
-				"IncludeInstall": false,
-				"TemplateID":     "nuxt-app",
-			},
-			Prepare: prepareJSLibrary,
-			NextSteps: []string{
-				"npm install",
-				"npm run dev",
-				"git init && git add .",
-			},
-			Prompts: catalog.ProjectPrompts{
-				ModuleLabel:       "npm package name",
-				ModuleDescription: `This is written to package.json as "name" (the app is private and not published).`,
-				ModuleExample:     "my-app",
-			},
-		},
+		webAppEntry("react", "React", "A focused React baseline with explicit production omissions", "#61DAFB", reactSource, reactBlueprint),
+		webAppEntry("nuxt", "Nuxt", "A focused Nuxt baseline with explicit production omissions", "#38E59D", nuxtSource, nuxtBlueprint),
 		catalog.Entry{
 			ID:             "vue-library",
 			Name:           "Vue library",
 			Language:       "typescript",
 			Kind:           "library",
 			Description:    "A production-ready Vue 3 component library built with Vite library mode, tests, CI, governance, security, and documentation",
-			Color:          "#42B883",
+			Color:          "#63D6AA",
 			Licenses:       []string{"MIT"},
 			DefaultLicense: "MIT",
 			Source:         vueSource,
@@ -186,60 +135,8 @@ func New() (*catalog.Memory, error) {
 				ModuleExample:     "my-library",
 			},
 		},
-		catalog.Entry{
-			ID:             "vue-app",
-			Name:           "Vue application",
-			Language:       "typescript",
-			Kind:           "app",
-			Description:    "A production-ready Vue 3 application built with Vite and Vitest, tests, CI, governance, security, and documentation",
-			Color:          "#42B883",
-			Licenses:       []string{"MIT"},
-			DefaultLicense: "MIT",
-			Source:         vueAppSource,
-			Blueprint:      vueAppBlueprint,
-			Defaults: map[string]any{
-				"IncludeInstall": false,
-				"TemplateID":     "vue-app",
-			},
-			Prepare: prepareJSLibrary,
-			NextSteps: []string{
-				"npm install",
-				"npm run dev",
-				"git init && git add .",
-			},
-			Prompts: catalog.ProjectPrompts{
-				ModuleLabel:       "npm package name",
-				ModuleDescription: `This is written to package.json as "name" (the app is private and not published).`,
-				ModuleExample:     "my-app",
-			},
-		},
-		catalog.Entry{
-			ID:             "next-app",
-			Name:           "Next.js application",
-			Language:       "typescript",
-			Kind:           "app",
-			Description:    "A production-ready Next.js application with the App Router, tests, CI, governance, security, and documentation",
-			Color:          "#7C3AED",
-			Licenses:       []string{"MIT"},
-			DefaultLicense: "MIT",
-			Source:         nextSource,
-			Blueprint:      nextBlueprint,
-			Defaults: map[string]any{
-				"IncludeInstall": false,
-				"TemplateID":     "next-app",
-			},
-			Prepare: prepareJSLibrary,
-			NextSteps: []string{
-				"npm install",
-				"npm run dev",
-				"git init && git add .",
-			},
-			Prompts: catalog.ProjectPrompts{
-				ModuleLabel:       "npm package name",
-				ModuleDescription: `This is written to package.json as "name" (the app is private and not published).`,
-				ModuleExample:     "my-app",
-			},
-		},
+		webAppEntry("vue", "Vue", "A focused Vue baseline with explicit production omissions", "#63D6AA", vueAppSource, vueAppBlueprint),
+		webAppEntry("next", "Next.js", "A focused Next.js baseline with explicit production omissions", "#B79AF4", nextSource, nextBlueprint),
 		catalog.Entry{
 			ID:             "python-library",
 			Name:           "Python library",
@@ -267,6 +164,19 @@ func New() (*catalog.Memory, error) {
 			},
 		},
 	)
+}
+
+func webAppEntry(id, name, description, color string, source fs.FS, blueprint templateengine.Blueprint) catalog.Entry {
+	return catalog.Entry{
+		ID: id, Name: name, Language: "typescript", Kind: "app", Description: description, Color: color,
+		Licenses: []string{"MIT"}, DefaultLicense: "MIT", Source: source, Blueprint: blueprint,
+		Defaults:  map[string]any{"IncludeInstall": false, "TemplateID": id},
+		Prepare:   prepareJSLibrary,
+		NextSteps: []string{"npm install", "npm run dev", "git init && git add ."},
+		Prompts: catalog.ProjectPrompts{
+			ModuleLabel: "npm package name", ModuleDescription: `This is written to package.json as "name" (the app is private and not published).`, ModuleExample: "my-app",
+		},
+	}
 }
 
 func prepareGoLibrary(data templateengine.Data) (templateengine.Data, error) {
