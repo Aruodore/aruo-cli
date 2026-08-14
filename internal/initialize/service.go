@@ -96,7 +96,7 @@ func (s *Service) Apply(ctx context.Context, plan Plan) (Result, error) {
 		}
 		// Contract files contain no secrets and must remain readable by repository
 		// collaborators and CI users after the staged commit.
-		if chmodErr := os.Chmod(target, 0o644); chmodErr != nil { //nolint:gosec // Repository governance files are intentionally world-readable.
+		if chmodErr := os.Chmod(target, 0o644); chmodErr != nil {
 			return Result{}, fmt.Errorf("set repository-readable mode on %s: %w", file.path, chmodErr)
 		}
 	}
