@@ -4,39 +4,44 @@
   "version": "0.0.0",
   "description": "{{ .Project.Description }}",
   "license": "{{ .Project.License }}",
-  "author": "{{ .Project.Author }}",
   "type": "module",
   "engines": {
     "node": ">=22 <25"
   },
   "scripts": {
-    "build": "nuxt build",
+    "build": "next build",
     "check": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build",
     "check:security": "npm audit --audit-level=high",
-    "dev": "nuxt dev",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "dev": "next dev",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",
-    "preview": "nuxt preview",
-    "postinstall": "nuxt prepare",
+    "start": "next start",
     "test": "vitest run",
-    "typecheck": "nuxt typecheck"
+    "typecheck": "tsc --noEmit --pretty false"
   },
   "dependencies": {
-    "nuxt": "4.5.2",
-    "vue": "3.5.40",
-    "vue-router": "5.2.0"
+    "drizzle-orm": "0.45.2",
+    "next": "16.3.0",
+    "postgres": "3.4.7",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "zod": "4.1.12"
   },
   "devDependencies": {
-    "@eslint/js": "9.39.1",
-    "@nuxt/eslint-config": "1.9.0",
-    "@nuxt/test-utils": "4.1.0",
-    "@vue/test-utils": "2.4.11",
+    "@testing-library/react": "16.3.2",
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "@vitejs/plugin-react": "6.0.5",
+    "drizzle-kit": "0.31.10",
     "eslint": "9.39.1",
-    "happy-dom": "20.11.1",
+    "eslint-config-next": "16.3.0",
+    "jsdom": "30.0.1",
     "prettier": "3.6.2",
     "typescript": "5.9.3",
-    "vitest": "4.1.10",
-    "vue-tsc": "3.3.9"
+    "vitest": "4.1.10"
   }
 }

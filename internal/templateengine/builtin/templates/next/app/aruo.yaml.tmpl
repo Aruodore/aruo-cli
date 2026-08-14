@@ -7,6 +7,7 @@ project:
 template:
   id: {{ .Variables.TemplateID }}
   version: builtin
+  profile: lean
 intent:
   capabilities:
     quality-gate: { status: SOLVED, evidence: npm-run-check }
@@ -16,7 +17,8 @@ intent:
     ai-contract: { status: SOLVED, evidence: AGENTS.md }
     authentication: { status: REQUIRED, reason: application-specific-identity }
     authorization: { status: REQUIRED, reason: application-specific-policy }
-    environment-validation: { status: REQUIRED, reason: no-required-runtime-values-yet }
+    environment-validation:
+      { status: REQUIRED, reason: no-required-runtime-values-yet }
     database: { status: OPTIONAL, reason: product-data-model-dependent }
     migrations: { status: DEFERRED, reason: no-database-selected }
     observability: { status: OPTIONAL, reason: provider-dependent }

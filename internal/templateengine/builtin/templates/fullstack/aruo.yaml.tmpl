@@ -1,0 +1,43 @@
+apiVersion: aruo.dev/v1alpha1
+project:
+  { name: {{ .Project.Name }}, kind: web-application, language: {{ .Project.Language }} }
+template: { id: {{ .Variables.TemplateID }}, version: builtin, profile: comprehensive }
+intent:
+  capabilities:
+    environment-validation: { status: SOLVED, evidence: server/env.ts }
+    database: { status: SOLVED, evidence: server/database.ts }
+    migrations: { status: SOLVED, evidence: server/db/migrations }
+    api-validation: { status: SOLVED, evidence: zod-boundary-convention }
+    structured-errors: { status: SOLVED, evidence: server/errors.ts }
+    structured-logging: { status: SOLVED, evidence: server/logger.ts }
+    health-checks: { status: SOLVED, evidence: live-and-ready-routes }
+    security-headers: { status: SOLVED, evidence: server-middleware }
+    content-security-policy:
+      { status: REQUIRED, reason: must-match-product-assets-and-deployment }
+    single-process-rate-limit:
+      { status: SOLVED, evidence: server/rate-limit.ts }
+    quality-gate: { status: SOLVED, evidence: npm-run-check }
+    authentication:
+      {
+        status: REQUIRED,
+        reason: identity-and-verification-method-not-selected,
+      }
+    authorization: { status: REQUIRED, reason: product-policy-required }
+    email: { status: OPTIONAL, reason: product-and-provider-dependent }
+    background-jobs: { status: OPTIONAL, reason: workload-dependent }
+    caching: { status: OPTIONAL, reason: measured-need-and-topology-dependent }
+    file-storage: { status: OPTIONAL, reason: product-and-provider-dependent }
+    telemetry-export:
+      { status: OPTIONAL, reason: provider-and-privacy-dependent }
+    distributed-rate-limit:
+      {
+        status: REQUIRED,
+        reason: required-before-horizontal-scale-or-high-risk-routes,
+      }
+    backups-and-restore:
+      { status: REQUIRED, reason: operator-managed-and-must-be-drilled }
+    production-readiness:
+      {
+        status: UNKNOWN,
+        reason: requires-runtime-product-and-operator-evidence,
+      }

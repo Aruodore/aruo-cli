@@ -146,8 +146,8 @@ func TestReactApp(t *testing.T) {
 	for _, file := range plan.Files {
 		files[file.Path] = string(file.Content)
 	}
-	if len(files) != 33 {
-		t.Errorf("file count = %d, want 33", len(files))
+	if len(files) != 51 {
+		t.Errorf("file count = %d, want 51", len(files))
 	}
 	if pkg := files["package.json"]; !strings.Contains(pkg, `"name": "example-app"`) || !strings.Contains(pkg, `"react"`) {
 		t.Errorf("package.json = %q", pkg)
@@ -155,7 +155,7 @@ func TestReactApp(t *testing.T) {
 	if app := files["src/App.tsx"]; !strings.Contains(app, "<h1>Example</h1>") {
 		t.Errorf("src/App.tsx = %q", app)
 	}
-	if test := files["src/App.test.tsx"]; !strings.Contains(test, `name: "Example"`) {
+	if test := files["src/App.test.tsx"]; !strings.Contains(test, `level: 1`) {
 		t.Errorf("src/App.test.tsx = %q", test)
 	}
 	if index := files["index.html"]; !strings.Contains(index, "<title>Example</title>") {
@@ -278,8 +278,8 @@ func TestNextApp(t *testing.T) {
 	for _, file := range plan.Files {
 		files[file.Path] = string(file.Content)
 	}
-	if len(files) != 31 {
-		t.Errorf("file count = %d, want 31", len(files))
+	if len(files) != 50 {
+		t.Errorf("file count = %d, want 50", len(files))
 	}
 	if pkg := files["package.json"]; !strings.Contains(pkg, `"name": "example-app"`) || !strings.Contains(pkg, `"next"`) {
 		t.Errorf("package.json = %q", pkg)

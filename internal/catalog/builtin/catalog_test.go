@@ -12,6 +12,27 @@ import (
 	"github.com/aruodore/aruo-cli/internal/templateengine"
 )
 
+func TestEveryApplicationFrameworkHasComprehensiveAndLeanProfiles(t *testing.T) {
+	t.Parallel()
+	templateCatalog, err := builtin.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, id := range []string{"react", "react-lean", "vue", "vue-lean", "next", "next-lean", "nuxt", "nuxt-lean"} {
+		entry, err := templateCatalog.Resolve(context.Background(), id)
+		if err != nil {
+			t.Errorf("Resolve(%q): %v", id, err)
+			continue
+		}
+		if entry.Kind != "app" {
+			t.Errorf("%s kind = %q, want app", id, entry.Kind)
+		}
+		if entry.Defaults["TemplateID"] != id {
+			t.Errorf("%s manifest ID default = %v", id, entry.Defaults["TemplateID"])
+		}
+	}
+}
+
 func TestGoLibraryIsProductionReadyAndBuilds(t *testing.T) {
 	t.Parallel()
 	templateCatalog, err := builtin.New()
@@ -214,7 +235,7 @@ func TestNuxtAppHasRequiredFiles(t *testing.T) {
 	required := []string{
 		"README.md", "AGENTS.md", "aruo.yaml", ".env.example", "package.json", "Dockerfile", "compose.yaml",
 		"docs/README.md", "docs/architecture.md", "docs/operations.md", "server/utils/env.ts", "server/utils/errors.ts",
-		"server/api/health/live.get.ts", "server/api/health/ready.get.ts", "server/api/notes.post.ts",
+		"server/api/health/live.get.ts", "server/api/health/ready.get.ts",
 		"server/db/schema.ts", "server/db/migrations/0000_initial.sql", "tests/env.test.ts",
 		".github/workflows/ci.yml",
 	}

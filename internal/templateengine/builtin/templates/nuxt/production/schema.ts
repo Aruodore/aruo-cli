@@ -1,9 +1,3 @@
-import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
-
-export const notes = pgTable("notes", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  title: text("title").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
+// Add product-owned tables here. The starter deliberately contains no
+// fictional business entities. Export every table so Drizzle can discover it.
+export {};

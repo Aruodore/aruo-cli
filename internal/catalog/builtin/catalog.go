@@ -3,6 +3,7 @@ package builtin
 
 import (
 	"fmt"
+	"io/fs"
 	"regexp"
 	"strings"
 
@@ -20,10 +21,14 @@ func New() (*catalog.Memory, error) {
 	tsSource, tsBlueprint := templatebuiltin.TSLibrary()
 	pySource, pyBlueprint := templatebuiltin.PythonLibrary()
 	reactSource, reactBlueprint := templatebuiltin.ReactApp()
+	reactLeanSource, reactLeanBlueprint := templatebuiltin.ReactLean()
 	nuxtSource, nuxtBlueprint := templatebuiltin.NuxtApp()
+	nuxtLeanSource, nuxtLeanBlueprint := templatebuiltin.NuxtLean()
 	vueSource, vueBlueprint := templatebuiltin.VueLibrary()
 	vueAppSource, vueAppBlueprint := templatebuiltin.VueApp()
+	vueLeanSource, vueLeanBlueprint := templatebuiltin.VueLean()
 	nextSource, nextBlueprint := templatebuiltin.NextApp()
+	nextLeanSource, nextLeanBlueprint := templatebuiltin.NextLean()
 	return catalog.NewMemory(
 		catalog.Entry{
 			ID:             "go-library",
@@ -110,7 +115,7 @@ func New() (*catalog.Memory, error) {
 			Name:           "React",
 			Language:       "typescript",
 			Kind:           "app",
-			Description:    "A production-ready React application built with Vite and Vitest, tests, CI, governance, security, and documentation",
+			Description:    "A domain-neutral React modular monolith with a Node server, PostgreSQL, production controls, tests, and explicit limitations",
 			Color:          "#61DAFB",
 			Licenses:       []string{"MIT"},
 			DefaultLicense: "MIT",
@@ -122,7 +127,8 @@ func New() (*catalog.Memory, error) {
 			},
 			Prepare: prepareJSLibrary,
 			NextSteps: []string{
-				"npm install",
+				"cp .env.example .env && npm install",
+				"docker compose up -d db && npm run db:migrate",
 				"npm run dev",
 				"git init && git add .",
 			},
@@ -132,6 +138,7 @@ func New() (*catalog.Memory, error) {
 				ModuleExample:     "my-app",
 			},
 		},
+		webAppEntry("react-lean", "React (lean)", "A lean React baseline with explicit production omissions", "#61DAFB", reactLeanSource, reactLeanBlueprint),
 		catalog.Entry{
 			ID:             "nuxt",
 			Name:           "Nuxt",
@@ -159,6 +166,7 @@ func New() (*catalog.Memory, error) {
 				ModuleExample:     "my-app",
 			},
 		},
+		webAppEntry("nuxt-lean", "Nuxt (lean)", "A lean Nuxt baseline with explicit production omissions", "#00DC82", nuxtLeanSource, nuxtLeanBlueprint),
 		catalog.Entry{
 			ID:             "vue-library",
 			Name:           "Vue library",
@@ -191,7 +199,7 @@ func New() (*catalog.Memory, error) {
 			Name:           "Vue",
 			Language:       "typescript",
 			Kind:           "app",
-			Description:    "A production-ready Vue 3 application built with Vite and Vitest, tests, CI, governance, security, and documentation",
+			Description:    "A domain-neutral Vue modular monolith with a Node server, PostgreSQL, production controls, tests, and explicit limitations",
 			Color:          "#42B883",
 			Licenses:       []string{"MIT"},
 			DefaultLicense: "MIT",
@@ -203,7 +211,8 @@ func New() (*catalog.Memory, error) {
 			},
 			Prepare: prepareJSLibrary,
 			NextSteps: []string{
-				"npm install",
+				"cp .env.example .env && npm install",
+				"docker compose up -d db && npm run db:migrate",
 				"npm run dev",
 				"git init && git add .",
 			},
@@ -213,12 +222,13 @@ func New() (*catalog.Memory, error) {
 				ModuleExample:     "my-app",
 			},
 		},
+		webAppEntry("vue-lean", "Vue (lean)", "A lean Vue baseline with explicit production omissions", "#42B883", vueLeanSource, vueLeanBlueprint),
 		catalog.Entry{
 			ID:             "next",
 			Name:           "Next.js",
 			Language:       "typescript",
 			Kind:           "app",
-			Description:    "A production-ready Next.js application with the App Router, tests, CI, governance, security, and documentation",
+			Description:    "A domain-neutral Next.js modular monolith with PostgreSQL, production controls, tests, and explicit limitations",
 			Color:          "#7C3AED",
 			Licenses:       []string{"MIT"},
 			DefaultLicense: "MIT",
@@ -230,7 +240,8 @@ func New() (*catalog.Memory, error) {
 			},
 			Prepare: prepareJSLibrary,
 			NextSteps: []string{
-				"npm install",
+				"cp .env.example .env && npm install",
+				"docker compose up -d db && npm run db:migrate",
 				"npm run dev",
 				"git init && git add .",
 			},
@@ -240,6 +251,7 @@ func New() (*catalog.Memory, error) {
 				ModuleExample:     "my-app",
 			},
 		},
+		webAppEntry("next-lean", "Next.js (lean)", "A lean Next.js baseline with explicit production omissions", "#7C3AED", nextLeanSource, nextLeanBlueprint),
 		catalog.Entry{
 			ID:             "python-library",
 			Name:           "Python library",
@@ -267,6 +279,19 @@ func New() (*catalog.Memory, error) {
 			},
 		},
 	)
+}
+
+func webAppEntry(id, name, description, color string, source fs.FS, blueprint templateengine.Blueprint) catalog.Entry {
+	return catalog.Entry{
+		ID: id, Name: name, Language: "typescript", Kind: "app", Description: description, Color: color,
+		Licenses: []string{"MIT"}, DefaultLicense: "MIT", Source: source, Blueprint: blueprint,
+		Defaults:  map[string]any{"IncludeInstall": false, "TemplateID": id},
+		Prepare:   prepareJSLibrary,
+		NextSteps: []string{"npm install", "npm run dev", "git init && git add ."},
+		Prompts: catalog.ProjectPrompts{
+			ModuleLabel: "npm package name", ModuleDescription: `This is written to package.json as "name" (the app is private and not published).`, ModuleExample: "my-app",
+		},
+	}
 }
 
 func prepareGoLibrary(data templateengine.Data) (templateengine.Data, error) {

@@ -7,4 +7,9 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   ...vue.configs["flat/recommended"],
+  {
+    rules: {
+      "vue/singleline-html-element-content-newline": "off",
+    },
+  },
 );
