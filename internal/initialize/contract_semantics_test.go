@@ -24,8 +24,8 @@ func TestEmbeddedContractSchemaAndSafetyInvariants(t *testing.T) {
 			ApplicationOwned []string `yaml:"applicationOwned"`
 		} `yaml:"ownership"`
 	}
-	if err := yaml.Unmarshal(content, &contract); err != nil {
-		t.Fatalf("contract.yaml is invalid: %v", err)
+	if unmarshalErr := yaml.Unmarshal(content, &contract); unmarshalErr != nil {
+		t.Fatalf("contract.yaml is invalid: %v", unmarshalErr)
 	}
 	if contract.APIVersion != "aruo.dev/v1alpha1" || contract.Kind != "EngineeringContract" || contract.Version != 2 || contractmeta.CurrentVersion != "2" {
 		t.Fatalf("contract identity = %#v, code version = %q", contract, contractmeta.CurrentVersion)

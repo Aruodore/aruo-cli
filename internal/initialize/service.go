@@ -91,8 +91,13 @@ func (s *Service) Apply(ctx context.Context, plan Plan) (Result, error) {
 		if mkdirErr := os.MkdirAll(filepath.Dir(target), 0o755); mkdirErr != nil {
 			return Result{}, fmt.Errorf("stage %s: %w", file.path, mkdirErr)
 		}
-		if writeErr := os.WriteFile(target, file.content, 0o644); writeErr != nil {
+		if writeErr := os.WriteFile(target, file.content, 0o600); writeErr != nil {
 			return Result{}, fmt.Errorf("stage %s: %w", file.path, writeErr)
+		}
+		// Contract files contain no secrets and must remain readable by repository
+		// collaborators and CI users after the staged commit.
+		if chmodErr := os.Chmod(target, 0o644); chmodErr != nil { //nolint:gosec // Repository governance files are intentionally world-readable.
+			return Result{}, fmt.Errorf("set repository-readable mode on %s: %w", file.path, chmodErr)
 		}
 	}
 	committed := make([]string, 0, 3)
@@ -186,8 +191,8 @@ func renderContractWithOverrides(stack Stack, overrides map[string][]byte) ([]pl
 		managed.Files[file.path] = "sha256:" + hex.EncodeToString(sum[:])
 	}
 	required, _ := contractmeta.RequiredFiles(contractmeta.CurrentVersion)
-	if err := validateManagedInventory(managed.Files, required); err != nil {
-		return nil, err
+	if inventoryErr := validateManagedInventory(managed.Files, required); inventoryErr != nil {
+		return nil, inventoryErr
 	}
 	managedContent, err := json.MarshalIndent(managed, "", "  ")
 	if err != nil {

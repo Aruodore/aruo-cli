@@ -20,9 +20,9 @@ func TestEveryApplicationFrameworkHasOneCanonicalTemplate(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, id := range []string{"react", "vue", "next", "nuxt"} {
-		entry, err := templateCatalog.Resolve(context.Background(), id)
-		if err != nil {
-			t.Errorf("Resolve(%q): %v", id, err)
+		entry, resolveErr := templateCatalog.Resolve(context.Background(), id)
+		if resolveErr != nil {
+			t.Errorf("Resolve(%q): %v", id, resolveErr)
 			continue
 		}
 		if entry.Kind != "app" {
@@ -33,7 +33,7 @@ func TestEveryApplicationFrameworkHasOneCanonicalTemplate(t *testing.T) {
 		}
 	}
 	for _, removed := range []string{"react-lean", "vue-lean", "next-lean", "nuxt-lean"} {
-		if _, err := templateCatalog.Resolve(context.Background(), removed); err == nil {
+		if _, resolveErr := templateCatalog.Resolve(context.Background(), removed); resolveErr == nil {
 			t.Errorf("removed template %q still resolves", removed)
 		}
 	}
