@@ -153,9 +153,9 @@ aruo create . --name my-tool --template go-library --module github.com/you/my-to
 
 ### `aruo doctor [repository]`
 
-Scores a repository's engineering health. Defaults to the current directory when no path is given.
+Scores a repository's engineering health and, when `aruo.yaml` declares production intent, audits its capability claims and unresolved responsibilities. Intent findings are separate and do not alter the versioned 100-point score. Defaults to the current directory when no path is given.
 
-**Key flags:** `--format human|json`, `--minimum-score <0-100>` (default `80`; exits `3` if the score is below it, useful as a CI gate).
+**Key flags:** `--format human|json`, `--minimum-score <0-100>` (default `80`). Doctor exits `3` when the score is below the threshold or the intent manifest has blocking findings, making it useful as a CI gate.
 
 ```sh
 aruo doctor                              # score the current directory
@@ -173,7 +173,7 @@ Generates a shell completion script (Cobra's standard mechanism), including dyna
 
 ### Exit codes
 
-Only what's actually implemented: `0` success, `1` operational failure, `3` `doctor` findings below `--minimum-score`, `130`/`143` interrupted by Ctrl+C/SIGTERM.
+Only what's actually implemented: `0` success, `1` operational failure, `3` `doctor` findings (score below `--minimum-score` or blocking production intent), `130`/`143` interrupted by Ctrl+C/SIGTERM.
 
 ## Generated project structure
 
@@ -187,7 +187,7 @@ my-library/
 │   ├── dependabot.yml
 │   └── pull_request_template.md
 ├── docs/README.md
-├── aruo.yaml                  # provenance: which template/version created this
+├── aruo.yaml                  # template provenance and explicit production intent
 ├── CHANGELOG.md
 ├── CODE_OF_CONDUCT.md
 ├── CONTRIBUTING.md
@@ -207,7 +207,7 @@ Every template's exact file set differs by ecosystem (an npm-based template gets
 
 ## Configuration
 
-There's no `aruo config` command and no project-level config file that Aruo reads back today. Only CLI flags and four environment variables:
+There's no `aruo config` command or resolved project configuration today. Doctor reads only the versioned provenance and `intent.capabilities` contract from `aruo.yaml`; it does not treat the file as runtime configuration. The active configuration surface remains CLI flags and four environment variables:
 
 | Variable | Effect |
 | --- | --- |
@@ -216,7 +216,7 @@ There's no `aruo config` command and no project-level config file that Aruo read
 | `ARUO_MOTION=never` | Disable animation |
 | `ARUO_NO_INPUT` | Disable prompting; fail instead of asking |
 
-The `aruo.yaml` written into every generated project is write-once provenance metadata (which template and version created it); nothing in Aruo reads it back. [`docs/configuration/README.md`](docs/configuration/README.md) describes a considerably larger planned configuration system (`aruo.yaml` as live config, `aruo config explain`, org policy, profiles); none of that exists yet.
+The `aruo.yaml` written into every generated project records template provenance and explicit production intent. `aruo doctor` reads and audits those fields only. [`docs/configuration/README.md`](docs/configuration/README.md) describes a considerably larger planned configuration system (`aruo.yaml` as live config, `aruo config explain`, org policy, profiles); that configuration system does not exist yet.
 
 ## Documentation
 

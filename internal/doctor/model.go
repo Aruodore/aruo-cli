@@ -48,4 +48,55 @@ type Report struct {
 	Grade         string          `json:"grade"`
 	Categories    []CategoryScore `json:"categories"`
 	Assessments   []Assessment    `json:"assessments"`
+	Intent        IntentReport    `json:"intent"`
+}
+
+// CapabilityStatus is the repository's explicit production-intent vocabulary.
+type CapabilityStatus string
+
+const (
+	CapabilitySolved   CapabilityStatus = "SOLVED"
+	CapabilityRequired CapabilityStatus = "REQUIRED"
+	CapabilityOptional CapabilityStatus = "OPTIONAL"
+	CapabilityDeferred CapabilityStatus = "DEFERRED"
+	CapabilityUnknown  CapabilityStatus = "UNKNOWN"
+)
+
+// EvidenceStatus describes what Doctor can prove from the local repository.
+type EvidenceStatus string
+
+const (
+	EvidenceVerified      EvidenceStatus = "VERIFIED"
+	EvidenceDeclared      EvidenceStatus = "DECLARED"
+	EvidenceMissing       EvidenceStatus = "MISSING"
+	EvidenceNotApplicable EvidenceStatus = "NOT_APPLICABLE"
+)
+
+// IntentCapability is one normalized capability declaration.
+type IntentCapability struct {
+	Name           string           `json:"name"`
+	Status         CapabilityStatus `json:"status"`
+	Evidence       string           `json:"evidence,omitempty"`
+	Reason         string           `json:"reason,omitempty"`
+	EvidenceStatus EvidenceStatus   `json:"evidenceStatus"`
+}
+
+// IntentFinding reports a malformed claim or visible unresolved responsibility.
+type IntentFinding struct {
+	Capability string `json:"capability,omitempty"`
+	Severity   string `json:"severity"`
+	Message    string `json:"message"`
+	Action     string `json:"action"`
+}
+
+// IntentReport audits aruo.yaml without changing the repository-health/v1 score.
+type IntentReport struct {
+	Present          bool               `json:"present"`
+	Valid            bool               `json:"valid"`
+	APIVersion       string             `json:"apiVersion,omitempty"`
+	TemplateID       string             `json:"templateId,omitempty"`
+	Profile          string             `json:"profile,omitempty"`
+	Capabilities     []IntentCapability `json:"capabilities,omitempty"`
+	Findings         []IntentFinding    `json:"findings,omitempty"`
+	BlockingFindings int                `json:"blockingFindings"`
 }

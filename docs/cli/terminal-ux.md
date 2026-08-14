@@ -81,8 +81,9 @@ for measured evidence.
 - Global flags: `--no-input`, `--interactive`, `--accessible`,
   `--color=auto|always|never`, `--motion=auto|always|never`; `create`'s
   `--non-interactive` is deprecated in favor of `--no-input` but still works.
-  `doctor --format human|json` predates this work and is unchanged; its JSON
-  schema is untouched.
+  `doctor --format human|json` uses the same adapters for human output and a
+  typed report for automation. Report schema version 2 adds production-intent
+  findings while preserving the `repository-health/v1` score.
 - Shell completion (bash/zsh/fish/PowerShell) via Cobra, including dynamic,
   local, sub-100ms completion for `--template`/`--language`/`--kind`,
   `--format`, `--color`, and `--motion`.

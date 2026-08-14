@@ -475,7 +475,7 @@ func NextApp() (fs.FS, templateengine.Blueprint) {
 			filtered = append(filtered, file)
 		}
 	}
-	blueprint.Files = append(filtered,
+	filtered = append(filtered,
 		fullstackFile("fullstack/server/env.ts", "server/env.ts"),
 		fullstackFile("fullstack/server/errors.ts", "server/errors.ts"),
 		fullstackFile("fullstack/server/logger.ts", "server/logger.ts"),
@@ -499,6 +499,7 @@ func NextApp() (fs.FS, templateengine.Blueprint) {
 		fullstackTemplate("next/full/package.json.tmpl", "package.json"),
 		fullstackTemplate("fullstack/README.md.tmpl", "README.md"),
 	)
+	blueprint.Files = filtered
 	return source, blueprint
 }
 

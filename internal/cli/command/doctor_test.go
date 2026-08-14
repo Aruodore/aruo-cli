@@ -3,6 +3,8 @@ package command
 import (
 	"bytes"
 	"errors"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/aruodore/aruo-cli/internal/cli/iostreams"
@@ -109,5 +111,27 @@ func TestDoctorCommandJSONFormatSucceedsAtMinimumScoreZero(t *testing.T) {
 	}
 	if !bytes.Contains(out.Bytes(), []byte(`"schemaVersion"`)) {
 		t.Errorf("output = %q, want a JSON report containing schemaVersion", out.String())
+	}
+}
+
+func TestDoctorCommandReturnsFindingsExitCodeForRequiredIntent(t *testing.T) {
+	t.Parallel()
+	directory := t.TempDir()
+	manifest := "apiVersion: aruo.dev/v1alpha1\nintent:\n  capabilities:\n    authentication: { status: REQUIRED, reason: identity-not-selected }\n"
+	if err := os.WriteFile(filepath.Join(directory, "aruo.yaml"), []byte(manifest), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	var out bytes.Buffer
+	command := newDoctor(sessionFactory{streams: iostreams.IOStreams{Out: &out}}, zeroCheckService(t))
+	command.SetArgs([]string{directory, "--format", "json", "--minimum-score", "0"})
+	command.SilenceErrors = true
+	command.SilenceUsage = true
+	err := command.Execute()
+	var clier *clierror.Error
+	if !errors.As(err, &clier) || clier.ExitCode() != 3 {
+		t.Fatalf("Execute() error = %v, want findings exit code 3", err)
+	}
+	if !bytes.Contains(out.Bytes(), []byte(`"blockingFindings": 1`)) {
+		t.Fatalf("output = %q, want structured blocking intent finding", out.String())
 	}
 }

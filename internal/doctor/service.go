@@ -33,5 +33,13 @@ func (s *Service) Audit(ctx context.Context, target string) (Report, error) {
 	if err != nil {
 		return Report{}, err
 	}
-	return s.engine.Run(ctx, absolute, repository)
+	report, err := s.engine.Run(ctx, absolute, repository)
+	if err != nil {
+		return Report{}, err
+	}
+	report.Intent, err = auditIntent(repository)
+	if err != nil {
+		return Report{}, fmt.Errorf("audit intent manifest: %w", err)
+	}
+	return report, nil
 }
