@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"testing"
 
@@ -92,19 +93,21 @@ func TestServicePlansAndAppliesContractWithoutChangingApplication(t *testing.T) 
 			t.Errorf("managed manifest is missing %s", name)
 		}
 	}
-	for _, name := range []string{"AGENTS.md", "aruo.yaml", ".aruo/contract.yaml", ".aruo/rules/security.md"} {
-		info, statErr := os.Stat(filepath.Join(repository, filepath.FromSlash(name)))
-		if statErr != nil {
-			t.Fatal(statErr)
+	if runtime.GOOS != "windows" {
+		for _, name := range []string{"AGENTS.md", "aruo.yaml", ".aruo/contract.yaml", ".aruo/rules/security.md"} {
+			info, statErr := os.Stat(filepath.Join(repository, filepath.FromSlash(name)))
+			if statErr != nil {
+				t.Fatal(statErr)
+			}
+			if got := info.Mode().Perm(); got != 0o644 {
+				t.Errorf("%s mode = %o, want 644", name, got)
+			}
 		}
-		if got := info.Mode().Perm(); got != 0o644 {
-			t.Errorf("%s mode = %o, want 644", name, got)
+		if info, statErr := os.Stat(filepath.Join(repository, ".aruo")); statErr != nil {
+			t.Errorf("stat .aruo: %v", statErr)
+		} else if info.Mode().Perm() != 0o755 {
+			t.Errorf(".aruo mode = %o, want 755", info.Mode().Perm())
 		}
-	}
-	if info, statErr := os.Stat(filepath.Join(repository, ".aruo")); statErr != nil {
-		t.Errorf("stat .aruo: %v", statErr)
-	} else if info.Mode().Perm() != 0o755 {
-		t.Errorf(".aruo mode = %o, want 755", info.Mode().Perm())
 	}
 }
 
