@@ -11,46 +11,6 @@ import (
 //go:embed templates
 var templates embed.FS
 
-func appendFullstackFiles(files []templateengine.FileSpec, packageSource string) []templateengine.FileSpec {
-	filtered := files[:0]
-	for _, file := range files {
-		if file.Destination != "AGENTS.md" && file.Destination != "aruo.yaml" && file.Destination != "package.json" && file.Destination != "README.md" {
-			filtered = append(filtered, file)
-		}
-	}
-	return append(filtered,
-		fullstackFile("fullstack/server/env.ts", "server/env.ts"),
-		fullstackFile("fullstack/server/errors.ts", "server/errors.ts"),
-		fullstackFile("fullstack/server/logger.ts", "server/logger.ts"),
-		fullstackFile("fullstack/server/database.ts", "server/database.ts"),
-		fullstackFile("fullstack/server/rate-limit.ts", "server/rate-limit.ts"),
-		fullstackFile("fullstack/server/index.ts", "server/index.ts"),
-		fullstackFile("fullstack/server/schema.ts", "server/db/schema.ts"),
-		fullstackFile("fullstack/server/migration.sql", "server/db/migrations/0000_baseline.sql"),
-		fullstackFile("fullstack/server/env.test.ts", "server/env.test.ts"),
-		fullstackFile("fullstack/env.example", ".env.example"),
-		fullstackFile("fullstack/compose.yaml", "compose.yaml"),
-		fullstackFile("fullstack/Dockerfile", "Dockerfile"),
-		fullstackFile("fullstack/dockerignore", ".dockerignore"),
-		fullstackFile("fullstack/tsconfig.server.json", "tsconfig.server.json"),
-		fullstackFile("fullstack/drizzle.config.ts", "drizzle.config.ts"),
-		fullstackFile("fullstack/AGENTS.md", "AGENTS.md"),
-		fullstackFile("fullstack/docs-architecture.md", "docs/architecture.md"),
-		fullstackFile("fullstack/docs-operations.md", "docs/operations.md"),
-		fullstackTemplate("fullstack/aruo.yaml.tmpl", "aruo.yaml"),
-		fullstackTemplate(packageSource, "package.json"),
-		fullstackTemplate("fullstack/README.md.tmpl", "README.md"),
-	)
-}
-
-func fullstackFile(source, destination string) templateengine.FileSpec {
-	return templateengine.FileSpec{Source: source, Destination: destination}
-}
-
-func fullstackTemplate(source, destination string) templateengine.FileSpec {
-	return templateengine.FileSpec{Source: source, Destination: destination, Template: true}
-}
-
 // GoLibrary returns the built-in Go library proof bundle.
 func GoLibrary() (fs.FS, templateengine.Blueprint) {
 	source, err := fs.Sub(templates, "templates")
@@ -166,14 +126,14 @@ func TSLibrary() (fs.FS, templateengine.Blueprint) {
 	}
 }
 
-// ReactLean returns the reduced React application baseline.
-func ReactLean() (fs.FS, templateengine.Blueprint) {
+// ReactApp returns the built-in React application baseline.
+func ReactApp() (fs.FS, templateengine.Blueprint) {
 	source, err := fs.Sub(templates, "templates")
 	if err != nil {
 		panic("embedded template subtree is invalid: " + err.Error())
 	}
 	return source, templateengine.Blueprint{
-		ID:       "aruo/react-lean",
+		ID:       "aruo/react",
 		Language: "typescript",
 		Files: []templateengine.FileSpec{
 			{Source: "react/app/README.md.tmpl", Destination: "README.md", Template: true},
@@ -214,15 +174,7 @@ func ReactLean() (fs.FS, templateengine.Blueprint) {
 	}
 }
 
-// ReactApp returns the comprehensive React modular-monolith baseline.
-func ReactApp() (fs.FS, templateengine.Blueprint) {
-	source, blueprint := ReactLean()
-	blueprint.ID = "aruo/react"
-	blueprint.Files = appendFullstackFiles(blueprint.Files, "react/full/package.json.tmpl")
-	return source, blueprint
-}
-
-// NuxtApp returns the built-in Nuxt application proof bundle.
+// NuxtApp returns the built-in Nuxt application baseline.
 func NuxtApp() (fs.FS, templateengine.Blueprint) {
 	source, err := fs.Sub(templates, "templates")
 	if err != nil {
@@ -230,68 +182,6 @@ func NuxtApp() (fs.FS, templateengine.Blueprint) {
 	}
 	return source, templateengine.Blueprint{
 		ID:       "aruo/nuxt",
-		Language: "typescript",
-		Files: []templateengine.FileSpec{
-			{Source: "nuxt/production/README.md.tmpl", Destination: "README.md", Template: true},
-			{Source: "nuxt/production/AGENTS.md", Destination: "AGENTS.md"},
-			{Source: "nuxt/production/package.json.tmpl", Destination: "package.json", Template: true},
-			{Source: "nuxt/production/nuxt.config.ts", Destination: "nuxt.config.ts"},
-			{Source: "nuxt/production/tsconfig.json", Destination: "tsconfig.json"},
-			{Source: "nuxt/production/eslint.config.mjs", Destination: "eslint.config.mjs"},
-			{Source: "nuxt/production/vitest.config.ts", Destination: "vitest.config.ts"},
-			{Source: "nuxt/production/drizzle.config.ts", Destination: "drizzle.config.ts"},
-			{Source: "nuxt/production/prettierignore", Destination: ".prettierignore"},
-			{Source: "nuxt/production/gitignore", Destination: ".gitignore"},
-			{Source: "nuxt/production/env.example", Destination: ".env.example"},
-			{Source: "nuxt/production/app.vue.tmpl", Destination: "app/app.vue", Template: true},
-			{Source: "nuxt/app/main.css", Destination: "app/assets/css/main.css"},
-			{Source: "nuxt/production/env.ts", Destination: "server/utils/env.ts"},
-			{Source: "nuxt/production/errors.ts", Destination: "server/utils/errors.ts"},
-			{Source: "nuxt/production/request-id.ts", Destination: "server/utils/request-id.ts"},
-			{Source: "nuxt/production/logger.ts", Destination: "server/utils/logger.ts"},
-			{Source: "nuxt/production/request-context.ts", Destination: "server/middleware/request-context.ts"},
-			{Source: "nuxt/production/security-headers.ts", Destination: "server/middleware/security-headers.ts"},
-			{Source: "nuxt/production/db.ts", Destination: "server/db/client.ts"},
-			{Source: "nuxt/production/schema.ts", Destination: "server/db/schema.ts"},
-			{Source: "nuxt/production/migrate.ts", Destination: "server/db/migrate.ts"},
-			{Source: "nuxt/production/migration.sql", Destination: "server/db/migrations/0000_initial.sql"},
-			{Source: "nuxt/production/migration-journal.json", Destination: "server/db/migrations/meta/_journal.json"},
-			{Source: "nuxt/production/health-live.ts", Destination: "server/api/health/live.get.ts"},
-			{Source: "nuxt/production/health-ready.ts", Destination: "server/api/health/ready.get.ts"},
-			{Source: "nuxt/production/env.test.ts", Destination: "tests/env.test.ts"},
-			{Source: "nuxt/production/errors.test.ts", Destination: "tests/errors.test.ts"},
-			{Source: "nuxt/production/Dockerfile", Destination: "Dockerfile"},
-			{Source: "nuxt/production/dockerignore", Destination: ".dockerignore"},
-			{Source: "nuxt/production/compose.yaml", Destination: "compose.yaml"},
-			{Source: "nuxt/production/Makefile", Destination: "Makefile"},
-			{Source: "nuxt/production/ci.yml", Destination: ".github/workflows/ci.yml"},
-			{Source: "nuxt/production/aruo.yaml.tmpl", Destination: "aruo.yaml", Template: true},
-			{Source: "nuxt/production/docs-architecture.md", Destination: "docs/architecture.md"},
-			{Source: "nuxt/production/docs-operations.md", Destination: "docs/operations.md"},
-			{Source: "nuxt/production/docs-README.md", Destination: "docs/README.md"},
-			{Source: "foundation/LICENSE.tmpl", Destination: "LICENSE", Template: true},
-			{Source: "foundation/CHANGELOG.md", Destination: "CHANGELOG.md"},
-			{Source: "foundation/ROADMAP.md", Destination: "ROADMAP.md"},
-			{Source: "foundation/SECURITY.md.tmpl", Destination: "SECURITY.md", Template: true},
-			{Source: "foundation/CONTRIBUTING.md", Destination: "CONTRIBUTING.md"},
-			{Source: "foundation/CODE_OF_CONDUCT.md", Destination: "CODE_OF_CONDUCT.md"},
-			{Source: "foundation/editorconfig", Destination: ".editorconfig"},
-			{Source: "foundation/issue-bug.yml", Destination: ".github/ISSUE_TEMPLATE/bug.yml"},
-			{Source: "foundation/issue-feature.yml", Destination: ".github/ISSUE_TEMPLATE/feature.yml"},
-			{Source: "foundation/pull-request.md", Destination: ".github/pull_request_template.md"},
-			{Source: "js/library/dependabot.yml", Destination: ".github/dependabot.yml"},
-		},
-	}
-}
-
-// NuxtLean returns the reduced Nuxt application baseline.
-func NuxtLean() (fs.FS, templateengine.Blueprint) {
-	source, err := fs.Sub(templates, "templates")
-	if err != nil {
-		panic("embedded template subtree is invalid: " + err.Error())
-	}
-	return source, templateengine.Blueprint{
-		ID:       "aruo/nuxt-lean",
 		Language: "typescript",
 		Files: []templateengine.FileSpec{
 			{Source: "nuxt/app/README.md.tmpl", Destination: "README.md", Template: true},
@@ -313,8 +203,8 @@ func NuxtLean() (fs.FS, templateengine.Blueprint) {
 			{Source: "frontend/app/AGENTS.md", Destination: "AGENTS.md"},
 			{Source: "nuxt/app/aruo.yaml.tmpl", Destination: "aruo.yaml", Template: true},
 			{Source: "frontend/app/docs-README.md", Destination: "docs/README.md"},
-			{Source: "nuxt/production/eslint.config.mjs", Destination: "eslint.config.mjs"},
-			{Source: "nuxt/production/prettierignore", Destination: ".prettierignore"},
+			{Source: "nuxt/app/eslint.config.mjs", Destination: "eslint.config.mjs"},
+			{Source: "nuxt/app/prettierignore", Destination: ".prettierignore"},
 			{Source: "foundation/pull-request.md", Destination: ".github/pull_request_template.md"},
 			{Source: "js/library/dependabot.yml", Destination: ".github/dependabot.yml"},
 		},
@@ -363,14 +253,14 @@ func VueLibrary() (fs.FS, templateengine.Blueprint) {
 	}
 }
 
-// VueLean returns the reduced Vue application baseline.
-func VueLean() (fs.FS, templateengine.Blueprint) {
+// VueApp returns the built-in Vue application baseline.
+func VueApp() (fs.FS, templateengine.Blueprint) {
 	source, err := fs.Sub(templates, "templates")
 	if err != nil {
 		panic("embedded template subtree is invalid: " + err.Error())
 	}
 	return source, templateengine.Blueprint{
-		ID:       "aruo/vue-lean",
+		ID:       "aruo/vue",
 		Language: "typescript",
 		Files: []templateengine.FileSpec{
 			{Source: "vue/app/README.md.tmpl", Destination: "README.md", Template: true},
@@ -411,22 +301,14 @@ func VueLean() (fs.FS, templateengine.Blueprint) {
 	}
 }
 
-// VueApp returns the comprehensive Vue modular-monolith baseline.
-func VueApp() (fs.FS, templateengine.Blueprint) {
-	source, blueprint := VueLean()
-	blueprint.ID = "aruo/vue"
-	blueprint.Files = appendFullstackFiles(blueprint.Files, "vue/full/package.json.tmpl")
-	return source, blueprint
-}
-
-// NextLean returns the reduced Next.js application baseline.
-func NextLean() (fs.FS, templateengine.Blueprint) {
+// NextApp returns the built-in Next.js application baseline.
+func NextApp() (fs.FS, templateengine.Blueprint) {
 	source, err := fs.Sub(templates, "templates")
 	if err != nil {
 		panic("embedded template subtree is invalid: " + err.Error())
 	}
 	return source, templateengine.Blueprint{
-		ID:       "aruo/next-lean",
+		ID:       "aruo/next",
 		Language: "typescript",
 		Files: []templateengine.FileSpec{
 			{Source: "next/app/README.md.tmpl", Destination: "README.md", Template: true},
@@ -463,44 +345,6 @@ func NextLean() (fs.FS, templateengine.Blueprint) {
 			{Source: "next/app/prettierignore", Destination: ".prettierignore"},
 		},
 	}
-}
-
-// NextApp returns the comprehensive Next.js modular-monolith baseline.
-func NextApp() (fs.FS, templateengine.Blueprint) {
-	source, blueprint := NextLean()
-	blueprint.ID = "aruo/next"
-	filtered := blueprint.Files[:0]
-	for _, file := range blueprint.Files {
-		if file.Destination != "AGENTS.md" && file.Destination != "aruo.yaml" && file.Destination != "package.json" && file.Destination != "README.md" {
-			filtered = append(filtered, file)
-		}
-	}
-	filtered = append(filtered,
-		fullstackFile("fullstack/server/env.ts", "server/env.ts"),
-		fullstackFile("fullstack/server/errors.ts", "server/errors.ts"),
-		fullstackFile("fullstack/server/logger.ts", "server/logger.ts"),
-		fullstackFile("fullstack/server/database.ts", "server/database.ts"),
-		fullstackFile("fullstack/server/rate-limit.ts", "server/rate-limit.ts"),
-		fullstackFile("fullstack/server/schema.ts", "server/db/schema.ts"),
-		fullstackFile("fullstack/server/migration.sql", "server/db/migrations/0000_baseline.sql"),
-		fullstackFile("fullstack/server/env.test.ts", "server/env.test.ts"),
-		fullstackFile("fullstack/env.example", ".env.example"),
-		fullstackFile("fullstack/compose.yaml", "compose.yaml"),
-		fullstackFile("fullstack/drizzle.config.ts", "drizzle.config.ts"),
-		fullstackFile("fullstack/AGENTS.md", "AGENTS.md"),
-		fullstackFile("fullstack/docs-architecture.md", "docs/architecture.md"),
-		fullstackFile("fullstack/docs-operations.md", "docs/operations.md"),
-		fullstackFile("fullstack/dockerignore", ".dockerignore"),
-		fullstackFile("next/full/Dockerfile", "Dockerfile"),
-		fullstackFile("next/full/health-live.ts", "app/api/health/live/route.ts"),
-		fullstackFile("next/full/health-ready.ts", "app/api/health/ready/route.ts"),
-		fullstackFile("next/full/proxy.ts", "proxy.ts"),
-		fullstackTemplate("fullstack/aruo.yaml.tmpl", "aruo.yaml"),
-		fullstackTemplate("next/full/package.json.tmpl", "package.json"),
-		fullstackTemplate("fullstack/README.md.tmpl", "README.md"),
-	)
-	blueprint.Files = filtered
-	return source, blueprint
 }
 
 // PythonLibrary returns the built-in Python library proof bundle.

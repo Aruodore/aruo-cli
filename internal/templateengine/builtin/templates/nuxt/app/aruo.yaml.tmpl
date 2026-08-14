@@ -1,7 +1,7 @@
 apiVersion: aruo.dev/v1alpha1
 project:
   { name: {{ .Project.Name }}, kind: web-application, language: typescript }
-template: { id: {{ .Variables.TemplateID }}, version: builtin, profile: lean }
+template: { id: {{ .Variables.TemplateID }}, version: builtin }
 intent:
   capabilities:
     strict-types: { status: SOLVED, evidence: nuxt-typecheck }

@@ -21,14 +21,10 @@ func New() (*catalog.Memory, error) {
 	tsSource, tsBlueprint := templatebuiltin.TSLibrary()
 	pySource, pyBlueprint := templatebuiltin.PythonLibrary()
 	reactSource, reactBlueprint := templatebuiltin.ReactApp()
-	reactLeanSource, reactLeanBlueprint := templatebuiltin.ReactLean()
 	nuxtSource, nuxtBlueprint := templatebuiltin.NuxtApp()
-	nuxtLeanSource, nuxtLeanBlueprint := templatebuiltin.NuxtLean()
 	vueSource, vueBlueprint := templatebuiltin.VueLibrary()
 	vueAppSource, vueAppBlueprint := templatebuiltin.VueApp()
-	vueLeanSource, vueLeanBlueprint := templatebuiltin.VueLean()
 	nextSource, nextBlueprint := templatebuiltin.NextApp()
-	nextLeanSource, nextLeanBlueprint := templatebuiltin.NextLean()
 	return catalog.NewMemory(
 		catalog.Entry{
 			ID:             "go-library",
@@ -110,63 +106,8 @@ func New() (*catalog.Memory, error) {
 				ModuleExample:     "my-library",
 			},
 		},
-		catalog.Entry{
-			ID:             "react",
-			Name:           "React",
-			Language:       "typescript",
-			Kind:           "app",
-			Description:    "A domain-neutral React modular monolith with a Node server, PostgreSQL, production controls, tests, and explicit limitations",
-			Color:          "#61DAFB",
-			Licenses:       []string{"MIT"},
-			DefaultLicense: "MIT",
-			Source:         reactSource,
-			Blueprint:      reactBlueprint,
-			Defaults: map[string]any{
-				"IncludeInstall": false,
-				"TemplateID":     "react",
-			},
-			Prepare: prepareJSLibrary,
-			NextSteps: []string{
-				"cp .env.example .env && npm install",
-				"docker compose up -d db && npm run db:migrate",
-				"npm run dev",
-				"git init && git add .",
-			},
-			Prompts: catalog.ProjectPrompts{
-				ModuleLabel:       "npm package name",
-				ModuleDescription: `This is written to package.json as "name" (the app is private and not published).`,
-				ModuleExample:     "my-app",
-			},
-		},
-		webAppEntry("react-lean", "React (lean)", "A lean React baseline with explicit production omissions", "#61DAFB", reactLeanSource, reactLeanBlueprint),
-		catalog.Entry{
-			ID:             "nuxt",
-			Name:           "Nuxt",
-			Language:       "typescript",
-			Kind:           "app",
-			Description:    "A Nuxt modular monolith with PostgreSQL, validation, structured logging, health checks, containers, tests, and an AI development contract",
-			Color:          "#38E59D",
-			Licenses:       []string{"MIT"},
-			DefaultLicense: "MIT",
-			Source:         nuxtSource,
-			Blueprint:      nuxtBlueprint,
-			Defaults: map[string]any{
-				"IncludeInstall": false,
-				"TemplateID":     "nuxt",
-			},
-			Prepare: prepareJSLibrary,
-			NextSteps: []string{
-				"cp .env.example .env && npm install",
-				"docker compose up -d db && npm run db:migrate",
-				"npm run dev",
-			},
-			Prompts: catalog.ProjectPrompts{
-				ModuleLabel:       "npm package name",
-				ModuleDescription: `This is written to package.json as "name" (the app is private and not published).`,
-				ModuleExample:     "my-app",
-			},
-		},
-		webAppEntry("nuxt-lean", "Nuxt (lean)", "A lean Nuxt baseline with explicit production omissions", "#38E59D", nuxtLeanSource, nuxtLeanBlueprint),
+		webAppEntry("react", "React", "A focused React baseline with explicit production omissions", "#61DAFB", reactSource, reactBlueprint),
+		webAppEntry("nuxt", "Nuxt", "A focused Nuxt baseline with explicit production omissions", "#38E59D", nuxtSource, nuxtBlueprint),
 		catalog.Entry{
 			ID:             "vue-library",
 			Name:           "Vue library",
@@ -194,64 +135,8 @@ func New() (*catalog.Memory, error) {
 				ModuleExample:     "my-library",
 			},
 		},
-		catalog.Entry{
-			ID:             "vue",
-			Name:           "Vue",
-			Language:       "typescript",
-			Kind:           "app",
-			Description:    "A domain-neutral Vue modular monolith with a Node server, PostgreSQL, production controls, tests, and explicit limitations",
-			Color:          "#63D6AA",
-			Licenses:       []string{"MIT"},
-			DefaultLicense: "MIT",
-			Source:         vueAppSource,
-			Blueprint:      vueAppBlueprint,
-			Defaults: map[string]any{
-				"IncludeInstall": false,
-				"TemplateID":     "vue",
-			},
-			Prepare: prepareJSLibrary,
-			NextSteps: []string{
-				"cp .env.example .env && npm install",
-				"docker compose up -d db && npm run db:migrate",
-				"npm run dev",
-				"git init && git add .",
-			},
-			Prompts: catalog.ProjectPrompts{
-				ModuleLabel:       "npm package name",
-				ModuleDescription: `This is written to package.json as "name" (the app is private and not published).`,
-				ModuleExample:     "my-app",
-			},
-		},
-		webAppEntry("vue-lean", "Vue (lean)", "A lean Vue baseline with explicit production omissions", "#63D6AA", vueLeanSource, vueLeanBlueprint),
-		catalog.Entry{
-			ID:             "next",
-			Name:           "Next.js",
-			Language:       "typescript",
-			Kind:           "app",
-			Description:    "A domain-neutral Next.js modular monolith with PostgreSQL, production controls, tests, and explicit limitations",
-			Color:          "#B79AF4",
-			Licenses:       []string{"MIT"},
-			DefaultLicense: "MIT",
-			Source:         nextSource,
-			Blueprint:      nextBlueprint,
-			Defaults: map[string]any{
-				"IncludeInstall": false,
-				"TemplateID":     "next",
-			},
-			Prepare: prepareJSLibrary,
-			NextSteps: []string{
-				"cp .env.example .env && npm install",
-				"docker compose up -d db && npm run db:migrate",
-				"npm run dev",
-				"git init && git add .",
-			},
-			Prompts: catalog.ProjectPrompts{
-				ModuleLabel:       "npm package name",
-				ModuleDescription: `This is written to package.json as "name" (the app is private and not published).`,
-				ModuleExample:     "my-app",
-			},
-		},
-		webAppEntry("next-lean", "Next.js (lean)", "A lean Next.js baseline with explicit production omissions", "#B79AF4", nextLeanSource, nextLeanBlueprint),
+		webAppEntry("vue", "Vue", "A focused Vue baseline with explicit production omissions", "#63D6AA", vueAppSource, vueAppBlueprint),
+		webAppEntry("next", "Next.js", "A focused Next.js baseline with explicit production omissions", "#B79AF4", nextSource, nextBlueprint),
 		catalog.Entry{
 			ID:             "python-library",
 			Name:           "Python library",

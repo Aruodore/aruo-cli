@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/aruodore/aruo-cli/internal/catalog/builtin"
@@ -12,13 +13,13 @@ import (
 	"github.com/aruodore/aruo-cli/internal/templateengine"
 )
 
-func TestEveryApplicationFrameworkHasComprehensiveAndLeanProfiles(t *testing.T) {
+func TestEveryApplicationFrameworkHasOneCanonicalTemplate(t *testing.T) {
 	t.Parallel()
 	templateCatalog, err := builtin.New()
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, id := range []string{"react", "react-lean", "vue", "vue-lean", "next", "next-lean", "nuxt", "nuxt-lean"} {
+	for _, id := range []string{"react", "vue", "next", "nuxt"} {
 		entry, err := templateCatalog.Resolve(context.Background(), id)
 		if err != nil {
 			t.Errorf("Resolve(%q): %v", id, err)
@@ -30,6 +31,24 @@ func TestEveryApplicationFrameworkHasComprehensiveAndLeanProfiles(t *testing.T) 
 		if entry.Defaults["TemplateID"] != id {
 			t.Errorf("%s manifest ID default = %v", id, entry.Defaults["TemplateID"])
 		}
+	}
+	for _, removed := range []string{"react-lean", "vue-lean", "next-lean", "nuxt-lean"} {
+		if _, err := templateCatalog.Resolve(context.Background(), removed); err == nil {
+			t.Errorf("removed template %q still resolves", removed)
+		}
+	}
+	entries, err := templateCatalog.List(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	appCount := 0
+	for _, entry := range entries {
+		if entry.Kind == "app" {
+			appCount++
+		}
+	}
+	if appCount != 4 {
+		t.Fatalf("application template count = %d, want 4", appCount)
 	}
 }
 
@@ -205,6 +224,7 @@ func TestReactAppHasRequiredFiles(t *testing.T) {
 			t.Errorf("required file %s: %v", name, err)
 		}
 	}
+	assertCanonicalApplicationManifest(t, destination, "react")
 }
 
 // TestNuxtAppHasRequiredFiles checks the generated file plan only, for the
@@ -233,17 +253,20 @@ func TestNuxtAppHasRequiredFiles(t *testing.T) {
 		t.Fatal(err)
 	}
 	required := []string{
-		"README.md", "AGENTS.md", "aruo.yaml", ".env.example", "package.json", "Dockerfile", "compose.yaml",
-		"docs/README.md", "docs/architecture.md", "docs/operations.md", "server/utils/env.ts", "server/utils/errors.ts",
-		"server/api/health/live.get.ts", "server/api/health/ready.get.ts",
-		"server/db/schema.ts", "server/db/migrations/0000_initial.sql", "tests/env.test.ts",
-		".github/workflows/ci.yml",
+		"README.md", "AGENTS.md", "AGENTS.local.md", "aruo.yaml", "package.json", "nuxt.config.ts",
+		"docs/README.md", "app/app.vue", "tests/app.test.ts", ".github/workflows/ci.yml",
 	}
 	for _, name := range required {
 		if _, err := os.Stat(filepath.Join(destination, filepath.FromSlash(name))); err != nil {
 			t.Errorf("required file %s: %v", name, err)
 		}
 	}
+	for _, retired := range []string{".env.example", "Dockerfile", "compose.yaml", "docs/operations.md", "server/db/schema.ts"} {
+		if _, err := os.Stat(filepath.Join(destination, filepath.FromSlash(retired))); !os.IsNotExist(err) {
+			t.Errorf("retired comprehensive file %s still exists", retired)
+		}
+	}
+	assertCanonicalApplicationManifest(t, destination, "nuxt")
 }
 
 // TestVueLibraryHasRequiredFiles checks the generated file plan only, for
@@ -326,6 +349,7 @@ func TestVueAppHasRequiredFiles(t *testing.T) {
 			t.Errorf("required file %s: %v", name, err)
 		}
 	}
+	assertCanonicalApplicationManifest(t, destination, "vue")
 }
 
 // TestNextAppHasRequiredFiles checks the generated file plan only, for the
@@ -366,6 +390,25 @@ func TestNextAppHasRequiredFiles(t *testing.T) {
 		if _, err := os.Stat(filepath.Join(destination, filepath.FromSlash(name))); err != nil {
 			t.Errorf("required file %s: %v", name, err)
 		}
+	}
+	assertCanonicalApplicationManifest(t, destination, "next")
+}
+
+func assertCanonicalApplicationManifest(t *testing.T, destination, templateID string) {
+	t.Helper()
+	content, err := os.ReadFile(filepath.Join(destination, "aruo.yaml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	manifest := string(content)
+	if !strings.Contains(manifest, "id: "+templateID) {
+		t.Errorf("aruo.yaml does not use canonical template ID %q: %s", templateID, manifest)
+	}
+	if strings.Contains(manifest, "profile:") || strings.Contains(manifest, "-lean") {
+		t.Errorf("aruo.yaml still exposes a removed application profile: %s", manifest)
+	}
+	if _, err := os.Stat(filepath.Join(destination, "AGENTS.local.md")); err != nil {
+		t.Errorf("application-owned stack guidance is missing: %v", err)
 	}
 }
 

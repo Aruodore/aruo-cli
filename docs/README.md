@@ -8,6 +8,7 @@ This directory is the user and contributor documentation source. Navigation foll
 - [CLI reference](cli/README.md)
 - [Configuration](configuration/README.md)
 - [Templates](templates/README.md)
+- [Application templates](application-templates.md)
 - [Plugins](plugins/README.md)
 - [Development](development/README.md)
 - [Contributing](contributing/README.md)
