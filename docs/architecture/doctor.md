@@ -50,6 +50,10 @@ When `aruo.yaml` declares `intent.capabilities`, Doctor audits that contract sep
 
 A missing `aruo.yaml` is visible but does not block repositories that have not adopted the Aruo intent contract. Blocking intent findings produce exit code 3 after the complete human or JSON report is written, independently of `--minimum-score`.
 
+Doctor has a deliberately small registry of safe static evidence verifiers. It can inspect package scripts for complete quality gates and framework builds, confirm a declared test runner has discoverable tests, recognize strict TypeScript configuration, find high-severity dependency auditing in CI, locate committed SQL migrations, and confirm distinct liveness/readiness handlers. These checks read bounded repository files only; they never install dependencies or execute scripts.
+
+`VERIFIED` means the declared static convention was observed, not that runtime behavior succeeded. Claims that need execution, infrastructure, provider configuration, or semantic code analysis—such as a reachable database, effective authorization, correct logs, or secure middleware behavior—remain `DECLARED` until a future verifier has honest evidence. Unknown evidence identifiers also remain `DECLARED` for forward compatibility.
+
 ## Recommendations
 
 Recommendations identify the missing or weak outcome, why it matters, and a concrete next action. They are ordered by lost points, then stable check ID. Aruo does not generate blanket “add file” advice when substance is the problem. Human output emphasizes deductions; JSON includes passing and failing evidence for automation.

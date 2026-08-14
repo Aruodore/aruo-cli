@@ -90,7 +90,19 @@ func auditIntent(repository Repository) (IntentReport, error) {
 					}
 				}
 			default:
-				capability.EvidenceStatus = EvidenceDeclared
+				verification, evidenceErr := verifySemanticEvidence(repository, capability.Evidence)
+				if evidenceErr != nil {
+					return report, evidenceErr
+				}
+				switch {
+				case !verification.recognized:
+					capability.EvidenceStatus = EvidenceDeclared
+				case verification.verified:
+					capability.EvidenceStatus = EvidenceVerified
+				default:
+					capability.EvidenceStatus = EvidenceMissing
+					addIntentFinding(&report, name, "error", fmt.Sprintf("declared semantic evidence %q could not be verified", capability.Evidence), verification.action, true)
+				}
 			}
 		case CapabilityRequired:
 			if capability.Reason == "" {

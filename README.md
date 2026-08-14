@@ -155,6 +155,8 @@ aruo create . --name my-tool --template go-library --module github.com/you/my-to
 
 Scores a repository's engineering health and, when `aruo.yaml` declares production intent, audits its capability claims and unresolved responsibilities. Intent findings are separate and do not alter the versioned 100-point score. Defaults to the current directory when no path is given.
 
+Doctor statically verifies supported evidence conventions such as complete npm quality scripts, framework build/type-check scripts, test files, dependency-audit CI steps, committed migrations, and health-route pairs. It does not run repository code. Runtime and provider-dependent evidence remains visibly `DECLARED`, never overstated as verified.
+
 **Key flags:** `--format human|json`, `--minimum-score <0-100>` (default `80`). Doctor exits `3` when the score is below the threshold or the intent manifest has blocking findings, making it useful as a CI gate.
 
 ```sh

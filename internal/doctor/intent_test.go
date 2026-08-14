@@ -30,11 +30,11 @@ func TestAuditIntent(t *testing.T) {
 		},
 		{
 			name:       "semantic evidence remains declared",
-			manifest:   manifestWith("quality-gate: { status: SOLVED, evidence: npm-run-check }"),
+			manifest:   manifestWith("structured-logging: { status: SOLVED, evidence: json-request-logs }"),
 			present:    true,
 			valid:      true,
 			evidence:   EvidenceDeclared,
-			capability: "quality-gate",
+			capability: "structured-logging",
 		},
 		{
 			name:        "missing path disproves solved claim",
