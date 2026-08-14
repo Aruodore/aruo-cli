@@ -267,7 +267,7 @@ func TestRunGuideSkipsKindStepWhenCatalogHasOneKind(t *testing.T) {
 	}
 }
 
-func TestRunGuideKindStepOffersEcosystemNamesPerKind(t *testing.T) {
+func TestRunGuideKindStepOffersConciseChoices(t *testing.T) {
 	t.Parallel()
 
 	templateCatalog := fakeCatalog{entries: []catalog.Entry{
@@ -286,10 +286,10 @@ func TestRunGuideKindStepOffersEcosystemNamesPerKind(t *testing.T) {
 			t.Fatalf("kind options = %#v, want 2 kinds", request.Options)
 		}
 		app, library := request.Options[0], request.Options[1]
-		if app.ID != "app" || app.Label != "Application" || app.Description != "Next.js" {
+		if app.ID != "app" || app.Label != "Application" || app.Description != "" {
 			t.Errorf("app option = %+v", app)
 		}
-		if library.ID != "library" || library.Label != "Library" || library.Description != "Go library, JavaScript library" {
+		if library.ID != "library" || library.Label != "Library" || library.Description != "" {
 			t.Errorf("library option = %+v", library)
 		}
 	}

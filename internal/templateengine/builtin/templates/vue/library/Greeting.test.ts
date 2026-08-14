@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { mount } from "@vue/test-utils";
 
-import Greeting from "../Greeting.vue";
+import Greeting from "../greeting.vue";
 
 describe("Greeting", () => {
   it("renders the provided name", () => {

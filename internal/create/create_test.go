@@ -44,8 +44,13 @@ func TestServiceCreatesRepository(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if string(content) != "hello World" || result.FileCount != 1 {
+	if string(content) != "hello World" || result.FileCount != 13 {
 		t.Errorf("content=%q result=%+v", content, result)
+	}
+	for _, name := range []string{"AGENTS.md", "aruo.yaml", ".aruo/contract.yaml", ".aruo/managed.json", ".aruo/rules/security.md"} {
+		if _, err := os.Stat(filepath.Join(destination, filepath.FromSlash(name))); err != nil {
+			t.Errorf("created repository is missing %s: %v", name, err)
+		}
 	}
 }
 

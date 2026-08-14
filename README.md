@@ -98,7 +98,7 @@ A real, unedited run of the commands above:
 
 ```text
 $ aruo create my-library --template go-library
-✓ Created go-library with 24 files at ./my-library
+✓ Created go-library with 35 files at ./my-library
 
 Next steps:
   cd my-library
@@ -197,12 +197,18 @@ Only what's actually implemented: `0` success, `1` operational failure, `3` `doc
 
 ```text
 my-library/
+├── .aruo/
+│   ├── rules/{api,architecture,data,delivery,observability,security,testing}.md
+│   ├── contract.yaml
+│   ├── managed.json
+│   └── stack.yaml
 ├── .github/
 │   ├── ISSUE_TEMPLATE/{bug.yml,feature.yml}
 │   ├── workflows/{ci.yml,pr-title.yml,release.yml}
 │   ├── dependabot.yml
 │   └── pull_request_template.md
 ├── docs/README.md
+├── AGENTS.md                 # AI entry point and managed engineering contract
 ├── aruo.yaml                  # template provenance and explicit production intent
 ├── CHANGELOG.md
 ├── CODE_OF_CONDUCT.md
@@ -219,7 +225,7 @@ my-library/
 └── SECURITY.md
 ```
 
-Every template's exact file set differs by ecosystem (an npm-based template gets `package.json`/CI steps for `npm test`, for example) but follows the same shape: a working CI workflow, tests, and governance/security files, never placeholders.
+Every template's exact application file set differs by ecosystem (an npm-based template gets `package.json` and CI steps for `npm test`, for example). Every created project also receives the same managed AI engineering contract atomically: `AGENTS.md`, `.aruo/contract.yaml`, stack detection, managed hashes, and the rules under `.aruo/rules/`. Stack-specific guidance is retained in `AGENTS.md`; application-owned production intent remains in `aruo.yaml`.
 
 ## Configuration
 

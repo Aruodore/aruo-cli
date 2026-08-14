@@ -58,8 +58,9 @@ func (p *Prompter) buildGuideForm(steps []tux.Step) (*huh.Form, []guideField) {
 	for index, step := range steps {
 		field := p.buildGuideField(step, steps, fields, index)
 		group := huh.NewGroup(field)
-		if step.Skip != nil {
-			group = group.WithHide(step.Skip())
+		hidden := step.Skip != nil && step.Skip()
+		if hidden {
+			group = group.WithHide(true)
 		}
 		groups[index] = group
 	}
@@ -137,6 +138,7 @@ func buildGuideInput(step tux.Step, snapshot func() tux.Answers, bindings []any,
 		Key(step.ID).
 		TitleFunc(func() string { return request().Label }, bindings).
 		DescriptionFunc(func() string { return request().Description }, bindings).
+		Prompt(": ").
 		PlaceholderFunc(func() string {
 			req := request()
 			if req.Default != nil && *req.Default != "" {
@@ -166,7 +168,7 @@ func (p *Prompter) buildGuideSelect(step tux.Step, snapshot func() tux.Answers, 
 	}
 	out.pointer = &value
 	request := func() tux.SelectRequest { return step.Select(snapshot()) }
-	return huh.NewSelect[tux.OptionID]().
+	field := huh.NewSelect[tux.OptionID]().
 		Key(step.ID).
 		TitleFunc(func() string { return request().Label }, bindings).
 		DescriptionFunc(func() string { return request().Description }, bindings).
@@ -178,6 +180,10 @@ func (p *Prompter) buildGuideSelect(step tux.Step, snapshot func() tux.Answers, 
 			}
 			return nil
 		})
+	if initial.HighlightActive {
+		field.WithTheme(newHighlightedHuhTheme(p.capabilities, p.policy))
+	}
+	return field
 }
 
 func buildGuideConfirm(step tux.Step, snapshot func() tux.Answers, bindings []any, out *guideField) huh.Field {

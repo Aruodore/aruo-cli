@@ -134,6 +134,10 @@ func (s *Service) Apply(ctx context.Context, plan Plan) (Result, error) {
 }
 
 func renderContract(stack Stack) ([]plannedFile, error) {
+	return renderContractWithOverrides(stack, nil)
+}
+
+func renderContractWithOverrides(stack Stack, overrides map[string][]byte) ([]plannedFile, error) {
 	entries, err := fs.ReadDir(contractFiles, "contract")
 	if err != nil {
 		return nil, err
@@ -161,6 +165,9 @@ func renderContract(stack Stack) ([]plannedFile, error) {
 		destination := entry.Name()
 		if entry.Name() == "contract.yaml" {
 			destination = ".aruo/contract.yaml"
+		}
+		if override, ok := overrides[destination]; ok {
+			content = override
 		}
 		files = append(files, plannedFile{path: destination, content: content})
 	}

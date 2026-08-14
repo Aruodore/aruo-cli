@@ -194,7 +194,7 @@ func TestReactAppHasRequiredFiles(t *testing.T) {
 		"README.md", "LICENSE", "CHANGELOG.md", "ROADMAP.md", "SECURITY.md", "CONTRIBUTING.md",
 		"CODE_OF_CONDUCT.md", "aruo.yaml", "package.json", "tsconfig.json", "tsconfig.app.json",
 		"tsconfig.node.json", "vite.config.ts", "index.html",
-		"src/main.tsx", "src/App.tsx", "src/App.test.tsx", "Makefile",
+		"src/main.tsx", "src/app.tsx", "src/app.test.tsx", "Makefile",
 		"docs/README.md", ".github/workflows/ci.yml", ".github/pull_request_template.md",
 		".github/ISSUE_TEMPLATE/bug.yml", ".github/ISSUE_TEMPLATE/feature.yml",
 		".github/dependabot.yml", ".github/workflows/pr-title.yml", ".github/workflows/release.yml",
@@ -274,7 +274,7 @@ func TestVueLibraryHasRequiredFiles(t *testing.T) {
 	required := []string{
 		"README.md", "LICENSE", "CHANGELOG.md", "ROADMAP.md", "SECURITY.md", "CONTRIBUTING.md",
 		"CODE_OF_CONDUCT.md", "aruo.yaml", "package.json", "tsconfig.json", "vite.config.ts",
-		"vitest.config.ts", "src/index.ts", "src/Greeting.vue", "src/__tests__/Greeting.test.ts", "Makefile",
+		"vitest.config.ts", "src/index.ts", "src/greeting.vue", "src/__tests__/greeting.test.ts", "Makefile",
 		"docs/README.md", ".github/workflows/ci.yml", ".github/pull_request_template.md",
 		".github/ISSUE_TEMPLATE/bug.yml", ".github/ISSUE_TEMPLATE/feature.yml",
 		".github/dependabot.yml", ".github/workflows/pr-title.yml", ".github/workflows/release.yml",
@@ -315,7 +315,7 @@ func TestVueAppHasRequiredFiles(t *testing.T) {
 	required := []string{
 		"README.md", "LICENSE", "CHANGELOG.md", "ROADMAP.md", "SECURITY.md", "CONTRIBUTING.md",
 		"CODE_OF_CONDUCT.md", "aruo.yaml", "package.json", "tsconfig.json", "vite.config.ts",
-		"vitest.config.ts", "index.html", "src/main.ts", "src/App.vue", "src/App.test.ts", "Makefile",
+		"vitest.config.ts", "index.html", "src/main.ts", "src/app.vue", "src/app.test.ts", "Makefile",
 		"docs/README.md", ".github/workflows/ci.yml", ".github/pull_request_template.md",
 		".github/ISSUE_TEMPLATE/bug.yml", ".github/ISSUE_TEMPLATE/feature.yml",
 		".github/dependabot.yml", ".github/workflows/pr-title.yml", ".github/workflows/release.yml",

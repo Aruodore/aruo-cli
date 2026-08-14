@@ -2,7 +2,7 @@
 
 ## Naming and layout
 
-Use short descriptive lowercase Go package names; avoid `util`, `common`, `helpers`, and stuttering names. Export only stable consumer concepts. Files group cohesive behavior, not arbitrary type categories. Commands and config keys use lowercase kebab-case; environment variables use `ARUO_` plus uppercase snake case.
+Use short descriptive lowercase Go package names; avoid `util`, `common`, `helpers`, and stuttering names. Export only stable consumer concepts. Files group cohesive behavior, not arbitrary type categories. Project-owned filenames, commands, and config keys use lowercase kebab-case. Keep a different filename only when required by a language, framework, operating system, or established tool. Environment variables use `ARUO_` plus uppercase snake case.
 
 ## Formatting and static checks
 

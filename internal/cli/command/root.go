@@ -3,6 +3,7 @@ package command
 
 import (
 	"context"
+	"strings"
 
 	"github.com/aruodore/aruo-cli/internal/buildinfo"
 	"github.com/aruodore/aruo-cli/internal/catalog"
@@ -49,6 +50,7 @@ func NewRoot(streams iostreams.IOStreams, build buildinfo.Info, templateCatalog 
 	root := &cobra.Command{
 		Use:           "aruo",
 		Short:         "Build and maintain production-quality software projects",
+		Long:          "Aruo gives developers and AI agents explicit engineering intent,\nrepeatable project creation, and evidence-based repository checks.",
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		Args:          cobra.NoArgs,
@@ -56,6 +58,25 @@ func NewRoot(streams iostreams.IOStreams, build buildinfo.Info, templateCatalog 
 			return command.Help()
 		},
 	}
+	root.SetHelpTemplate(strings.TrimSpace(`
+ARUO
+  {{if .Long}}{{.Long}}{{else}}{{.Short}}{{end}}
+
+USAGE
+  {{.UseLine}}
+{{if .HasAvailableSubCommands}}
+COMMANDS
+{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}  {{rpad .Name .NamePadding }}  {{.Short}}
+{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}
+OPTIONS
+{{.LocalFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasAvailableInheritedFlags}}
+GLOBAL OPTIONS
+{{.InheritedFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasExample}}
+EXAMPLES
+{{.Example}}{{end}}
+
+Run "{{.CommandPath}} [command] --help" for command details.
+`) + "\n")
 
 	root.SetIn(streams.In)
 	root.SetOut(streams.Out)

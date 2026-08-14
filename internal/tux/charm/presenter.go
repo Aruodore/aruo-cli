@@ -4,7 +4,6 @@ package charm
 import (
 	"context"
 	"fmt"
-	"image/color"
 	"io"
 	"sort"
 	"strings"
@@ -20,14 +19,6 @@ type Presenter struct {
 	capabilities tux.Capabilities
 	policy       tux.Policy
 	theme        theme
-}
-
-type theme struct {
-	emphasis lipgloss.Style
-	success  lipgloss.Style
-	warning  lipgloss.Style
-	danger   lipgloss.Style
-	muted    lipgloss.Style
 }
 
 // NewPresenter constructs a styled presenter over explicit result and diagnostic streams.
@@ -47,13 +38,13 @@ func (p *Presenter) Message(ctx context.Context, message tux.Message) error {
 		return err
 	}
 	label, marker, style := p.messageStyle(message.Kind)
-	text := message.Text
+	prefix := ""
 	if marker != "" {
-		text = marker + " " + text
+		prefix = style.Render(marker) + " "
 	} else if label != "" {
-		text = label + ": " + text
+		prefix = style.Render(label+":") + " "
 	}
-	if _, err := fmt.Fprintln(p.result, style.Render(text)); err != nil {
+	if _, err := fmt.Fprintln(p.result, prefix+message.Text); err != nil {
 		return fmt.Errorf("write message: %w", err)
 	}
 	return nil
@@ -88,16 +79,20 @@ func (p *Presenter) Diagnostic(ctx context.Context, diagnostic tux.Diagnostic) e
 	if _, err := fmt.Fprintln(p.diagnostic, p.theme.danger.Render("Error: "+diagnostic.Summary)); err != nil {
 		return fmt.Errorf("write diagnostic summary: %w", err)
 	}
-	for _, value := range []string{diagnostic.Detail, diagnostic.Effect, diagnostic.Suggestion} {
-		if value == "" {
+	for _, item := range []struct{ label, value string }{
+		{"Detail", diagnostic.Detail},
+		{"Effect", diagnostic.Effect},
+		{"Next", diagnostic.Suggestion},
+	} {
+		if item.value == "" {
 			continue
 		}
-		if _, err := fmt.Fprintf(p.diagnostic, "\n%s\n", value); err != nil {
+		if _, err := fmt.Fprintf(p.diagnostic, "  %s  %s\n", p.theme.muted.Render(item.label), item.value); err != nil {
 			return fmt.Errorf("write diagnostic detail: %w", err)
 		}
 	}
 	if diagnostic.Code != "" {
-		if _, err := fmt.Fprintf(p.diagnostic, "\n%s\n", p.theme.muted.Render("Debug reference: "+diagnostic.Code)); err != nil {
+		if _, err := fmt.Fprintf(p.diagnostic, "  %s  %s\n", p.theme.muted.Render("Reference"), diagnostic.Code); err != nil {
 			return fmt.Errorf("write diagnostic reference: %w", err)
 		}
 	}
@@ -134,7 +129,7 @@ func (p *Presenter) writeRow(table tux.Table, columns, widths []int, row []strin
 		alignment := table.Columns[source].Alignment
 		cell := pad(value, widths[index], alignment)
 		if heading {
-			cell = p.theme.emphasis.Render(cell)
+			cell = p.theme.accent.Render(strings.ToUpper(cell))
 		}
 		cells = append(cells, cell)
 	}
@@ -142,36 +137,6 @@ func (p *Presenter) writeRow(table tux.Table, columns, widths []int, row []strin
 		return fmt.Errorf("write table row: %w", err)
 	}
 	return nil
-}
-
-func newTheme(capabilities tux.Capabilities, policy tux.Policy) theme {
-	if policy.Color == tux.FeatureNever || capabilities.Color == tux.ColorNone {
-		return theme{
-			emphasis: lipgloss.NewStyle(),
-			success:  lipgloss.NewStyle(),
-			warning:  lipgloss.NewStyle(),
-			danger:   lipgloss.NewStyle(),
-			muted:    lipgloss.NewStyle(),
-		}
-	}
-	return theme{
-		emphasis: lipgloss.NewStyle().Bold(true),
-		success:  lipgloss.NewStyle().Foreground(semanticColor(capabilities.Color, "2", "42", "#2DA44E")),
-		warning:  lipgloss.NewStyle().Foreground(semanticColor(capabilities.Color, "3", "214", "#BF8700")),
-		danger:   lipgloss.NewStyle().Bold(true).Foreground(semanticColor(capabilities.Color, "1", "196", "#CF222E")),
-		muted:    lipgloss.NewStyle().Foreground(semanticColor(capabilities.Color, "8", "245", "#6E7781")),
-	}
-}
-
-func semanticColor(level tux.ColorLevel, ansi16, ansi256, trueColor string) color.Color {
-	switch level {
-	case tux.ColorTrueColor:
-		return lipgloss.Color(trueColor)
-	case tux.ColorANSI256:
-		return lipgloss.Color(ansi256)
-	default:
-		return lipgloss.Color(ansi16)
-	}
 }
 
 func visibleColumns(table tux.Table, width int) []int {

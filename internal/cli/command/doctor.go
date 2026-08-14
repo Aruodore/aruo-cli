@@ -24,7 +24,11 @@ func newDoctor(factory sessionFactory, service *doctor.Service) *cobra.Command {
 	command := &cobra.Command{
 		Use:   "doctor [repository]",
 		Short: "Assess repository engineering health",
-		Args:  cobra.MaximumNArgs(1),
+		Example: `  aruo doctor
+  aruo doctor ./service
+  aruo doctor --minimum-score 90
+  aruo doctor --format json`,
+		Args: cobra.MaximumNArgs(1),
 		RunE: func(command *cobra.Command, args []string) error {
 			target := "."
 			if len(args) == 1 {

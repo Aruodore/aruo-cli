@@ -129,7 +129,7 @@ type Option struct {
 	ID          OptionID
 	Label       string
 	Description string
-	// Color is an optional truecolor hex hint (for example "#00ADD8").
+	// Color is an optional terminal-readable truecolor hex hint.
 	// Adapters with no color rendering ignore it. Color-capable adapters
 	// apply it only when the active color policy and capability permit
 	// color at all; it never substitutes for Label as the only way to
@@ -175,7 +175,10 @@ type SelectRequest struct {
 	Description string
 	Options     []Option
 	Default     *OptionID
-	Validate    func(OptionID) error
+	// HighlightActive uses a filled, terminal-adaptive active state instead
+	// of the default underline. Reserve it for short categorical choices.
+	HighlightActive bool
+	Validate        func(OptionID) error
 }
 
 // MultiSelectRequest describes zero or more selections from stable options.

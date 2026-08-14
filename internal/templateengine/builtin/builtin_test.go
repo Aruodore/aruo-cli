@@ -152,11 +152,11 @@ func TestReactApp(t *testing.T) {
 	if pkg := files["package.json"]; !strings.Contains(pkg, `"name": "example-app"`) || !strings.Contains(pkg, `"react"`) {
 		t.Errorf("package.json = %q", pkg)
 	}
-	if app := files["src/App.tsx"]; !strings.Contains(app, "<h1>Example</h1>") {
-		t.Errorf("src/App.tsx = %q", app)
+	if app := files["src/app.tsx"]; !strings.Contains(app, "<h1>Example</h1>") {
+		t.Errorf("src/app.tsx = %q", app)
 	}
-	if test := files["src/App.test.tsx"]; !strings.Contains(test, `level: 1`) {
-		t.Errorf("src/App.test.tsx = %q", test)
+	if test := files["src/app.test.tsx"]; !strings.Contains(test, `level: 1`) {
+		t.Errorf("src/app.test.tsx = %q", test)
 	}
 	if index := files["index.html"]; !strings.Contains(index, "<title>Example</title>") {
 		t.Errorf("index.html = %q", index)
@@ -247,8 +247,8 @@ func TestVueLibrary(t *testing.T) {
 	if pkg := files["package.json"]; !strings.Contains(pkg, `"name": "example-library"`) || !strings.Contains(pkg, `"vue"`) {
 		t.Errorf("package.json = %q", pkg)
 	}
-	if greeting := files["src/Greeting.vue"]; !strings.Contains(greeting, "{{ name }}") {
-		t.Errorf("src/Greeting.vue = %q", greeting)
+	if greeting := files["src/greeting.vue"]; !strings.Contains(greeting, "{{ name }}") {
+		t.Errorf("src/greeting.vue = %q", greeting)
 	}
 }
 

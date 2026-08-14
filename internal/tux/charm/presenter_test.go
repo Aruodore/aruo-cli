@@ -31,7 +31,7 @@ func TestMessageUsesSemanticRichPresentation(t *testing.T) {
 	if err := presenter.Message(context.Background(), tux.Message{Kind: tux.MessageSuccess, Text: "created project"}); err != nil {
 		t.Fatal(err)
 	}
-	if got := result.String(); !strings.Contains(got, "✓ created project") || !strings.Contains(got, "\x1b[") {
+	if got := result.String(); !strings.Contains(got, "✓") || !strings.Contains(got, "created project") || !strings.Contains(got, "\x1b[") {
 		t.Fatalf("result = %q", got)
 	}
 }
@@ -54,7 +54,7 @@ func TestTableDropsLowerPriorityColumns(t *testing.T) {
 		t.Fatal(err)
 	}
 	got := result.String()
-	if !strings.Contains(got, "Name") || !strings.Contains(got, "Score") || strings.Contains(got, "Detail") || strings.Contains(got, "token") {
+	if !strings.Contains(got, "NAME") || !strings.Contains(got, "SCORE") || strings.Contains(got, "DETAIL") || strings.Contains(got, "token") {
 		t.Fatalf("result = %q", got)
 	}
 }

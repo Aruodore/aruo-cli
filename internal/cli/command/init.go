@@ -23,7 +23,10 @@ func newInit(factory sessionFactory, service *initialize.Service) *cobra.Command
 	command := &cobra.Command{
 		Use:   "init [repository]",
 		Short: "Install Aruo's AI engineering contract",
-		Args:  cobra.MaximumNArgs(1),
+		Example: `  aruo init
+  aruo init ./existing-project --dry-run
+  aruo init ./existing-project --yes`,
+		Args: cobra.MaximumNArgs(1),
 		RunE: func(command *cobra.Command, args []string) error {
 			target := "."
 			if len(args) == 1 {
@@ -111,7 +114,7 @@ func renderInitHuman(ctx context.Context, presenter tux.Presenter, result initia
 	if result.DryRun {
 		mode = "Dry run"
 	}
-	if err := presenter.Message(ctx, tux.Message{Kind: tux.MessageInfo, Text: fmt.Sprintf("%s: Aruo engineering contract\n%s\nStack: %s; frameworks: %s; package manager: %s", mode, result.Repository, result.Stack.Ecosystem, frameworks, result.Stack.PackageManager)}); err != nil {
+	if err := presenter.Message(ctx, tux.Message{Kind: tux.MessageInfo, Text: fmt.Sprintf("%s Aruo engineering contract\n%s\n%s · %s · %s", mode, result.Repository, result.Stack.Ecosystem, frameworks, result.Stack.PackageManager)}); err != nil {
 		return err
 	}
 	table := tux.Table{Columns: []tux.Column{{ID: "action", Heading: "Action"}, {ID: "path", Heading: "Path"}}}
@@ -124,5 +127,5 @@ func renderInitHuman(ctx context.Context, presenter tux.Presenter, result initia
 	if result.DryRun {
 		return presenter.Message(ctx, tux.Message{Kind: tux.MessageInfo, Text: "No files were written. Run again with --yes to apply this plan."})
 	}
-	return presenter.Message(ctx, tux.Message{Kind: tux.MessageSuccess, Text: "Aruo initialized. AI agents must begin with AGENTS.md; run aruo doctor to inspect production intent."})
+	return presenter.Message(ctx, tux.Message{Kind: tux.MessageSuccess, Text: "Aruo initialized\n  Read AGENTS.md before changing code\n  Run aruo doctor to inspect production intent"})
 }
