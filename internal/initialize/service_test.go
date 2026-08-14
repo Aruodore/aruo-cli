@@ -5,8 +5,24 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"sort"
 	"testing"
 )
+
+var expectedInstalledContractPaths = []string{
+	".aruo/contract.yaml",
+	".aruo/managed.json",
+	".aruo/rules/api.md",
+	".aruo/rules/architecture.md",
+	".aruo/rules/data.md",
+	".aruo/rules/delivery.md",
+	".aruo/rules/observability.md",
+	".aruo/rules/security.md",
+	".aruo/rules/testing.md",
+	".aruo/stack.yaml",
+	"AGENTS.md",
+	"aruo.yaml",
+}
 
 func TestServicePlansAndAppliesContractWithoutChangingApplication(t *testing.T) {
 	t.Parallel()
@@ -25,8 +41,16 @@ func TestServicePlansAndAppliesContractWithoutChangingApplication(t *testing.T) 
 	if got := plan.Stack.Frameworks; len(got) != 3 || got[0] != "next" || got[1] != "react" || got[2] != "vite" {
 		t.Fatalf("frameworks = %#v, want sorted next/react/vite", got)
 	}
-	if len(plan.Conflicts) != 0 || len(plan.Changes) < 10 {
+	if len(plan.Conflicts) != 0 {
 		t.Fatalf("plan = %#v, want a conflict-free complete contract", plan)
+	}
+	plannedPaths := make([]string, 0, len(plan.Changes))
+	for _, change := range plan.Changes {
+		plannedPaths = append(plannedPaths, change.Path)
+	}
+	sort.Strings(plannedPaths)
+	if !equalStrings(plannedPaths, expectedInstalledContractPaths) {
+		t.Fatalf("planned paths = %#v, want %#v", plannedPaths, expectedInstalledContractPaths)
 	}
 	result, err := service.Apply(context.Background(), plan)
 	if err != nil {
@@ -39,7 +63,7 @@ func TestServicePlansAndAppliesContractWithoutChangingApplication(t *testing.T) 
 	if err != nil || string(unchanged) != packageContent {
 		t.Fatalf("application package changed: %q, %v", unchanged, err)
 	}
-	for _, name := range []string{"AGENTS.md", "aruo.yaml", ".aruo/contract.yaml", ".aruo/stack.yaml", ".aruo/managed.json", ".aruo/rules/security.md"} {
+	for _, name := range expectedInstalledContractPaths {
 		if _, statErr := os.Stat(filepath.Join(repository, filepath.FromSlash(name))); statErr != nil {
 			t.Errorf("expected %s: %v", name, statErr)
 		}
@@ -55,8 +79,30 @@ func TestServicePlansAndAppliesContractWithoutChangingApplication(t *testing.T) 
 	if err := json.Unmarshal(managedContent, &managed); err != nil {
 		t.Fatal(err)
 	}
-	if managed.ContractVersion != contractVersion || managed.Files["AGENTS.md"] == "" || managed.Files["aruo.yaml"] != "" {
+	if managed.ContractVersion != contractVersion || len(managed.Files) != 10 || managed.Files["AGENTS.md"] == "" || managed.Files["aruo.yaml"] != "" || managed.Files[".aruo/managed.json"] != "" {
 		t.Fatalf("managed manifest = %#v, want managed AGENTS and application-owned aruo.yaml", managed)
+	}
+	for _, name := range expectedInstalledContractPaths {
+		if name == "aruo.yaml" || name == ".aruo/managed.json" {
+			continue
+		}
+		if managed.Files[name] == "" {
+			t.Errorf("managed manifest is missing %s", name)
+		}
+	}
+	for _, name := range []string{"AGENTS.md", "aruo.yaml", ".aruo/contract.yaml", ".aruo/rules/security.md"} {
+		info, statErr := os.Stat(filepath.Join(repository, filepath.FromSlash(name)))
+		if statErr != nil {
+			t.Fatal(statErr)
+		}
+		if got := info.Mode().Perm(); got != 0o644 {
+			t.Errorf("%s mode = %o, want 644", name, got)
+		}
+	}
+	if info, statErr := os.Stat(filepath.Join(repository, ".aruo")); statErr != nil {
+		t.Errorf("stat .aruo: %v", statErr)
+	} else if info.Mode().Perm() != 0o755 {
+		t.Errorf(".aruo mode = %o, want 755", info.Mode().Perm())
 	}
 }
 
@@ -132,4 +178,16 @@ func writeTestFile(t *testing.T, root, name, content string) {
 	if err := os.WriteFile(target, []byte(content), 0o600); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func equalStrings(left, right []string) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	for index := range left {
+		if left[index] != right[index] {
+			return false
+		}
+	}
+	return true
 }

@@ -1,8 +1,8 @@
 # Architecture and dependencies
 
-- Understand the existing boundaries and data flow before changing them. Put code beside the behavior it owns.
-- Name project-owned files with lowercase kebab-case. Keep a non-kebab filename only when a language, framework, operating system, or established tool requires that exact name (for example `README.md`, `AGENTS.md`, `Dockerfile`, Go `_test.go` files, or Python modules that must be importable).
-- Create an abstraction only when it removes demonstrated complexity. Prefer direct code and established project conventions.
-- Before adding a dependency, document the concrete capability it provides, why existing code or platform APIs are insufficient, its maintenance/security posture, and removal cost.
-- Keep the application a modular monolith unless measured operational needs justify another boundary.
-- Architecture changes require a stated problem, alternatives considered, migration impact, and updated documentation.
+- MUST understand and preserve existing boundaries, data flow, and project conventions unless the task requires changing them.
+- MUST stay within the requested scope. Material architecture changes require a stated problem, considered alternatives, migration and compatibility impact, and documentation proportional to the decision.
+- SHOULD use direct code until an abstraction removes demonstrated duplication, coupling, or complexity.
+- MUST follow language, framework, operating-system, and repository naming conventions. For new otherwise-unconstrained files, SHOULD prefer lowercase kebab-case. Do not rename unrelated files solely for consistency.
+- MUST NOT introduce a distributed or deployment boundary without a stated reliability, security, scaling, deployment, or ownership need that outweighs its operational cost.
+- Dependency additions MUST have a concrete need, come from a trusted source, and include review of manifest and lockfile changes. Runtime, privileged, native, abandoned, or security-sensitive dependencies require proportionally deeper maintenance, integrity, and removal-risk review.

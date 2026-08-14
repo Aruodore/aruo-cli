@@ -5,9 +5,9 @@
 ## Ownership
 
 - Aruo-managed: `AGENTS.md` and `.aruo/**`. `.aruo/managed.json` records contract version and SHA-256 hashes for every managed file except itself.
-- Application-owned: `aruo.yaml` and all application code. Aruo creates the initial intent file but never lists it as managed.
+- Application-owned: `aruo.yaml`, generated `AGENTS.local.md` guidance, and all application code. Aruo creates the initial intent and generated guidance but never lists either as managed.
 
-This boundary enables a future `aruo update` to replace unchanged managed rules while preserving application decisions. Update and merge behavior are not implemented yet.
+This boundary enables a future `aruo update` to replace unchanged managed rules while preserving application decisions. Managed `AGENTS.md` loads `AGENTS.local.md` when present, so stack and application guidance does not have to be merged into a managed file. Update behavior is not implemented yet.
 
 ## Workflow
 
@@ -18,7 +18,7 @@ This boundary enables a future `aruo update` to replace unchanged managed rules 
 5. Refuse if any destination already exists. There is no force flag.
 6. Materialize files in same-filesystem staging, create `.aruo` exclusively, and link top-level files with no-replace semantics. Roll back paths created by this operation if commit fails.
 
-The first version deliberately avoids merging an existing `AGENTS.md`. Safe composition and managed updates require an explicit design; silently appending or overwriting instructions would make ownership ambiguous.
+`init` deliberately refuses an existing `AGENTS.md`. During `create`, blueprint-provided `AGENTS.md` content is installed as application-owned `AGENTS.local.md`, while the canonical root `AGENTS.md` remains Aruo-managed.
 
 ## Installed contract
 

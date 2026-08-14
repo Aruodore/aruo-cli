@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-const contractVersion = "1"
+const contractVersion = "2"
 
 //go:embed contract
 var contractFiles embed.FS
@@ -91,7 +91,7 @@ func (s *Service) Apply(ctx context.Context, plan Plan) (Result, error) {
 		if mkdirErr := os.MkdirAll(filepath.Dir(target), 0o755); mkdirErr != nil {
 			return Result{}, fmt.Errorf("stage %s: %w", file.path, mkdirErr)
 		}
-		if writeErr := os.WriteFile(target, file.content, 0o600); writeErr != nil {
+		if writeErr := os.WriteFile(target, file.content, 0o644); writeErr != nil {
 			return Result{}, fmt.Errorf("stage %s: %w", file.path, writeErr)
 		}
 	}
@@ -102,7 +102,7 @@ func (s *Service) Apply(ctx context.Context, plan Plan) (Result, error) {
 		}
 	}
 	managedRoot := filepath.Join(plan.Repository, ".aruo")
-	if mkdirErr := os.Mkdir(managedRoot, 0o700); mkdirErr != nil {
+	if mkdirErr := os.Mkdir(managedRoot, 0o755); mkdirErr != nil {
 		return Result{}, fmt.Errorf("commit .aruo without overwriting: %w", mkdirErr)
 	}
 	committed = append(committed, ".aruo")

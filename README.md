@@ -140,7 +140,7 @@ aruo init --yes                     # initialize the current repository
 aruo init ./application --format json --yes
 ```
 
-Managed files are `AGENTS.md` and `.aruo/**`. `aruo.yaml` is created once and then owned by the application. Initialization refuses collisions, uses exclusive commit operations, and rolls back files it created when a commit cannot complete. Updating an existing installation is intentionally deferred to `aruo update`; rerunning `init` does not overwrite it.
+Managed files are `AGENTS.md` and `.aruo/**`. `aruo.yaml` and generated `AGENTS.local.md` guidance are application-owned. Initialization refuses collisions, uses exclusive commit operations, and rolls back files it created when a commit cannot complete. Updating an existing installation is intentionally deferred to `aruo update`; rerunning `init` does not overwrite it.
 
 ### `aruo create [name-or-path]`
 
@@ -209,6 +209,7 @@ my-library/
 │   └── pull_request_template.md
 ├── docs/README.md
 ├── AGENTS.md                 # AI entry point and managed engineering contract
+├── AGENTS.local.md           # application-owned stack guidance
 ├── aruo.yaml                  # template provenance and explicit production intent
 ├── CHANGELOG.md
 ├── CODE_OF_CONDUCT.md
@@ -225,7 +226,7 @@ my-library/
 └── SECURITY.md
 ```
 
-Every template's exact application file set differs by ecosystem (an npm-based template gets `package.json` and CI steps for `npm test`, for example). Every created project also receives the same managed AI engineering contract atomically: `AGENTS.md`, `.aruo/contract.yaml`, stack detection, managed hashes, and the rules under `.aruo/rules/`. Stack-specific guidance is retained in `AGENTS.md`; application-owned production intent remains in `aruo.yaml`.
+Every template's exact application file set differs by ecosystem (an npm-based template gets `package.json` and CI steps for `npm test`, for example). Every created project also receives the same managed AI engineering contract atomically: `AGENTS.md`, `.aruo/contract.yaml`, stack detection, managed hashes, and the rules under `.aruo/rules/`. Stack-specific guidance is retained in application-owned `AGENTS.local.md`; production intent remains application-owned in `aruo.yaml`.
 
 ## Configuration
 

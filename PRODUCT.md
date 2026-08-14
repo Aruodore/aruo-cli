@@ -26,7 +26,7 @@ Intentional, candid, dependable. The product should create confidence through ex
 
 ## Design Principles
 
-1. Intent is first-class: every managed rule states why it exists and how it is verified.
+1. Intent is first-class: managed rules state when they apply, and completion claims distinguish repository evidence from unverified operational knowledge.
 2. Keep product decisions out of infrastructure: provide capabilities and seams, not fictional business models.
 3. Make failure legible: errors explain what failed, the effect, and the next useful action.
 4. Prefer native conventions and boring infrastructure over clever cross-platform abstractions.

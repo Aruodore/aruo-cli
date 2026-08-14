@@ -29,39 +29,37 @@ func AugmentPlan(plan templateengine.Plan) (templateengine.Plan, error) {
 	if intent, ok := existing["aruo.yaml"]; ok {
 		overrides["aruo.yaml"] = intent.Content
 	}
-	if guidance, ok := existing["AGENTS.md"]; ok {
-		base, readErr := contractFiles.ReadFile("contract/AGENTS.md")
-		if readErr != nil {
-			return templateengine.Plan{}, fmt.Errorf("read base agent contract: %w", readErr)
+	guidance, hasGuidance := existing["AGENTS.md"]
+	if hasGuidance {
+		if _, conflict := existing["AGENTS.local.md"]; conflict {
+			return templateengine.Plan{}, fmt.Errorf("creation plan contains both AGENTS.md guidance and AGENTS.local.md")
 		}
-		combined := append(append(append([]byte(nil), base...), []byte("\n## Stack-specific guidance\n\n")...), guidance.Content...)
-		overrides["AGENTS.md"] = combined
+		delete(existing, "AGENTS.md")
 	}
 	contract, err := renderContractWithOverrides(stack, overrides)
 	if err != nil {
 		return templateengine.Plan{}, err
 	}
 
-	result := templateengine.Plan{BlueprintID: plan.BlueprintID, Files: append([]templateengine.File(nil), plan.Files...)}
+	result := templateengine.Plan{BlueprintID: plan.BlueprintID, Files: make([]templateengine.File, 0, len(plan.Files)+len(contract))}
+	for _, file := range plan.Files {
+		if hasGuidance && file.Path == "AGENTS.md" {
+			file.Path = "AGENTS.local.md"
+			file.Source = guidance.Source
+		}
+		result.Files = append(result.Files, file)
+	}
 	for _, file := range contract {
-		if current, exists := existing[file.path]; exists {
-			if file.path != "AGENTS.md" && file.path != "aruo.yaml" {
+		if _, exists := existing[file.path]; exists {
+			if file.path != "aruo.yaml" {
 				return templateengine.Plan{}, fmt.Errorf("creation plan path %q conflicts with managed Aruo contract", file.path)
-			}
-			if file.path == "AGENTS.md" {
-				for index := range result.Files {
-					if result.Files[index].Path == file.path {
-						result.Files[index].Content = append([]byte(nil), file.content...)
-						result.Files[index].Source = "aruo:contract+" + current.Source
-					}
-				}
 			}
 			// aruo.yaml remains application-owned and is intentionally not
 			// listed in managed.json.
 			continue
 		}
 		result.Files = append(result.Files, templateengine.File{
-			Path: file.path, Content: append([]byte(nil), file.content...), Mode: 0o600, Source: "aruo:contract",
+			Path: file.path, Content: append([]byte(nil), file.content...), Mode: 0o644, Source: "aruo:contract",
 		})
 	}
 	sort.Slice(result.Files, func(i, j int) bool { return result.Files[i].Path < result.Files[j].Path })

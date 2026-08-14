@@ -16,6 +16,19 @@ type managedContract struct {
 	Files           map[string]string `json:"files"`
 }
 
+var requiredContractFiles = []string{
+	".aruo/contract.yaml",
+	".aruo/rules/api.md",
+	".aruo/rules/architecture.md",
+	".aruo/rules/data.md",
+	".aruo/rules/delivery.md",
+	".aruo/rules/observability.md",
+	".aruo/rules/security.md",
+	".aruo/rules/testing.md",
+	".aruo/stack.yaml",
+	"AGENTS.md",
+}
+
 func auditContract(repository Repository) (ContractReport, error) {
 	content, err := repository.ReadText(".aruo/managed.json")
 	if errors.Is(err, fs.ErrNotExist) {
@@ -35,6 +48,24 @@ func auditContract(repository Repository) (ContractReport, error) {
 	if managed.ContractVersion == "" || len(managed.Files) == 0 {
 		addContractFinding(&report, "managed contract metadata is incomplete", "Reinitialize the contract in a clean repository or restore valid managed metadata.")
 		report.Valid = false
+	}
+	if managed.ContractVersion != "1" && managed.ContractVersion != "2" {
+		addContractFinding(&report, fmt.Sprintf("managed contract version %q is unsupported", managed.ContractVersion), "Upgrade Aruo or restore a supported managed contract version.")
+		report.Valid = false
+	}
+	if managed.ContractVersion == "1" || managed.ContractVersion == "2" {
+		required := make(map[string]struct{}, len(requiredContractFiles))
+		for _, name := range requiredContractFiles {
+			required[name] = struct{}{}
+			if _, present := managed.Files[name]; !present {
+				addContractFinding(&report, fmt.Sprintf("managed contract file %q is absent from the manifest", name), "Restore the complete managed manifest for this contract version.")
+			}
+		}
+		for name := range managed.Files {
+			if _, expected := required[name]; !expected && name != "aruo.yaml" {
+				addContractFinding(&report, fmt.Sprintf("managed contract path %q is not part of version %s", name, managed.ContractVersion), "Remove unexpected managed paths or restore the manifest from a trusted installation.")
+			}
+		}
 	}
 	paths := make([]string, 0, len(managed.Files))
 	for name := range managed.Files {

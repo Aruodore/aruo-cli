@@ -1,8 +1,8 @@
 # Testing and completion
 
-- Test externally meaningful behavior and failure paths, not private implementation details.
-- Match test depth to risk: unit tests for logic, integration tests for boundaries, and end-to-end tests only for critical journeys.
-- Every bug fix needs a regression test unless the limitation is explicitly documented.
-- Before completion run the repository's formatter, linter, type checker, tests, production build, and relevant dependency/security checks.
-- Do not delete, skip, loosen, or rewrite a meaningful test simply to make a change pass.
-- Report commands run, results, checks not run, known limitations, and any new production responsibility.
+- MUST test externally meaningful changed behavior and relevant failure paths without coupling tests unnecessarily to private implementation details.
+- Test depth MUST be proportional to risk: isolate logic, test important boundaries with real integrations where practical, and reserve end-to-end tests for critical cross-boundary journeys.
+- A bug fix SHOULD include a stable regression test. If that is infeasible or disproportionate, document why and describe the alternative verification.
+- Before completion, run repository-provided checks relevant to the changed area, such as formatting, linting, type checking, tests, builds, or dependency/security checks. Do not add tooling solely to satisfy this list.
+- MUST inspect the final diff for unrelated changes, generated artifacts, secrets, weakened controls, and mismatched tests or documentation.
+- MUST report commands run, results, checks unavailable or not run, known limitations, and any new operational responsibility.

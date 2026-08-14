@@ -10,7 +10,7 @@ import (
 	"github.com/aruodore/aruo-cli/internal/templateengine"
 )
 
-func TestAugmentPlanPreservesIntentAndCombinesStackGuidance(t *testing.T) {
+func TestAugmentPlanPreservesApplicationOwnedIntentAndGuidance(t *testing.T) {
 	t.Parallel()
 
 	intent := "apiVersion: aruo.dev/v1alpha1\ntemplate: next\n"
@@ -28,15 +28,18 @@ func TestAugmentPlanPreservesIntentAndCombinesStackGuidance(t *testing.T) {
 		t.Fatalf("aruo.yaml = %q, want application-owned intent preserved", files["aruo.yaml"])
 	}
 	agents := string(files["AGENTS.md"])
-	if !strings.Contains(agents, "Read `.aruo/contract.yaml`") || !strings.Contains(agents, guidance) {
-		t.Fatalf("AGENTS.md did not combine managed and stack guidance: %q", agents)
+	if !strings.Contains(agents, "read `.aruo/contract.yaml`") || strings.Contains(agents, guidance) {
+		t.Fatalf("managed AGENTS.md is not canonical: %q", agents)
+	}
+	if got := string(files["AGENTS.local.md"]); got != guidance {
+		t.Fatalf("AGENTS.local.md = %q, want application guidance %q", got, guidance)
 	}
 	if !strings.Contains(string(files[".aruo/stack.yaml"]), "  - next\n") {
 		t.Fatalf("stack.yaml = %q, want detected Next.js stack", files[".aruo/stack.yaml"])
 	}
 	architecture := string(files[".aruo/rules/architecture.md"])
-	if !strings.Contains(architecture, "lowercase kebab-case") {
-		t.Errorf("architecture rules do not require kebab-case filenames: %q", architecture)
+	if !strings.Contains(architecture, "otherwise-unconstrained files") || !strings.Contains(architecture, "Do not rename unrelated files") {
+		t.Errorf("architecture naming rule is not safely scoped: %q", architecture)
 	}
 
 	var managed struct {
@@ -51,6 +54,20 @@ func TestAugmentPlanPreservesIntentAndCombinesStackGuidance(t *testing.T) {
 	}
 	if _, managedIntent := managed.Files["aruo.yaml"]; managedIntent {
 		t.Fatal("application-owned aruo.yaml appears in managed hashes")
+	}
+	if _, managedGuidance := managed.Files["AGENTS.local.md"]; managedGuidance {
+		t.Fatal("application-owned AGENTS.local.md appears in managed hashes")
+	}
+}
+
+func TestAugmentPlanRejectsAmbiguousApplicationGuidance(t *testing.T) {
+	t.Parallel()
+	_, err := AugmentPlan(templateengine.Plan{Files: []templateengine.File{
+		{Path: "AGENTS.md"},
+		{Path: "AGENTS.local.md"},
+	}})
+	if err == nil || !strings.Contains(err.Error(), "both AGENTS.md guidance and AGENTS.local.md") {
+		t.Fatalf("AugmentPlan() error = %v, want ambiguous guidance rejection", err)
 	}
 }
 
